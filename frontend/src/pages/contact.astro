@@ -1,12 +1,90 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const title = "Players Club - Contact";
+const title = "Contact | Chen-Pei Jyuan";
 ---
 
 <BaseLayout title={title}>
-  <div class="content content--page">
-    <h1>Contact</h1>
-    <p>This is just an example page</p>
-  </div>
+	<section class="content">
+		<h1>Contact</h1>
+
+		<p>
+			I'm available for freelance projects, collaborations and full-time
+			opportunities.
+		</p>
+
+		<div class="contact-list">
+			<div>
+				<span>Email</span>
+				<a href="mailto:yourmail@gmail.com">
+					yourmail@gmail.com
+				</a>
+			</div>
+
+			<div>
+				<span>Instagram</span>
+				<a href="#">
+					@youraccount
+				</a>
+			</div>
+
+			<div>
+				<span>Behance</span>
+				<a href="#">
+					behance.net/youraccount
+				</a>
+			</div>
+
+			<div>
+				<span>LinkedIn</span>
+				<a href="#">
+					linkedin.com/in/youraccount
+				</a>
+			</div>
+		</div>
+	</section>
 </BaseLayout>
+
+<style>
+	.content {
+		max-width: 900px;
+		margin: 4rem auto;
+		padding: 0 1rem;
+	}
+
+	h1 {
+		font-size: 3rem;
+		margin-bottom: 2rem;
+	}
+
+	.contact-list {
+		margin-top: 3rem;
+	}
+
+	.contact-list div {
+		display: flex;
+		justify-content: space-between;
+		padding: 1.25rem 0;
+		border-bottom: 1px solid #ddd;
+	}
+
+	.contact-list span {
+		opacity: .5;
+	}
+
+	a {
+		text-decoration: none;
+		color: inherit;
+	}
+
+	a:hover {
+		opacity: .6;
+	}
+
+	@media (max-width:768px) {
+		.contact-list div {
+			flex-direction: column;
+			gap: .5rem;
+		}
+	}
+</style>
