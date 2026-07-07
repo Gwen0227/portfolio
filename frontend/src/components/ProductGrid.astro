@@ -4,33 +4,51 @@ import ProductCard from "./ProductCard.astro";
 import ProductTooltip from "./ProductTooltip.astro";
 
 type Props = {
-	products: CollectionEntry<"products">[];
+	projects: CollectionEntry<"projects">[];
 };
 
-const { products } = Astro.props;
-const grid = "products";
+const { projects } = Astro.props;
+const grid = "projects";
 ---
 
-<section class="product-grid" id='grid' data-grid={grid}>
-  {products.map((product) => <ProductCard product={product} />)}
+<section
+	class="product-grid"
+	id="grid"
+	data-grid={grid}
+>
+	{projects.map((project) => (
+		<ProductCard product={project} />
+	))}
 </section>
 
 <ProductTooltip grid={grid} />
 
 <style>
-  .product-grid {
-    position: relative;
-    overflow: hidden;
-    display: grid;
-    width: 100%;
-    grid-template-columns: repeat(2, calc(100% / 2));
-    margin: 1rem 0 10rem;
-    min-height: 400px;
-    @media screen and (min-width: 30em) {
-      grid-template-columns: repeat(4, calc(100% / 4));
-    }
-    @media screen and (min-width: 50em) {
-      grid-template-columns: repeat(6, calc(100% / 6));
-    }
-  }
+	.product-grid {
+		position: relative;
+		overflow: hidden;
+		display: grid;
+		width: 100%;
+
+		/* 手機：3 欄 */
+		grid-template-columns: repeat(3, 1fr);
+
+		gap: 1.5rem;
+		margin: 1rem 0 10rem;
+		min-height: 400px;
+	}
+
+	/* 平板：4 欄 */
+	@media screen and (min-width: 50em) {
+		.product-grid {
+			grid-template-columns: repeat(4, 1fr);
+		}
+	}
+
+	/* 桌機：5 欄 */
+	@media screen and (min-width: 80em) {
+		.product-grid {
+			grid-template-columns: repeat(5, 1fr);
+		}
+	}
 </style>

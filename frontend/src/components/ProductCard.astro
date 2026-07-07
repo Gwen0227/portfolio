@@ -1,9 +1,8 @@
 ---
 import type { CollectionEntry } from "astro:content";
-import SanityImage from "./SanityImage.astro";
 
 type Props = {
-	product: CollectionEntry<"products">;
+	product: CollectionEntry<"projects">;
 };
 
 const { product } = Astro.props;
@@ -11,24 +10,21 @@ const { product } = Astro.props;
 
 <a
 	class="product-card"
-	data-product-title={product.data.name}
+	data-product-title={product.data.title}
 	data-astro-prefetch
 	href="#"
 >
 	<article>
-		<SanityImage
-			node={product.data.imageWithAlt}
-			width={800}
+		<img
+			src={product.data.cover}
+			alt={product.data.title}
+			loading="lazy"
 		/>
 
 		<div class="product-meta">
-			<h3>{product.data.name}</h3>
+			<h3>{product.data.title}</h3>
 
-			<p>
-				{product.data.publishedAt
-					? new Date(product.data.publishedAt).getFullYear()
-					: ""}
-			</p>
+			<p>{product.data.year}</p>
 		</div>
 	</article>
 </a>
@@ -39,6 +35,13 @@ const { product } = Astro.props;
 		flex-direction: column;
 		gap: 0.5rem;
 		max-width: 300px;
+	}
+
+	img {
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		object-fit: cover;
+		display: block;
 	}
 
 	.product-meta {

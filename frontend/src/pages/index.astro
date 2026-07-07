@@ -5,18 +5,22 @@ import ProductGrid from "../components/ProductGrid.astro";
 import ProductGridHeader from "../components/ProductGridHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
 
-const allProducts = await getCollection("products");
-const productsTotal = allProducts.length;
-const title = "Astro Sanity Club - All Pieces";
+const allProjects = await getCollection("projects");
+const projectsTotal = allProjects.length;
+
+const title = "Gwen Portfolio";
 ---
 
 <BaseLayout title={title}>
-  <!--
-    The <Preloader /> component is used to preload all images on the homepage using the images.loaded.js script.
-    If you don’t want to use the preloader (e.g., for faster page load times or if you don’t require preloading images), you can safely remove the <Preloader /> component from this layout.
-  -->
-  <Preloader />
-  <ProductGridHeader productsTotal={productsTotal} />
-  <ProductGrid products={allProducts} />
+	<!--
+		The <Preloader /> component is used to preload all images on the homepage using the images.loaded.js script.
+		If you don’t want to use the preloader, you can safely remove it.
+	-->
+	<Preloader />
+
+	<ProductGridHeader productsTotal={projectsTotal} />
+
+	<ProductGrid projects={allProjects} />
 </BaseLayout>
+
 <script src="../scripts/index.js"></script>

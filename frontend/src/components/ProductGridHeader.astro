@@ -16,22 +16,17 @@ const { productsTotal } = Astro.props;
 
 	<div>
 		<button data-sort>
-			<TextSlider content="Latest" />
+			<TextSlider content="品牌設計" />
 		</button>
 
-		<div>
-			<button data-search class="search">
-				<TextSlider content="Search" />
-			</button>
+		<button data-sort>
+			<TextSlider content="視覺設計" />
+		</button>
 
-			<button
-				data-clear
-				class="clear hidden"
-				aria-label="Clear search"
-			>
-				<Cross width={14} height={14} />
-			</button>
-		</div>
+		<button data-sort>
+			<TextSlider content="包裝設計" />
+		</button>
+
 	</div>
 
 	<span>

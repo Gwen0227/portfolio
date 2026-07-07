@@ -19,13 +19,13 @@ const activeRoute = routes[currentPath] || null;
 <header>
 	<h1>
 		<a href="/" class={activeRoute === "Projects" ? "current" : ""}>
-			<TextSlider content="Gwen Portfolio" />
+			<TextSlider content="Chen-Pei Jyuan" />
 		</a>
 	</h1>
 
-	<span>
-		<TextSlider content="Frontend Developer" />
-	</span>
+	<span class="role">
+	<TextSlider content="Brand & Visual Designer" />
+</span>
 
 	<ul>
 		<li>
@@ -83,6 +83,11 @@ const activeRoute = routes[currentPath] || null;
 		margin: 0;
 		white-space: nowrap;
 	}
+
+    .role {
+	opacity: 0.6;
+	font-weight: 400;
+    }
 
 	ul {
 		display: flex;
