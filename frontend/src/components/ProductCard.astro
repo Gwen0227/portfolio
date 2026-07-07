@@ -6,32 +6,68 @@ type Props = {
 };
 
 const { product } = Astro.props;
+
+// 🎯 讀取個別作品的設定，沒寫的話預設是 "page" (進入說明頁)
+const mode = product.data.mode || "page";
+const projectLink = `/projects/${product.data.slug || product.id}`;
 ---
 
-<a
-	class="product-card"
-	data-product-title={product.data.title}
-	data-astro-prefetch
-	href="#"
->
-	<article>
-		<img
-			src={product.data.cover}
-			alt={product.data.title}
-			loading="lazy"
-		/>
+{mode === "zoom" ? (
+	<div
+		class="product-card is-zoom-mode"
+		data-product-title={product.data.title}
+		data-zoom={product.data.cover}
+	>
+		<article>
+			<img
+				src={product.data.cover}
+				alt={product.data.title}
+				loading="lazy"
+			/>
 
-		<div class="product-meta">
-			<h3>{product.data.title}</h3>
-			<p>{product.data.year}</p>
-		</div>
-	</article>
-</a>
+			<div class="product-meta">
+				<h3>{product.data.title}</h3>
+				<p>{product.data.year}</p>
+			</div>
+		</article>
+	</div>
+) : (
+	<a
+		class="product-card is-page-mode"
+		data-product-title={product.data.title}
+		data-astro-prefetch
+		href={projectLink}
+	>
+		<article>
+			<img
+				src={product.data.cover}
+				alt={product.data.title}
+				loading="lazy"
+			/>
+
+			<div class="product-meta">
+				<h3>{product.data.title}</h3>
+				<p>{product.data.year}</p>
+			</div>
+		</article>
+	</a>
+)}
 
 <style>
 	.product-card {
 		display: block;
 		width: 100%;
+		text-decoration: none;
+		color: inherit;
+	}
+
+	/* 🎯 依據模式切換滑鼠游標 */
+	.is-zoom-mode {
+		cursor: zoom-in;
+	}
+
+	.is-page-mode {
+		cursor: pointer;
 	}
 
 	article {

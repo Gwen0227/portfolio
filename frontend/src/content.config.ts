@@ -12,10 +12,11 @@ const projects = defineCollection({
         year: z.number(),
         cover: z.string(),
         tech: z.array(z.string()),
+        category: z.string().optional(),
         github: z.string().optional(),
         demo: z.string().optional(),
-        // 🎯 關鍵修正：允許 Astro 讀取 .md 檔中的 category 欄位（設定為選填，避免沒寫的作品報錯）
-        category: z.string().optional(),
+        // 🎯 核心修正：讓每個作品可以個別設定 "zoom" (放大) 或 "page" (內頁)
+        mode: z.enum(["zoom", "page"]).optional(),
     }),
 });
 

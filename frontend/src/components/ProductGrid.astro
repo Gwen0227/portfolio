@@ -11,15 +11,9 @@ const { projects } = Astro.props;
 const grid = "projects";
 ---
 
-<section
-	class="product-grid"
-	id="grid"
-	data-grid={grid}
->
+<section class="product-grid" id="grid" data-grid={grid}>
 	{projects.map((project) => {
-		// 🎯 這裡已經改回對齊你的 .md 欄位：category
 		const currentCategory = project.data.category || "None";
-		
 		return (
 			<div data-category={currentCategory} class="grid-item">
 				<ProductCard product={project} />
@@ -28,7 +22,48 @@ const grid = "projects";
 	})}
 </section>
 
+<div id="lightbox-modal" class="lightbox">
+	<span class="close-lightbox">&times;</span>
+	<img class="lightbox-content" id="lightbox-img" src="" alt="Enlarged view" />
+</div>
+
 <ProductTooltip grid={grid} />
+
+<script>
+	function initLightbox() {
+		const modal = document.getElementById('lightbox-modal');
+		const lightboxImg = document.getElementById('lightbox-img') as HTMLImageElement;
+		const closeBtn = document.querySelector('.close-lightbox');
+		const zoomCards = document.querySelectorAll('[data-zoom]');
+
+		if (!modal || !lightboxImg) return;
+
+		zoomCards.forEach(card => {
+			card.addEventListener('click', () => {
+				const largeImgUrl = card.getAttribute('data-zoom');
+				if (largeImgUrl) {
+					lightboxImg.src = largeImgUrl;
+					modal.classList.add('active');
+					document.body.style.overflow = 'hidden';
+				}
+			});
+		});
+
+		closeBtn?.addEventListener('click', closeModal);
+		modal.addEventListener('click', (e) => {
+			if (e.target === modal) closeModal();
+		});
+
+		function closeModal() {
+			modal.classList.remove('active');
+			document.body.style.overflow = '';
+			setTimeout(() => { lightboxImg.src = ''; }, 300);
+		}
+	}
+
+	initLightbox();
+	document.addEventListener('astro:page-load', initLightbox);
+</script>
 
 <style>
 	.product-grid {
@@ -37,7 +72,7 @@ const grid = "projects";
 		display: grid;
 		width: 100%;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 0rem;
+		gap: 1.5rem;
 		margin: 1rem 0 10rem;
 		min-height: 400px;
 	}
@@ -45,18 +80,56 @@ const grid = "projects";
 	.grid-item {
 		display: block;
 		width: 100%;
+	}
+
+	.lightbox {
+		position: fixed;
+		z-index: 9999;
+		top: 0;
+		left: 0;
+		width: 100%;
 		height: 100%;
+		background-color: rgba(0, 0, 0, 0.95);
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.3s ease;
+	}
+
+	.lightbox.active {
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	.lightbox-content {
+		max-width: 90%;
+		max-height: 85vh;
+		object-fit: contain;
+		transform: scale(0.97);
+		transition: transform 0.3s ease;
+	}
+
+	.lightbox.active .lightbox-content {
+		transform: scale(1);
+	}
+
+	.close-lightbox {
+		position: absolute;
+		top: 20px;
+		right: 30px;
+		color: #ffffff;
+		font-size: 40px;
+		font-weight: 200;
+		cursor: pointer;
 	}
 
 	@media screen and (min-width: 50em) {
-		.product-grid {
-			grid-template-columns: repeat(4, 1fr);
-		}
+		.product-grid { grid-template-columns: repeat(4, 1fr); }
 	}
 
 	@media screen and (min-width: 80em) {
-		.product-grid {
-			grid-template-columns: repeat(5, 1fr);
-		}
+		.product-grid { grid-template-columns: repeat(5, 1fr); }
 	}
 </style>
