@@ -3,7 +3,7 @@ title: About Me
 slug: aboutme
 year: 2026
 cover: /images/aboutme.jpg
-tag: "平面設計"
+tag: "視覺設計"
 tech:
   - Astro
   - TypeScript
