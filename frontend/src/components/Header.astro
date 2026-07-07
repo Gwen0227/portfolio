@@ -2,13 +2,12 @@
 import Separator from "../components/Separator.astro";
 import TextSlider from "../components/TextSlider.astro";
 
-const base = import.meta.env.BASE_URL;
 const currentPath = Astro.url.pathname;
 
 const routes = {
-	[base]: "Projects",
-	[`${base}about/`]: "About",
-	[`${base}contact/`]: "Contact",
+	"/": "Projects",
+	"/about/": "About",
+	"/contact/": "Contact",
 };
 
 const activeRoute = routes[currentPath] || null;
@@ -16,7 +15,7 @@ const activeRoute = routes[currentPath] || null;
 
 <header>
 	<h1 class="logo-group">
-		<a href={base}>
+		<a href="/">
 			<TextSlider content="Chen-Pei Jyuan" />
 		</a>
 	</h1>
@@ -28,7 +27,7 @@ const activeRoute = routes[currentPath] || null;
 	<ul>
 		<li>
 			<a
-				href={base}
+				href="/"
 				class={activeRoute === "Projects" ? "current" : ""}
 				data-astro-prefetch
 			>
@@ -38,7 +37,7 @@ const activeRoute = routes[currentPath] || null;
 
 		<li>
 			<a
-				href={`${base}about/`}
+				href="/about/"
 				class={activeRoute === "About" ? "current" : ""}
 				data-astro-prefetch
 			>
@@ -48,7 +47,7 @@ const activeRoute = routes[currentPath] || null;
 
 		<li>
 			<a
-				href={`${base}contact/`}
+				href="/contact/"
 				class={activeRoute === "Contact" ? "current" : ""}
 				data-astro-prefetch
 			>
@@ -64,17 +63,15 @@ const activeRoute = routes[currentPath] || null;
 		display: grid;
 		grid-template-columns: auto auto 1fr;
 		align-items: flex-end;
-
 		column-gap: 1.5rem;
 		row-gap: 1rem;
-
-		padding: 1.25rem 0;
+		padding: 1.25rem 0; /* 稍微縮小內距，配合 1rem 的字級 */
 		z-index: 3;
 	}
 
 	h1 {
 		margin: 0;
-		font-size: 1.2rem;
+		font-size: 1.2rem; /* 🎯 名字同步調回 1rem */
 		font-weight: 600;
 		line-height: 1;
 		white-space: nowrap;
@@ -82,75 +79,73 @@ const activeRoute = routes[currentPath] || null;
 
 	.logo-group a {
 		text-decoration: none;
-		color: inherit;
+		color: #000000;
+		position: relative;
+		padding-bottom: 0.5rem;
 		display: inline-flex;
 		align-items: center;
+		justify-content: center;
+		pointer-events: auto !important;
+	}
+
+	.logo-group a::after {
+		display: none !important;
 	}
 
 	.role {
-		font-size: 0.9rem;
+		font-size: 0.9rem; /* 職稱稍微縮小，維持視覺比例 */
 		font-weight: 400;
 		opacity: 0.45;
 		line-height: 1;
 		white-space: nowrap;
-		padding-bottom: 0.15rem;
+		padding-bottom: 0.5rem;
 	}
 
 	ul {
 		grid-column: 3;
 		justify-self: end;
-
 		display: flex;
 		align-items: center;
 		gap: 2rem;
-
 		margin: 0;
 		padding: 0;
-
 		list-style: none;
-
-		font-size: 0.95rem;
+		font-size: 0.9rem; /* 🎯 主選單（Projects...）成功改回 1rem */
 		font-weight: 600;
 	}
 
 	ul a {
 		position: relative;
 		text-decoration: none;
-		color: inherit;
-		padding-bottom: 0.45rem;
-		transition: color .2s ease;
+		color: #000000;
+		padding-bottom: 0.5rem; /* 微調底線留白距離 */
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 	}
 
-	/* 目前頁面 */
+	/* 🎯 保持好看的 4px 黑色厚底線 */
 	ul a.current::after {
 		content: "";
 		position: absolute;
 		left: 0;
-		right: 0;
 		bottom: -2px;
+		width: 100%;
 		height: 4px;
-		background: #000;
+		background-color: #000000;
 	}
 
 	ul a.current {
 		pointer-events: none;
 	}
 
+	/* 📱 手機版響應式調整 */
 	@media (max-width: 768px) {
 		header {
 			grid-template-columns: auto 1fr;
 			column-gap: 0.75rem;
-			row-gap: 1rem;
+			row-gap: 1.2rem;
 			padding: 1rem 0;
-		}
-
-		h1 {
-			font-size: 1rem;
-		}
-
-		.role {
-			font-size: 0.82rem;
-			padding-bottom: 0;
 		}
 
 		ul {
@@ -159,7 +154,13 @@ const activeRoute = routes[currentPath] || null;
 			gap: 1.5rem;
 			font-size: 0.95rem;
 		}
+
+		h1 {
+			font-size: 1rem;
+		}
+
+		.role {
+			font-size: 0.85rem;
+		}
 	}
 </style>
-
-<Separator />
