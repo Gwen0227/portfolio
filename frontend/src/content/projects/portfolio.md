@@ -3,7 +3,7 @@ title: Portfolio Website
 slug: portfolio
 year: 2026
 cover: /images/portfolio.jpg
-tag: "品牌設計"
+category: "Packaging Design"
 tech:
   - Astro
   - TypeScript

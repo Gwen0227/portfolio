@@ -11,16 +11,20 @@ const { productsTotal } = Astro.props;
 
 <header class="project-filter">
 	<div class="categories">
-		<button>
-			<TextSlider content="品牌設計" />
+		<button data-filter="all" class="active">
+			<TextSlider content="All" />
 		</button>
 
-		<button>
-			<TextSlider content="視覺設計" />
+		<button data-filter="Brand Identity">
+			<TextSlider content="Brand Identity" />
 		</button>
 
-		<button>
-			<TextSlider content="包裝設計" />
+		<button data-filter="Visual Design">
+			<TextSlider content="Visual Design" />
+		</button>
+
+		<button data-filter="Packaging Design">
+			<TextSlider content="Packaging Design" />
 		</button>
 	</div>
 
@@ -31,20 +35,50 @@ const { productsTotal } = Astro.props;
 
 <Separator />
 
+<script>
+	function initFilter() {
+		const buttons = document.querySelectorAll('.categories button');
+		const cards = document.querySelectorAll('[data-category]') as NodeListOf<HTMLElement>;
+
+		if (!buttons.length) return;
+
+		buttons.forEach(button => {
+			button.addEventListener('click', () => {
+				const filterValue = button.getAttribute('data-filter');
+
+				buttons.forEach(btn => btn.classList.remove('active'));
+				button.classList.add('active');
+
+				cards.forEach(card => {
+					const cardCategory = card.getAttribute('data-category');
+
+					if (filterValue === 'all' || cardCategory === filterValue) {
+						card.style.display = '';
+						card.style.opacity = '1';
+					} else {
+						card.style.display = 'none';
+					}
+				});
+			});
+		});
+	}
+
+	document.addEventListener('astro:page-load', initFilter);
+</script>
+
 <style>
 	.project-filter {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
 		padding: 0.75rem 0;
-		/* 確保整列的字體比主選單小，這裡設定 0.9rem（可依設計稿微調） */
 		font-size: 0.9rem; 
 	}
 
 	.categories {
 		display: flex;
 		align-items: center;
-		gap: 1rem;
+		gap: 1.5rem;
 	}
 
 	.categories button {
@@ -52,7 +86,6 @@ const { productsTotal } = Astro.props;
 		border: none;
 		padding: 0.35rem 0;
 
-		/* 強制使用一般字重，不繼承可能從上層帶來的粗體 */
 		font-family: inherit;
 		font-size: inherit;
 		font-weight: normal; 
@@ -60,16 +93,20 @@ const { productsTotal } = Astro.props;
 		cursor: pointer;
 		color: #000000;
 
-		transition: opacity 0.2s ease;
+		transition: opacity 0.2s ease, font-weight 0.2s ease;
+		opacity: 0.4; 
+	}
+
+	.categories button.active {
 		opacity: 1;
+		font-weight: 600;
 	}
 
 	.categories button:hover {
-		opacity: 0.7;
+		opacity: 0.8;
 	}
 
 	.count {
-		/* 改回一般字重（normal），並維持全黑不透明 */
 		font-weight: normal; 
 		color: #000000;
 		opacity: 1;
