@@ -17,6 +17,7 @@ const grid = "projects";
 	data-grid={grid}
 >
 	{projects.map((project) => {
+		// 🎯 這裡已經改回對齊你的 .md 欄位：category
 		const currentCategory = project.data.category || "None";
 		
 		return (
