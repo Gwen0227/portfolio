@@ -9,95 +9,109 @@ const initializeElements = () => {
 };
 
 // Load all images and background images on the page.
-// Resolves when all assets are loaded, or rejects if any fail.
 const loadImages = () => {
-	return new Promise((resolve, reject) => {
-		// Collect all <img> elements.
+	return new Promise((resolve) => {
+		// Collect all <img> elements
 		const imgElements = document.querySelectorAll("img");
 
-		// Collect elements with background images.
+		// Collect elements with background images
 		const bgElements = [...document.querySelectorAll("*")].filter((el) => {
 			const style = window.getComputedStyle(el);
 			return style.backgroundImage !== "none";
 		});
 
-		// Combine both sets of elements.
 		const allElements = [...imgElements, ...bgElements];
 
-		// Use imagesLoaded to track asset loading.
-		const imgLoad = imagesLoaded(allElements, { background: true });
-		imgLoad.on("done", resolve);
+		const imgLoad = imagesLoaded(allElements, {
+			background: true,
+		});
+
+		// 顯示哪些圖片失敗
 		imgLoad.on("fail", () => {
-			reject(new Error("Failed to load some images or assets"));
+			console.warn("Some images failed to load.");
+		});
+
+		// 無論成功或失敗，都繼續
+		imgLoad.on("always", () => {
+			resolve();
 		});
 	});
 };
 
-// Load assets and dispatch a custom event when done.
+// Load assets and dispatch a custom event.
 const loadAssets = async () => {
-	try {
-		await loadImages();
-		const event = new CustomEvent("assetsLoaded");
-		document.dispatchEvent(event);
-	} catch (error) {
-		console.error("Failed to load assets:", error);
-		throw error;
-	}
+	await loadImages();
+
+	document.dispatchEvent(
+		new CustomEvent("assetsLoaded")
+	);
 };
 
-// Show the preloader, load assets if needed, and then hide the preloader.
+// Show the preloader, load assets, then always hide it.
 const toggleLoading = async () => {
+	if (!loading) return;
+
 	if (sessionStorage.getItem("preloadComplete") === "true") {
 		hide();
 		return;
 	}
+
 	show();
+
 	try {
 		await loadAssets();
 		sessionStorage.setItem("preloadComplete", "true");
-		hide();
 	} catch (error) {
-		console.error("Failed to load assets or animate:", error);
+		console.error(error);
+	} finally {
+		hide();
 	}
 };
 
 // Display the preloader.
 const show = () => {
-	loading.classList.remove("hidden");
+	if (loading) {
+		loading.classList.remove("hidden");
+	}
 };
 
 // Hide the preloader.
 const hide = () => {
-	loading.classList.add("hidden");
+	if (loading) {
+		loading.classList.add("hidden");
+	}
 };
 
-// Cleanup to reset references.
+// Cleanup.
 const cleanup = () => {
 	loading = null;
 };
 
-// Initialize the preloader logic.
+// Initialize.
 const init = () => {
 	initializeElements();
 	toggleLoading();
 };
 
-// Execute a callback only if the current page is the home page.
-const handlePageEvent = (_, callback) => {
+// Execute callback only on homepage.
+const handlePageEvent = (callback) => {
 	const page = document.documentElement.getAttribute("data-page");
-	if (page === "home") callback();
+
+	if (page === "home") {
+		callback();
+	}
 };
 
-// Listen for Astro's lifecycle events.
+// Astro page events
 document.addEventListener("astro:page-load", () => {
-	handlePageEvent("page-load", init);
+	handlePageEvent(init);
 });
 
 document.addEventListener("astro:before-swap", () => {
-	handlePageEvent("before-swap", cleanup);
+	handlePageEvent(cleanup);
 });
 
-// Clear the preload flag before page unload to ensure the loader appears on refresh.
+// Show loader again after refresh
 window.addEventListener("beforeunload", () => {
 	sessionStorage.removeItem("preloadComplete");
 });
