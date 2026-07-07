@@ -6,9 +6,9 @@ let textSliders;
 let gridContainer;
 let gridItems;
 let hasPreloaderComponent;
-let animationTimeline; // GSAP timeline instance
+let animationTimeline;
 
-// Initialize DOM elements used in the animations.
+// Initialize DOM elements
 const initializeVariables = () => {
 	lines = document.querySelectorAll("hr");
 	textSliders = document.querySelectorAll("header .oh > .oh__inner");
@@ -17,42 +17,76 @@ const initializeVariables = () => {
 	hasPreloaderComponent = document.querySelector(".loading");
 };
 
-// Animate the homepage elements using a GSAP timeline.
+// Homepage animation
 const animateHomepageElements = () => {
 	if (!gridContainer || !gridItems.length) return;
 
-	// Hide the grid container before starting the animation.
-	animationTimeline = gsap.set(gridContainer, { autoAlpha: 0 });
+	// 先隱藏作品區
+	gsap.set(gridContainer, { autoAlpha: 0 });
 
-	gsap
-		.timeline({
-			defaults: {
-				duration: 1.4,
-				ease: "power4",
-			},
-			onComplete: () => {
-				// Dispatch a custom event after all animations complete.
-				const event = new CustomEvent("gridRendered");
-				document.dispatchEvent(event);
-			},
-		})
-		.fromTo(
-			lines,
-			{ transformOrigin: "0% 50%", scaleX: 0 },
-			{ duration: 1.6, ease: "power2", stagger: 0.9, scaleX: 1 },
-		)
-		.from(textSliders, { yPercent: 100, stagger: 0.1 }, 0.2)
-		.set(gridContainer, { autoAlpha: 1 }, "<+=1")
-		.from(gridItems, { yPercent: 100, stagger: 0.08 }, "<")
-		.from(gridItems, { ease: "sine", autoAlpha: 0, stagger: 0.08 }, "<");
+	animationTimeline = gsap.timeline({
+		defaults: {
+			duration: 1.2,
+			ease: "power3.out",
+		},
+		onComplete: () => {
+			document.dispatchEvent(new CustomEvent("gridRendered"));
+		},
+	});
+
+	// Header 線條
+	animationTimeline.fromTo(
+		lines,
+		{
+			transformOrigin: "0% 50%",
+			scaleX: 0,
+		},
+		{
+			duration: 1,
+			scaleX: 1,
+			stagger: 0.2,
+			ease: "power2.out",
+		},
+	);
+
+	// Header 文字
+	animationTimeline.from(
+		textSliders,
+		{
+			yPercent: 100,
+			stagger: 0.05,
+		},
+		0.1
+	);
+
+	// 顯示作品區
+	animationTimeline.set(
+		gridContainer,
+		{
+			autoAlpha: 1,
+		},
+		"<+=0.2"
+	);
+
+	// ★ 所有作品一起淡入（不再一張張）
+	animationTimeline.from(
+		gridItems,
+		{
+			autoAlpha: 0,
+			duration: 0.45,
+			ease: "power2.out",
+		},
+		"<"
+	);
 };
 
-// Clean up animations and DOM references to prevent memory leaks.
+// Cleanup
 const cleanup = () => {
 	if (animationTimeline) {
-		animationTimeline.kill(); // Stop the timeline
+		animationTimeline.kill();
 		animationTimeline = null;
 	}
+
 	lines = null;
 	textSliders = null;
 	gridContainer = null;
@@ -60,18 +94,16 @@ const cleanup = () => {
 	hasPreloaderComponent = null;
 };
 
-// Initialize the page: set variables, manage scroll behavior, and trigger animations.
+// Init
 const init = () => {
 	initializeVariables();
 
-	// Disable scroll restoration on browser back navigation.
 	if ("scrollRestoration" in history) {
 		history.scrollRestoration = "manual";
 	}
-	// Scroll to the top of the page.
+
 	window.scrollTo(0, 0);
 
-	// Wait for assets to load if a preloader is present.
 	if (
 		hasPreloaderComponent &&
 		sessionStorage.getItem("preloadComplete") !== "true"
@@ -84,18 +116,20 @@ const init = () => {
 	}
 };
 
-// Run a callback only if the current page is the home page.
+// Run only on homepage
 const handlePageEvent = (_, callback) => {
 	const page = document.documentElement.getAttribute("data-page");
-	if (page === "home") callback();
+
+	if (page === "home") {
+		callback();
+	}
 };
 
-// Astro lifecycle hook: initialize animations on page load.
+// Astro lifecycle
 document.addEventListener("astro:page-load", () => {
 	handlePageEvent("page-load", init);
 });
 
-// Astro lifecycle hook: clean up before swapping pages.
 document.addEventListener("astro:before-swap", () => {
 	handlePageEvent("before-swap", cleanup);
 });
