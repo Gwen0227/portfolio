@@ -73,7 +73,7 @@ const animateHomepageElements = () => {
 		gridItems,
 		{
 			autoAlpha: 0,
-			duration: 0.45,
+			duration: 1.5,
 			ease: "power2.out",
 		},
 		"<"
