@@ -3,7 +3,7 @@ title: Landing Page
 slug: landing-page
 year: 2026
 cover: /images/landing-page.jpg
-category: "Visual Design"
+category: "Visual"
 tech:
   - Astro
   - TypeScript

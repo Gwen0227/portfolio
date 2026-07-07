@@ -3,7 +3,7 @@ title: About Me
 slug: aboutme
 year: 2026
 cover: /images/aboutme.jpg
-category: "Visual Design"
+category: "Visual"
 tech:
   - Astro
   - TypeScript

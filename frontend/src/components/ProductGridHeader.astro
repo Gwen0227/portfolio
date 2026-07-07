@@ -15,16 +15,16 @@ const { productsTotal } = Astro.props;
 			<TextSlider content="All" />
 		</button>
 
-		<button data-filter="Brand Identity">
-			<TextSlider content="Brand Identity" />
+		<button data-filter="Brand">
+			<TextSlider content="Brand" />
 		</button>
 
-		<button data-filter="Visual Design">
-			<TextSlider content="Visual Design" />
+		<button data-filter="Visual">
+			<TextSlider content="Visual" />
 		</button>
 
-		<button data-filter="Packaging Design">
-			<TextSlider content="Packaging Design" />
+		<button data-filter="Packaging">
+			<TextSlider content="Packaging" />
 		</button>
 	</div>
 
@@ -37,20 +37,27 @@ const { productsTotal } = Astro.props;
 
 <script>
 	function initFilter() {
+		console.log("=== 🔍 篩選系統啟動 ===");
+		
 		const buttons = document.querySelectorAll('.categories button');
 		const cards = document.querySelectorAll('[data-category]') as NodeListOf<HTMLElement>;
+
+		console.log(`找到按鈕數量: ${buttons.length} 個`);
+		console.log(`找到蓋有印章的作品卡片數量: ${cards.length} 個`);
 
 		if (!buttons.length) return;
 
 		buttons.forEach(button => {
 			button.addEventListener('click', () => {
 				const filterValue = button.getAttribute('data-filter');
+				console.log(`👉 你點擊了分類: ${filterValue}`);
 
 				buttons.forEach(btn => btn.classList.remove('active'));
 				button.classList.add('active');
 
 				cards.forEach(card => {
 					const cardCategory = card.getAttribute('data-category');
+					console.log(`卡片對應的分類是: [${cardCategory}]`);
 
 					if (filterValue === 'all' || cardCategory === filterValue) {
 						card.style.display = '';
@@ -63,6 +70,7 @@ const { productsTotal } = Astro.props;
 		});
 	}
 
+	initFilter();
 	document.addEventListener('astro:page-load', initFilter);
 </script>
 
