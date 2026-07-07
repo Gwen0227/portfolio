@@ -16,11 +16,15 @@ const grid = "projects";
 	id="grid"
 	data-grid={grid}
 >
-	{projects.map((project) => (
-		<div data-category={project.data.category} class="grid-item">
-			<ProductCard product={project} />
-		</div>
-	))}
+	{projects.map((project) => {
+		const currentCategory = project.data.category || "None";
+		
+		return (
+			<div data-category={currentCategory} class="grid-item">
+				<ProductCard product={project} />
+			</div>
+		);
+	})}
 </section>
 
 <ProductTooltip grid={grid} />
@@ -31,30 +35,24 @@ const grid = "projects";
 		overflow: hidden;
 		display: grid;
 		width: 100%;
-
-		/* 手機：3 欄 */
 		grid-template-columns: repeat(3, 1fr);
-
 		gap: 0rem;
 		margin: 1rem 0 10rem;
 		min-height: 400px;
 	}
 
-	/* 🎯 確保包裹用的 div 完美填滿網格，不排擠原本的作品卡片樣式 */
 	.grid-item {
 		display: block;
 		width: 100%;
 		height: 100%;
 	}
 
-	/* 平板：4 欄 */
 	@media screen and (min-width: 50em) {
 		.product-grid {
 			grid-template-columns: repeat(4, 1fr);
 		}
 	}
 
-	/* 桌機：5 欄 */
 	@media screen and (min-width: 80em) {
 		.product-grid {
 			grid-template-columns: repeat(5, 1fr);
