@@ -4,13 +4,16 @@ import TextSlider from "../components/TextSlider.astro";
 
 const currentPath = Astro.url.pathname;
 
+// 🎯 修正 1：統一將當前路徑結尾的斜線去掉，避免比對出錯
+const normalizedPath = currentPath.replace(/\/$/, "") || "/";
+
 const routes = {
 	"/": "Projects",
-	"/about/": "About",
-	"/contact/": "Contact",
+	"/about": "About",    // 🎯 修正 2：去掉尾端斜線
+	"/contact": "Contact",// 🎯 修正 2：去掉尾端斜線
 };
 
-const activeRoute = routes[currentPath] || null;
+const activeRoute = routes[normalizedPath] || null;
 ---
 
 <header>
@@ -28,7 +31,7 @@ const activeRoute = routes[currentPath] || null;
 		<li>
 			<a
 				href="/"
-				class={activeRoute === "Projects" ? "current" : ""}
+				class={normalizedPath === "/" ? "current" : ""}
 				data-astro-prefetch
 			>
 				<TextSlider content="Projects" />
@@ -36,8 +39,9 @@ const activeRoute = routes[currentPath] || null;
 		</li>
 
 		<li>
+			<!-- 🎯 修正 3：href 改成 /about (不帶斜線) -->
 			<a
-				href="/about/"
+				href="/about"
 				class={activeRoute === "About" ? "current" : ""}
 				data-astro-prefetch
 			>
@@ -46,8 +50,9 @@ const activeRoute = routes[currentPath] || null;
 		</li>
 
 		<li>
+			<!-- 🎯 修正 3：href 改成 /contact (不帶斜線) -->
 			<a
-				href="/contact/"
+				href="/contact"
 				class={activeRoute === "Contact" ? "current" : ""}
 				data-astro-prefetch
 			>
@@ -65,13 +70,13 @@ const activeRoute = routes[currentPath] || null;
 		align-items: flex-end;
 		column-gap: 1.5rem;
 		row-gap: 1rem;
-		padding: 1.25rem 0; /* 稍微縮小內距，配合 1rem 的字級 */
+		padding: 1.25rem 0;
 		z-index: 3;
 	}
 
 	h1 {
 		margin: 0;
-		font-size: 1.2rem; /* 🎯 名字同步調回 1rem */
+		font-size: 1.2rem;
 		font-weight: 600;
 		line-height: 1;
 		white-space: nowrap;
@@ -93,7 +98,7 @@ const activeRoute = routes[currentPath] || null;
 	}
 
 	.role {
-		font-size: 0.9rem; /* 職稱稍微縮小，維持視覺比例 */
+		font-size: 0.9rem;
 		font-weight: 400;
 		opacity: 0.45;
 		line-height: 1;
@@ -110,7 +115,7 @@ const activeRoute = routes[currentPath] || null;
 		margin: 0;
 		padding: 0;
 		list-style: none;
-		font-size: 0.9rem; /* 🎯 主選單（Projects...）成功改回 1rem */
+		font-size: 0.9rem;
 		font-weight: 600;
 	}
 
@@ -118,13 +123,13 @@ const activeRoute = routes[currentPath] || null;
 		position: relative;
 		text-decoration: none;
 		color: #000000;
-		padding-bottom: 0.5rem; /* 微調底線留白距離 */
+		padding-bottom: 0.5rem;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 	}
 
-	/* 🎯 保持好看的 4px 黑色厚底線 */
+	/* 4px 黑色厚底線 */
 	ul a.current::after {
 		content: "";
 		position: absolute;
