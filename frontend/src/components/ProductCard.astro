@@ -23,7 +23,6 @@ const { product } = Astro.props;
 
 		<div class="product-meta">
 			<h3>{product.data.title}</h3>
-
 			<p>{product.data.year}</p>
 		</div>
 	</article>
@@ -31,32 +30,53 @@ const { product } = Astro.props;
 
 <style>
 	.product-card {
-		display: flex;
-		flex-direction: column;
-		gap: 0.5rem;
-		max-width: 300px;
+		display: block;
+		width: 100%;
+	}
+
+	article {
+		width: 100%;
 	}
 
 	img {
 		width: 100%;
+		display: block;
+
 		aspect-ratio: 1 / 1;
 		object-fit: cover;
-		display: block;
 	}
 
 	.product-meta {
 		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-top: 0.5rem;
+		align-items: baseline;
+		gap: 0.4rem;
+
+		margin-top: 0.35rem;
 	}
 
-	h3,
+	h3 {
+		margin: 0;
+
+		font-size: 0.95rem;
+		font-weight: 700;
+		line-height: 1.1;
+	}
+
 	p {
 		margin: 0;
+
+		font-size: 0.95rem;
+		font-weight: 400;
+
+		opacity: 0.45;
+
+		line-height: 1.1;
 	}
 
-	p {
-		opacity: 0.6;
+	@media (max-width: 768px) {
+		h3,
+		p {
+			font-size: 0.9rem;
+		}
 	}
 </style>

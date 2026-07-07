@@ -2,30 +2,27 @@
 import Separator from "../components/Separator.astro";
 import TextSlider from "../components/TextSlider.astro";
 
-// Get the current pathname
 const currentPath = Astro.url.pathname;
 
-// Define a map of routes
 const routes = {
 	"/": "Projects",
 	"/about/": "About",
 	"/contact/": "Contact",
 };
 
-// Determine the active route
 const activeRoute = routes[currentPath] || null;
 ---
 
 <header>
-	<h1>
-		<a href="/" class={activeRoute === "Projects" ? "current" : ""}>
+	<h1 class="logo-group">
+		<a href="/">
 			<TextSlider content="Chen-Pei Jyuan" />
 		</a>
 	</h1>
 
 	<span class="role">
-	<TextSlider content="Brand & Visual Designer" />
-</span>
+		<TextSlider content="Brand & Visual Designer" />
+	</span>
 
 	<ul>
 		<li>
@@ -66,41 +63,116 @@ const activeRoute = routes[currentPath] || null;
 	header {
 		position: relative;
 		display: grid;
-		grid-template-columns: min-content auto;
-		font-weight: 700;
-		padding: 1rem 0;
-		gap: 1rem;
+		grid-template-columns: auto auto 1fr;
+		align-items: flex-end;
+
+		column-gap: 1.5rem;
+		row-gap: 1rem;
+
+		padding: 1.75rem 0;
+
 		z-index: 3;
 	}
 
-	header a.current {
-		pointer-events: none;
-	}
-
 	h1 {
-		font-size: 1rem;
-		font-weight: inherit;
 		margin: 0;
+		font-size: 1.25rem;
+		font-weight: 700;
+		line-height: 1;
 		white-space: nowrap;
 	}
 
-    .role {
-	opacity: 0.6;
-	font-weight: 400;
-    }
+	/* 🎯 獨立設定名字的連結樣式，確保這裡絕對沒有底線效果 */
+	.logo-group a {
+		text-decoration: none;
+		color: #000000;
+		position: relative;
+		padding-bottom: 0.65rem;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		pointer-events: auto !important; /* 確保名字永遠可以點擊回首頁 */
+	}
+
+	/* 🎯 確保名字下面絕對不會出現 ::after 的底線 */
+	.logo-group a::after {
+		display: none !important;
+	}
+
+	.role {
+		font-size: 1rem;
+		font-weight: 400;
+		opacity: 0.45;
+		line-height: 1;
+		white-space: nowrap;
+		padding-bottom: 0.65rem; /* 讓職稱與名字在同一水平線上對齊 */
+	}
 
 	ul {
+		grid-column: 3;
+		justify-self: end;
+
 		display: flex;
-		list-style: none;
-		gap: 1rem;
+		align-items: center;
+		gap: 2rem;
+
 		margin: 0;
 		padding: 0;
-		grid-column: auto / span 2;
+
+		list-style: none;
+
+		font-size: 1.25rem;
+		font-weight: 700;
 	}
 
-	@media screen and (min-width: 50em) {
+	ul a {
+		position: relative;
+		text-decoration: none;
+		color: #000000;
+		padding-bottom: 0.65rem;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	/* 🎯 只有右側選單（ul 內的 a.current）才會有這條 4px 黑色厚底線 */
+	ul a.current::after {
+		content: "";
+		position: absolute;
+		left: 0;
+		bottom: -2px;
+		width: 100%;
+		height: 4px;
+		background-color: #000000;
+	}
+
+	/* 只有選單選中的項目會被鎖死點擊 */
+	ul a.current {
+		pointer-events: none;
+	}
+
+	/* 📱 手機版響應式調整 */
+	@media (max-width: 768px) {
 		header {
-			grid-template-columns: 20vw 1fr auto auto;
+			grid-template-columns: auto 1fr;
+			column-gap: 0.75rem;
+			row-gap: 1.2rem;
+			padding: 1.25rem 0;
+		}
+
+		ul {
+			grid-column: 1 / -1;
+			justify-self: start;
+			gap: 1.5rem;
+			font-size: 1.1rem;
+		}
+
+		h1 {
+			font-size: 1.15rem;
+		}
+
+		.role {
+			font-size: 0.9rem;
 		}
 	}
-</style> 
+</style>
