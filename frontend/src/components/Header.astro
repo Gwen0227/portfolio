@@ -57,8 +57,6 @@ const activeRoute = routes[currentPath] || null;
 	</ul>
 </header>
 
-<Separator />
-
 <style>
 	header {
 		position: relative;
@@ -69,43 +67,41 @@ const activeRoute = routes[currentPath] || null;
 		column-gap: 1.5rem;
 		row-gap: 1rem;
 
-		padding: 1.75rem 0;
+		padding: 1.25rem 0; /* 稍微縮小內距，配合 1rem 的字級 */
 
 		z-index: 3;
 	}
 
 	h1 {
 		margin: 0;
-		font-size: 1.25rem;
+		font-size: 1rem; /* 🎯 名字同步調回 1rem */
 		font-weight: 700;
 		line-height: 1;
 		white-space: nowrap;
 	}
 
-	/* 🎯 獨立設定名字的連結樣式，確保這裡絕對沒有底線效果 */
 	.logo-group a {
 		text-decoration: none;
 		color: #000000;
 		position: relative;
-		padding-bottom: 0.65rem;
+		padding-bottom: 0.5rem;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		pointer-events: auto !important; /* 確保名字永遠可以點擊回首頁 */
+		pointer-events: auto !important;
 	}
 
-	/* 🎯 確保名字下面絕對不會出現 ::after 的底線 */
 	.logo-group a::after {
 		display: none !important;
 	}
 
 	.role {
-		font-size: 1rem;
+		font-size: 0.9rem; /* 職稱稍微縮小，維持視覺比例 */
 		font-weight: 400;
 		opacity: 0.45;
 		line-height: 1;
 		white-space: nowrap;
-		padding-bottom: 0.65rem; /* 讓職稱與名字在同一水平線上對齊 */
+		padding-bottom: 0.5rem;
 	}
 
 	ul {
@@ -121,7 +117,7 @@ const activeRoute = routes[currentPath] || null;
 
 		list-style: none;
 
-		font-size: 1.25rem;
+		font-size: 1rem; /* 🎯 主選單（Projects...）成功改回 1rem */
 		font-weight: 700;
 	}
 
@@ -129,13 +125,13 @@ const activeRoute = routes[currentPath] || null;
 		position: relative;
 		text-decoration: none;
 		color: #000000;
-		padding-bottom: 0.65rem;
+		padding-bottom: 0.5rem; /* 微調底線留白距離 */
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 	}
 
-	/* 🎯 只有右側選單（ul 內的 a.current）才會有這條 4px 黑色厚底線 */
+	/* 🎯 保持好看的 4px 黑色厚底線 */
 	ul a.current::after {
 		content: "";
 		position: absolute;
@@ -146,7 +142,6 @@ const activeRoute = routes[currentPath] || null;
 		background-color: #000000;
 	}
 
-	/* 只有選單選中的項目會被鎖死點擊 */
 	ul a.current {
 		pointer-events: none;
 	}
@@ -157,22 +152,22 @@ const activeRoute = routes[currentPath] || null;
 			grid-template-columns: auto 1fr;
 			column-gap: 0.75rem;
 			row-gap: 1.2rem;
-			padding: 1.25rem 0;
+			padding: 1rem 0;
 		}
 
 		ul {
 			grid-column: 1 / -1;
 			justify-self: start;
 			gap: 1.5rem;
-			font-size: 1.1rem;
+			font-size: 0.95rem;
 		}
 
 		h1 {
-			font-size: 1.15rem;
+			font-size: 1rem;
 		}
 
 		.role {
-			font-size: 0.9rem;
+			font-size: 0.85rem;
 		}
 	}
 </style>
