@@ -17,7 +17,9 @@ const grid = "projects";
 	data-grid={grid}
 >
 	{projects.map((project) => (
-		<ProductCard product={project} />
+		<div data-category={project.data.category} class="grid-item">
+			<ProductCard product={project} />
+		</div>
 	))}
 </section>
 
@@ -36,6 +38,13 @@ const grid = "projects";
 		gap: 0rem;
 		margin: 1rem 0 10rem;
 		min-height: 400px;
+	}
+
+	/* 🎯 確保包裹用的 div 完美填滿網格，不排擠原本的作品卡片樣式 */
+	.grid-item {
+		display: block;
+		width: 100%;
+		height: 100%;
 	}
 
 	/* 平板：4 欄 */
