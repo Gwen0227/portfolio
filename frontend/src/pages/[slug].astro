@@ -1,8 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
-// 修正這裡的路徑，確保能找到 src/layouts/Layout.astro
-// 如果此檔案在 src/pages/，那就只要用 ../layouts/Layout.astro
-import Layout from "../layouts/Layout.astro"; 
+// 修正匯入名稱為 BaseLayout
+import BaseLayout from "../layouts/BaseLayout.astro";
 
 export async function getStaticPaths() {
     const projects = await getCollection("projects");
@@ -16,7 +15,7 @@ const { project } = Astro.props;
 const { Content } = await render(project);
 ---
 
-<Layout title={project.data.title}>
+<BaseLayout title={project.data.title}>
     <main class="project-detail">
         <a href="/" class="back-link">← 回首頁</a>
         
@@ -30,7 +29,7 @@ const { Content } = await render(project);
             <Content />
         </article>
     </main>
-</Layout>
+</BaseLayout>
 
 <style>
     .project-detail {
@@ -44,13 +43,14 @@ const { Content } = await render(project);
         margin-bottom: 2rem;
         color: #000;
         text-decoration: none;
+        font-weight: 500;
     }
 
     .protected-img {
         width: 100%;
         border-radius: 8px;
         margin-bottom: 2rem;
-        /* 加入我們剛剛設定的防護效果 */
+        /* AI 防護與防盜設計 */
         filter: blur(0.6px);
         transition: filter 0.3s ease;
         user-select: none;
@@ -61,11 +61,12 @@ const { Content } = await render(project);
         filter: blur(0);
     }
 
-    /* 讓 Markdown 的內容美觀 */
+    /* 處理 Markdown 內容排版 */
     .prose {
-        line-height: 1.6;
+        line-height: 1.7;
         color: #333;
     }
     .prose h2 { margin-top: 2rem; font-size: 1.5rem; }
-    .prose p { margin-bottom: 1rem; }
+    .prose p { margin-bottom: 1.2rem; }
+    .prose ul { margin-left: 1.5rem; margin-bottom: 1rem; }
 </style>
