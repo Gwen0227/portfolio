@@ -9,7 +9,9 @@ const { product } = Astro.props;
 
 // 🎯 讀取個別作品的設定，預設為 "page" (進入說明頁)
 const mode = product.data.mode || "page";
-const projectLink = `/projects/${product.data.slug || product.id}`;
+
+// 🚀 連結修改：移除 /projects/，直接使用根目錄路徑
+const projectLink = `/${product.data.slug || product.id}`;
 ---
 
 {mode === "zoom" ? (
