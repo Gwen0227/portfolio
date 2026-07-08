@@ -1,7 +1,8 @@
 ---
 import { getCollection, render } from "astro:content";
-// 1. 匯入你的 Layout 元件 (路徑請根據你的資料夾結構調整，通常在 ../../layouts/Layout.astro)
-import Layout from "../../layouts/Layout.astro";
+// 修正這裡的路徑，確保能找到 src/layouts/Layout.astro
+// 如果此檔案在 src/pages/，那就只要用 ../layouts/Layout.astro
+import Layout from "../layouts/Layout.astro"; 
 
 export async function getStaticPaths() {
     const projects = await getCollection("projects");
@@ -23,7 +24,7 @@ const { Content } = await render(project);
             <h1>{project.data.title}</h1>
         </header>
 
-        <img src={project.data.cover} alt={project.data.title} class="cover-img" />
+        <img src={project.data.cover} alt={project.data.title} class="protected-img" />
 
         <article class="prose">
             <Content />
@@ -34,25 +35,37 @@ const { Content } = await render(project);
 <style>
     .project-detail {
         max-width: 800px;
-        margin: 2rem auto;
+        margin: 4rem auto;
         padding: 0 1rem;
     }
 
     .back-link {
         display: inline-block;
         margin-bottom: 2rem;
-        color: #666;
+        color: #000;
         text-decoration: none;
     }
 
-    .cover-img {
+    .protected-img {
         width: 100%;
         border-radius: 8px;
-        margin: 1.5rem 0;
+        margin-bottom: 2rem;
+        /* 加入我們剛剛設定的防護效果 */
+        filter: blur(0.6px);
+        transition: filter 0.3s ease;
+        user-select: none;
+        -webkit-user-drag: none;
+    }
+    
+    .protected-img:hover {
+        filter: blur(0);
     }
 
-    /* 處理 Markdown 內部的樣式 */
+    /* 讓 Markdown 的內容美觀 */
+    .prose {
+        line-height: 1.6;
+        color: #333;
+    }
     .prose h2 { margin-top: 2rem; font-size: 1.5rem; }
-    .prose p { line-height: 1.7; margin-bottom: 1.2rem; color: #333; }
-    .prose ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+    .prose p { margin-bottom: 1rem; }
 </style>
