@@ -1,5 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
+// 1. 匯入你的 Layout 元件 (路徑請根據你的資料夾結構調整，通常在 ../../layouts/Layout.astro)
+import Layout from "../../layouts/Layout.astro";
 
 export async function getStaticPaths() {
     const projects = await getCollection("projects");
@@ -13,15 +15,44 @@ const { project } = Astro.props;
 const { Content } = await render(project);
 ---
 
-<html>
-    <body>
-        <main style="max-width: 800px; margin: 4rem auto;">
-            <a href="/">← 回首頁</a>
+<Layout title={project.data.title}>
+    <main class="project-detail">
+        <a href="/" class="back-link">← 回首頁</a>
+        
+        <header>
             <h1>{project.data.title}</h1>
-            <img src={project.data.cover} alt={project.data.title} style="width: 100%;" />
-            <article>
-                <Content />
-            </article>
-        </main>
-    </body>
-</html>
+        </header>
+
+        <img src={project.data.cover} alt={project.data.title} class="cover-img" />
+
+        <article class="prose">
+            <Content />
+        </article>
+    </main>
+</Layout>
+
+<style>
+    .project-detail {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-bottom: 2rem;
+        color: #666;
+        text-decoration: none;
+    }
+
+    .cover-img {
+        width: 100%;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+    }
+
+    /* 處理 Markdown 內部的樣式 */
+    .prose h2 { margin-top: 2rem; font-size: 1.5rem; }
+    .prose p { line-height: 1.7; margin-bottom: 1.2rem; color: #333; }
+    .prose ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+</style>
