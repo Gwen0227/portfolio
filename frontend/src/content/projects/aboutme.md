@@ -4,6 +4,7 @@ slug: aboutme
 year: 2026
 cover: /images/aboutme.jpg
 category: "Visual"
+mode: "zoom"  # 🎯 加上這一行，它才會走進 zoom 邏輯！
 tech:
   - Astro
   - TypeScript
