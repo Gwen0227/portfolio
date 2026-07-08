@@ -1,0 +1,27 @@
+---
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+    const projects = await getCollection("projects");
+    return projects.map((project) => ({
+        params: { slug: project.data.slug },
+        props: { project },
+    }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+---
+
+<html>
+    <body>
+        <main style="max-width: 800px; margin: 4rem auto;">
+            <a href="/">← 回首頁</a>
+            <h1>{project.data.title}</h1>
+            <img src={project.data.cover} alt={project.data.title} style="width: 100%;" />
+            <article>
+                <Content />
+            </article>
+        </main>
+    </body>
+</html>
