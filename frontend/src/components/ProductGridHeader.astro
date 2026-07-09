@@ -18,6 +18,8 @@ const categories = [
 ---
 
 <div class="category-wrapper">
+	<div class="full-width-bg"></div>
+
 	<header class="project-filter">
 		<div class="categories">
 			{categories.map((cat) => {
@@ -78,26 +80,35 @@ const categories = [
 </script>
 
 <style>
-	/* 🎯 滿版灰底容器 (壓縮高度) */
+	/* 🎯 主容器：跟網頁主內容寬度完全一致 */
 	.category-wrapper {
-		width: 100vw;
 		position: relative;
-		left: 50%;
-		right: 50%;
-		margin-left: -50vw;
-		margin-right: -50vw;
-		background-color: #f1f1f1; /* 灰色背景 */
-		margin-top: 0.5rem;       /* 上方邊距壓低 */
-		margin-bottom: 1.5rem;    /* 下方邊距壓低 */
+		width: 100%;
+		margin-top: 0.5rem;
+		margin-bottom: 1.5rem;
 	}
 
+	/* 🎯 滿版灰底：用 absolute 獨立延伸出去，不影響內文排版 */
+	.full-width-bg {
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 50%;
+		width: 100vw;
+		transform: translateX(-50%);
+		background-color: #f1f1f1;
+		z-index: 0;
+	}
+
+	/* 🎯 文字選單內容：貼齊左右邊緣，且層級比灰底高 */
 	.project-filter {
-		max-width: 1200px;
-		margin: 0 auto;
+		position: relative;
+		z-index: 1;
+		width: 100%;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.25rem 2rem;    /* 關鍵：上下 padding 從 0.6rem 縮減到 0.25rem */
+		padding: 0.15rem 0; /* 上下留少許內邊距 */
 		font-size: 0.85rem; 
 		box-sizing: border-box;
 		white-space: nowrap;
@@ -118,7 +129,7 @@ const categories = [
 	.categories button {
 		background: transparent;
 		border: none;
-		padding: 0.2rem 0;        /* 關鍵：按鈕上下 padding 壓低 */
+		padding: 0.2rem 0;
 
 		font-family: inherit;
 		font-size: inherit;
@@ -149,10 +160,6 @@ const categories = [
 	}
 
 	@media (max-width: 768px) {
-		.project-filter {
-			padding: 0.25rem 1rem;
-		}
-
 		.categories {
 			gap: 1rem;
 		}
