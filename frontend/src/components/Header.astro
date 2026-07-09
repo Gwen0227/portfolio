@@ -14,8 +14,7 @@ if (normalizedPath === "/about") {
 
 <header>
 	<div class="header-main">
-		<!-- 品牌名稱與職稱 -->
-		<div class="brand-group">
+		<div class="branding-inline">
 			<h1 class="logo-group">
 				<a href="/">
 					<TextSlider content="Chen-Pei Jyuan" />
@@ -27,7 +26,6 @@ if (normalizedPath === "/about") {
 			</span>
 		</div>
 
-		<!-- 導覽選單（Projects / About / Contact） -->
 		<ul class="nav-menu">
 			<li>
 				<a href="/" class={currentTab === "Projects" ? "current" : ""} data-astro-prefetch>
@@ -57,21 +55,22 @@ if (normalizedPath === "/about") {
 		z-index: 3;
 	}
 
-	/* 🎯 使用 flex + wrap 允許自動換行 */
 	.header-main {
 		display: flex;
-		flex-wrap: wrap; /* 空間不夠時自動換行 */
 		justify-content: space-between;
 		align-items: flex-end;
-		gap: 1.25rem 1.5rem; /* 上下左右間距 */
 		padding: 1.25rem 0;
+		flex-wrap: wrap;
+		gap: 1rem;
 	}
 
-	.brand-group {
-		display: flex;
-		align-items: flex-end;
-		gap: 1.5rem;
-		flex-wrap: wrap; /* 名字跟職稱不夠寬時也能換行 */
+	/* 🎯 關鍵：強制名字與職稱在同一行，且永不換行 */
+	.branding-inline {
+		display: inline-flex;
+		align-items: baseline;
+		gap: 0.75rem;
+		white-space: nowrap; /* 絕對不換行 */
+		flex-shrink: 0;
 	}
 
 	h1 {
@@ -86,7 +85,6 @@ if (normalizedPath === "/about") {
 		text-decoration: none;
 		color: #000000;
 		position: relative;
-		padding-bottom: 0.2rem;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -102,7 +100,6 @@ if (normalizedPath === "/about") {
 		opacity: 0.45;
 		line-height: 1;
 		white-space: nowrap;
-		padding-bottom: 0.2rem;
 	}
 
 	.nav-menu {
@@ -114,8 +111,7 @@ if (normalizedPath === "/about") {
 		list-style: none;
 		font-size: 0.9rem;
 		font-weight: 600;
-		/* 當視窗縮窄折行時，確保選單滿版或自動對齊 */
-		flex-wrap: wrap;
+		white-space: nowrap;
 	}
 
 	.nav-menu a {
@@ -143,28 +139,26 @@ if (normalizedPath === "/about") {
 		pointer-events: none;
 	}
 
-	/* 📱 當視窗變窄或手機時的優化 */
+	/* 📱 手機與窄螢幕微調 */
 	@media (max-width: 768px) {
 		.header-main {
 			padding: 1rem 0;
 		}
 
-		.brand-group {
-			gap: 0.75rem;
-		}
-
-		.nav-menu {
-			width: 100%; /* 折行後佔滿整行 */
-			gap: 1.5rem;
-			font-size: 0.95rem;
-			margin-top: 0.25rem;
+		.branding-inline {
+			gap: 0.5rem;
 		}
 
 		h1 {
-			font-size: 1.1rem;
+			font-size: 1rem;
 		}
 
 		.role {
+			font-size: 0.8rem;
+		}
+
+		.nav-menu {
+			gap: 1.25rem;
 			font-size: 0.85rem;
 		}
 	}
