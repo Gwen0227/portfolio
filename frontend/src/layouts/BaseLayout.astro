@@ -78,12 +78,24 @@ const currentPage =
       }}
     />
     <ClientRouter />
+
+    <style is:global>
+      .hover-reveal,
+      [class*="hover-reveal"],
+      [class*="cursor"],
+      #cursor,
+      canvas.hover-canvas {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+    </style>
   </head>
   <body>
     <SmoothScroll />
     <Header />
     <slot />
     <Footer />
-    <script src="../scripts/imageFade.js"></script>
-  </body>
+    </body>
 </html>
