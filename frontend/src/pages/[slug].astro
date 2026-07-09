@@ -83,7 +83,7 @@ const activeCategory = project.data?.category || "all";
 
 	/* 🎯 圖片 AI 防護與樣式 */
 	.protected-img, 
-	.prose img {
+	.prose :global(img) {
 		width: 100%;
 		height: auto;
 		display: block;
@@ -94,14 +94,15 @@ const activeCategory = project.data?.category || "all";
 		/* 防盜防擷取微模糊效果 */
 		filter: blur(0.6px);
 		transition: filter 0.3s ease;
+		margin-bottom: 0.5rem;
 	}
 
 	.protected-img:hover, 
-	.prose img:hover {
+	.prose :global(img:hover) {
 		filter: blur(0);
 	}
 
-	/* 🎯 Markdown 內文豐富排版 (.prose) */
+	/* 🎯 Markdown 內文排版 (.prose) */
 	.prose {
 		width: 100%;
 		color: #222222;
@@ -115,8 +116,20 @@ const activeCategory = project.data?.category || "all";
 		font-weight: 700;
 		color: #000000;
 		margin-top: 3rem;
-		margin-bottom: 1.2rem;
+		margin-bottom: 0.5rem;
 		line-height: 1.4;
+	}
+
+	/* 🖤 獨立的黑色斜線裝飾元素 */
+	.prose :global(hr.slash) {
+		border: none;
+		outline: none;
+		width: 40px;            /* 斜線長度 */
+		height: 0.8px;          /* 🎯 線條更細 (原本 1.5px -> 0.8px) */
+		background-color: #000000; /* 純黑色 */
+		margin: 1.5rem 0 2.2rem 0; /* 🎯 距離拉大：上方 1.5rem / 下方 2.2rem */
+		transform: rotate(-25deg);
+		transform-origin: left center;
 	}
 
 	/* 小標題 (h3) */
@@ -135,17 +148,19 @@ const activeCategory = project.data?.category || "all";
 		word-break: break-word;
 	}
 
-	/* Markdown 內的圖片與圖說 (<figure> & <figcaption>) */
-	.prose :global(figure) {
-		width: 100%;
-		margin: 2.5rem 0;
-	}
-
-	.prose :global(figcaption) {
-		margin-top: 0.6rem;
-		font-size: 0.85rem;
-		color: #888888;
+	/* 🎯 圖片下方的圖說（灰色小字） */
+	.prose :global(figcaption),
+	.prose :global(p img + em),
+	.prose :global(p img + br + em),
+	.prose :global(p img + span) {
+		display: block;
+		margin-top: 0.5rem;
+		margin-bottom: 2.2rem;
+		font-style: normal;
+		font-size: 0.68rem !important; /* 🎯 再調小一點 (原本 0.85rem -> 0.72rem) */
+		color: #888888 !important;     /* 偏灰色 */
 		line-height: 1.5;
+		letter-spacing: 0.02em;        /* 微調字距提升質感 */
 	}
 
 	/* 清單樣式 */
