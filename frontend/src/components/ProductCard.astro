@@ -11,7 +11,7 @@ const { product } = Astro.props;
 const mode = product.data.mode || "page";
 const projectLink = `/${product.data.slug || product.id}`;
 
-// 🎯 取得年份，若 Markdown 未設定 year 欄位則預設顯示 2026
+// 🎯 取得年份，若未設定則預設為 2026
 const year = product.data.year || "2026";
 ---
 
@@ -92,38 +92,52 @@ const year = product.data.year || "2026";
 		color: #000000;
 	}
 
-	/* 🎯 關鍵修復：分類與年份同一行左右對齊，並控制字體小於標題 */
+	/* 🎯 分類與年份橫向排列 */
 	.project-meta {
 		display: flex !important;
 		flex-direction: row !important;
 		justify-content: space-between !important;
-		align-items: center !important;
+		align-items: baseline !important;
 		margin-top: 0.2rem;
 		width: 100%;
 	}
 
-	.category-tag,
-	.year-tag {
-		font-size: 0.8rem !important; /* 確保小字尺寸 */
+	.category-tag {
+		font-size: 0.8rem !important;
 		font-weight: 400 !important;
 		color: #888888 !important;
-		line-height: 1.2 !important;
-		display: inline-block !important;
+		line-height: 1 !important;
+	}
+
+	/* 🎯 年份再調小、微調透明度 */
+	.year-tag {
+		font-size: 0.72rem !important; /* 再調小 */
+		font-weight: 400 !important;
+		color: #aaaaaa !important; /* 顏色稍微淡一點更細緻 */
+		line-height: 1 !important;
 	}
 
 	@media (max-width: 768px) {
 		.project-info h3 { font-size: 0.9rem; }
-		.category-tag, .year-tag { font-size: 0.75rem !important; }
+		.category-tag { font-size: 0.75rem !important; }
+		.year-tag { font-size: 0.68rem !important; }
 	}
 </style>
 
 <style is:global>
+	/* 針對所有可能產生 Hover 黑底懸浮區塊的 Class 做強制屏蔽 */
+	[class*="hover-reveal"],
+	[class*="cursor-"],
 	.hover-reveal,
 	.hover-reveal__inner,
-	.hover-reveal__img {
+	.hover-reveal__img,
+	#cursor,
+	.cursor {
 		display: none !important;
 		opacity: 0 !important;
 		visibility: hidden !important;
 		pointer-events: none !important;
+		width: 0 !important;
+		height: 0 !important;
 	}
 </style>
