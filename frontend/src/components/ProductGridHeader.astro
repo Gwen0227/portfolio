@@ -78,7 +78,7 @@ const categories = [
 </script>
 
 <style>
-	/* 🎯 全寬灰底容器 (破腹延伸至螢幕左右邊緣) */
+	/* 🎯 滿版灰底容器 (壓縮高度) */
 	.category-wrapper {
 		width: 100vw;
 		position: relative;
@@ -87,17 +87,17 @@ const categories = [
 		margin-left: -50vw;
 		margin-right: -50vw;
 		background-color: #e5e5e5; /* 灰色背景 */
-		margin-top: 1rem;
-		margin-bottom: 2rem;
+		margin-top: 0.5rem;       /* 上方邊距壓低 */
+		margin-bottom: 1.5rem;    /* 下方邊距壓低 */
 	}
 
 	.project-filter {
-		max-width: 1200px; /* 請根據你網站容器寬度微調 */
+		max-width: 1200px;
 		margin: 0 auto;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.6rem 2rem;
+		padding: 0.25rem 2rem;    /* 關鍵：上下 padding 從 0.6rem 縮減到 0.25rem */
 		font-size: 0.85rem; 
 		box-sizing: border-box;
 		white-space: nowrap;
@@ -118,20 +118,19 @@ const categories = [
 	.categories button {
 		background: transparent;
 		border: none;
-		padding: 0.35rem 0;
+		padding: 0.2rem 0;        /* 關鍵：按鈕上下 padding 壓低 */
 
 		font-family: inherit;
 		font-size: inherit;
 		font-weight: normal; 
 		
 		cursor: pointer;
-		color: #888888; /* 未選中的灰字 */
+		color: #888888;
 
 		transition: color 0.2s ease, font-weight 0.2s ease;
 		flex-shrink: 0;
 	}
 
-	/* 🎯 當前選中的分類（黑字 + 粗體） */
 	.categories button.active {
 		color: #000000;
 		font-weight: 700;
@@ -151,7 +150,7 @@ const categories = [
 
 	@media (max-width: 768px) {
 		.project-filter {
-			padding: 0.6rem 1rem;
+			padding: 0.25rem 1rem;
 		}
 
 		.categories {

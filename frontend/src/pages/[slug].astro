@@ -1,72 +1,70 @@
 ---
 import { getCollection, render } from "astro:content";
-// 修正匯入名稱為 BaseLayout
 import BaseLayout from "../layouts/BaseLayout.astro";
+import ProjectFilter from "../components/ProjectFilter.astro";
 
 export async function getStaticPaths() {
-    const projects = await getCollection("projects");
-    return projects.map((project) => ({
-        params: { slug: project.data.slug },
-        props: { project },
-    }));
+	const projects = await getCollection("projects");
+	return projects.map((project) => ({
+		params: { slug: project.data.slug },
+		props: { project },
+	}));
 }
 
 const { project } = Astro.props;
 const { Content } = await render(project);
+
+// 🎯 取得所有作品總數（用來傳給 ProjectFilter 顯示 X Projects）
+const allProjects = await getCollection("projects");
 ---
 
 <BaseLayout title={project.data.title}>
-    <main class="project-detail">
-        <a href="/" class="back-link">← 回首頁</a>
-        
-        <header>
-            <h1>{project.data.title}</h1>
-        </header>
+	<ProjectFilter 
+		activeCategory={project.data.category} 
+		productsTotal={allProjects.length} 
+	/>
 
-        <img src={project.data.cover} alt={project.data.title} class="protected-img" />
+	<main class="project-detail">
+		<header>
+			<h1>{project.data.title}</h1>
+		</header>
 
-        <article class="prose">
-            <Content />
-        </article>
-    </main>
+		<img src={project.data.cover} alt={project.data.title} class="protected-img" />
+
+		<article class="prose">
+			<Content />
+		</article>
+	</main>
 </BaseLayout>
 
 <style>
-    .project-detail {
-        max-width: 800px;
-        margin: 4rem auto;
-        padding: 0 1rem;
-    }
+	.project-detail {
+		max-width: 800px;
+		margin: 2rem auto 4rem auto;
+		padding: 0 1rem;
+	}
 
-    .back-link {
-        display: inline-block;
-        margin-bottom: 2rem;
-        color: #000;
-        text-decoration: none;
-        font-weight: 500;
-    }
+	.protected-img {
+		width: 100%;
+		border-radius: 8px;
+		margin-bottom: 2rem;
+		/* AI 防護與防盜設計 */
+		filter: blur(0.6px);
+		transition: filter 0.3s ease;
+		user-select: none;
+		-webkit-user-drag: none;
+	}
 
-    .protected-img {
-        width: 100%;
-        border-radius: 8px;
-        margin-bottom: 2rem;
-        /* AI 防護與防盜設計 */
-        filter: blur(0.6px);
-        transition: filter 0.3s ease;
-        user-select: none;
-        -webkit-user-drag: none;
-    }
-    
-    .protected-img:hover {
-        filter: blur(0);
-    }
+	.protected-img:hover {
+		filter: blur(0);
+	}
 
-    /* 處理 Markdown 內容排版 */
-    .prose {
-        line-height: 1.7;
-        color: #333;
-    }
-    .prose h2 { margin-top: 2rem; font-size: 1.5rem; }
-    .prose p { margin-bottom: 1.2rem; }
-    .prose ul { margin-left: 1.5rem; margin-bottom: 1rem; }
+	/* 處理 Markdown 內容排版 */
+	.prose {
+		line-height: 1.7;
+		color: #333333;
+	}
+	.prose h2 { margin-top: 2rem; font-size: 1.5rem; }
+	.prose p { margin-bottom: 1.2rem; }
+	.prose ul { margin-left: 1.5rem; margin-bottom: 1rem; }
 </style>
