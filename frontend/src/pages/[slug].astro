@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
-import ProjectFilter from "../components/ProjectFilter.astro";
+import ProductGridHeader from "../components/ProductGridHeader.astro";
 
 export async function getStaticPaths() {
 	const projects = await getCollection("projects");
@@ -13,23 +13,22 @@ export async function getStaticPaths() {
 
 const { project } = Astro.props;
 
-// 1. 安全防護：確認 project 存在
 if (!project) {
 	throw new Error("Project not found");
 }
 
 const { Content } = await render(project);
 
-// 2. 安全防護：取得所有專案列表與數量，並處理空值
+// 🎯 取得所有專案列表與數量
 const allProjects = (await getCollection("projects")) || [];
 const productsTotal = allProjects.length;
 
-// 3. 安全防護：確保 activeCategory 絕對不會是 undefined
+// 🎯 取得該作品的分類，若無則預設為 "all"
 const activeCategory = project.data?.category || "all";
 ---
 
 <BaseLayout title={project.data.title}>
-	<ProjectFilter 
+	<ProductGridHeader 
 		activeCategory={activeCategory} 
 		productsTotal={productsTotal} 
 	/>
@@ -60,6 +59,7 @@ const activeCategory = project.data?.category || "all";
 		width: 100%;
 		border-radius: 8px;
 		margin-bottom: 2rem;
+		/* AI 防護與防盜設計 */
 		filter: blur(0.6px);
 		transition: filter 0.3s ease;
 		user-select: none;
@@ -70,6 +70,7 @@ const activeCategory = project.data?.category || "all";
 		filter: blur(0);
 	}
 
+	/* 處理 Markdown 內容排版 */
 	.prose {
 		line-height: 1.7;
 		color: #333333;
