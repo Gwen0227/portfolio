@@ -1,7 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import ProductCard from "./ProductCard.astro";
-import ProductTooltip from "./ProductTooltip.astro";
 
 type Props = {
 	projects: CollectionEntry<"projects">[];
@@ -26,8 +25,6 @@ const grid = "projects";
 	<span class="close-lightbox">&times;</span>
 	<img class="lightbox-content" id="lightbox-img" src="" alt="Enlarged view" />
 </div>
-
-<ProductTooltip grid={grid} />
 
 <script>
 	function initLightbox() {
@@ -72,8 +69,9 @@ const grid = "projects";
 		display: grid;
 		width: 100%;
 		grid-template-columns: repeat(3, 1fr);
-		gap: 0.2rem;
-		margin: 1rem 0 10rem;
+		/* 🎯 調整間距：上下距離 1rem，左右緊密間距 0.2rem */
+		gap: 1rem 0.2rem; 
+		margin: 1rem 0 6rem;
 		min-height: 400px;
 	}
 
@@ -126,10 +124,10 @@ const grid = "projects";
 	}
 
 	@media screen and (min-width: 50em) {
-		.product-grid { grid-template-columns: repeat(4, 1fr); }
+		.product-grid { grid-template-columns: repeat(3, 1fr); }
 	}
 
 	@media screen and (min-width: 80em) {
-		.product-grid { grid-template-columns: repeat(5, 1fr); }
+		.product-grid { grid-template-columns: repeat(3, 1fr); }
 	}
 </style>
