@@ -1,77 +1,117 @@
 ---
+import { getCollection } from "astro:content";
 import Separator from "../components/Separator.astro";
 import TextSlider from "../components/TextSlider.astro";
 
-const currentPath = Astro.url.pathname;
-
-// 🎯 修正 1：統一將當前路徑結尾的斜線去掉，避免比對出錯
-const normalizedPath = currentPath.replace(/\/$/, "") || "/";
-
-const routes = {
-	"/": "Projects",
-	"/about": "About",    // 🎯 修正 2：去掉尾端斜線
-	"/contact": "Contact",// 🎯 修正 2：去掉尾端斜線
+type Props = {
+	activeCategory?: string;
 };
 
-const activeRoute = routes[normalizedPath] || null;
+const { activeCategory } = Astro.props;
+
+const currentPath = Astro.url.pathname;
+
+// 🎯 1. 統一將當前路徑結尾的斜線去掉
+const normalizedPath = currentPath.replace(/\/$/, "") || "/";
+
+// 🎯 2. 判斷邏輯：如果路徑是 /about 或 /contact，對應其選單；否則（包含首頁 / 以及所有作品內頁 /landing-page）一律歸類為 "Projects"
+let currentTab = "Projects";
+if (normalizedPath === "/about") {
+	currentTab = "About";
+} else if (normalizedPath === "/contact") {
+	currentTab = "Contact";
+}
+
+// 🎯 3. 自動抓取 Content Collections 裡的所有專案分類與總數量
+const allProjects = await getCollection("projects");
+const rawCategories = Array.from(new Set(allProjects.map((p) => p.data.category).filter(Boolean)));
+const categories = ["All", ...rawCategories];
+
+// 如果是在 Projects 頁面且沒傳入特定 category，預設為 "All"
+const currentCategory = activeCategory || "All";
 ---
 
 <header>
-	<h1 class="logo-group">
-		<a href="/">
-			<TextSlider content="Chen-Pei Jyuan" />
-		</a>
-	</h1>
-
-	<span class="role">
-		<TextSlider content="Brand & Visual Designer" />
-	</span>
-
-	<ul>
-		<li>
-			<a
-				href="/"
-				class={normalizedPath === "/" ? "current" : ""}
-				data-astro-prefetch
-			>
-				<TextSlider content="Projects" />
+	<div class="header-main">
+		<h1 class="logo-group">
+			<a href="/">
+				<TextSlider content="Chen-Pei Jyuan" />
 			</a>
-		</li>
+		</h1>
 
-		<li>
-			<!-- 🎯 修正 3：href 改成 /about (不帶斜線) -->
-			<a
-				href="/about"
-				class={activeRoute === "About" ? "current" : ""}
-				data-astro-prefetch
-			>
-				<TextSlider content="About" />
-			</a>
-		</li>
+		<span class="role">
+			<TextSlider content="Brand & Visual Designer" />
+		</span>
 
-		<li>
-			<!-- 🎯 修正 3：href 改成 /contact (不帶斜線) -->
-			<a
-				href="/contact"
-				class={activeRoute === "Contact" ? "current" : ""}
-				data-astro-prefetch
-			>
-				<TextSlider content="Contact" />
-			</a>
-		</li>
-	</ul>
+		<ul>
+			<li>
+				<a
+					href="/"
+					class={currentTab === "Projects" ? "current" : ""}
+					data-astro-prefetch
+				>
+					<TextSlider content="Projects" />
+				</a>
+			</li>
+
+			<li>
+				<a
+					href="/about"
+					class={currentTab === "About" ? "current" : ""}
+					data-astro-prefetch
+				>
+					<TextSlider content="About" />
+				</a>
+			</li>
+
+			<li>
+				<a
+					href="/contact"
+					class={currentTab === "Contact" ? "current" : ""}
+					data-astro-prefetch
+				>
+					<TextSlider content="Contact" />
+				</a>
+			</li>
+		</ul>
+	</div>
+
+	{currentTab === "Projects" && (
+		<div class="category-bar">
+			<div class="category-list">
+				{categories.map((cat) => {
+					const isActive = cat.toLowerCase() === currentCategory.toLowerCase();
+					return (
+						<a 
+							href={cat === "All" ? "/#projects" : `/#projects?category=${cat}`}
+							class={`category-item ${isActive ? "is-active" : ""}`}
+						>
+							{cat}
+						</a>
+					);
+				})}
+			</div>
+			<div class="category-count">
+				{allProjects.length} Projects
+			</div>
+		</div>
+	)}
 </header>
 
 <style>
 	header {
 		position: relative;
+		width: 100%;
+		z-index: 3;
+	}
+
+	.header-main {
 		display: grid;
 		grid-template-columns: auto auto 1fr;
 		align-items: flex-end;
 		column-gap: 1.5rem;
 		row-gap: 1rem;
 		padding: 1.25rem 0;
-		z-index: 3;
 	}
 
 	h1 {
@@ -144,28 +184,42 @@ const activeRoute = routes[normalizedPath] || null;
 		pointer-events: none;
 	}
 
-	/* 📱 手機版響應式調整 */
-	@media (max-width: 768px) {
-		header {
-			grid-template-columns: auto 1fr;
-			column-gap: 0.75rem;
-			row-gap: 1.2rem;
-			padding: 1rem 0;
-		}
-
-		ul {
-			grid-column: 1 / -1;
-			justify-self: start;
-			gap: 1.5rem;
-			font-size: 0.95rem;
-		}
-
-		h1 {
-			font-size: 1rem;
-		}
-
-		.role {
-			font-size: 0.85rem;
-		}
+	/* 🎯 灰底二級過濾條樣式 */
+	.category-bar {
+		width: 100vw;
+		position: relative;
+		left: 50%;
+		right: 50%;
+		margin-left: -50vw;
+		margin-right: -50vw;
+		background-color: #e5e5e5;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 0.6rem 2rem;
+		box-sizing: border-box;
+		font-size: 0.85rem;
 	}
-</style>
+
+	.category-list {
+		display: flex;
+		gap: 1.5rem;
+	}
+
+	.category-item {
+		text-decoration: none;
+		color: #999999;
+		font-weight: 500;
+		transition: color 0.2s ease;
+	}
+
+	.category-item:hover {
+		color: #000000;
+	}
+
+	.category-item.is-active {
+		color: #000000;
+		font-weight: 700;
+	}
+
+	.category-count {
