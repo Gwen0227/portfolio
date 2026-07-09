@@ -10,6 +10,9 @@ const { product } = Astro.props;
 // 🎯 設定路徑與導向
 const mode = product.data.mode || "page";
 const projectLink = `/${product.data.slug || product.id}`;
+
+// 🎯 取得年份，若 Markdown 未設定 year 欄位則預設顯示 2026
+const year = product.data.year || "2026";
 ---
 
 {mode === "zoom" ? (
@@ -17,23 +20,30 @@ const projectLink = `/${product.data.slug || product.id}`;
 		class="product-card is-zoom-mode"
 		data-product-title={product.data.title}
 		data-zoom={product.data.cover}
+		data-category={product.data.category}
 	>
 		<div class="image-container">
 			<img src={product.data.cover} alt={product.data.title} loading="lazy" class="protected-img" />
 		</div>
 		<div class="project-info">
 			<h3>{product.data.title}</h3>
-			{product.data.category && <span class="category-tag">{product.data.category}</span>}
+			<div class="project-meta">
+				<span class="category-tag">{product.data.category || "Visual"}</span>
+				<span class="year-tag">/{year}</span>
+			</div>
 		</div>
 	</div>
 ) : (
-	<a href={projectLink} class="product-card is-page-mode" data-product-title={product.data.title}>
+	<a href={projectLink} class="product-card is-page-mode" data-product-title={product.data.title} data-category={product.data.category}>
 		<div class="image-container">
 			<img src={product.data.cover} alt={product.data.title} loading="lazy" class="protected-img" />
 		</div>
 		<div class="project-info">
 			<h3>{product.data.title}</h3>
-			{product.data.category && <span class="category-tag">{product.data.category}</span>}
+			<div class="project-meta">
+				<span class="category-tag">{product.data.category || "Visual"}</span>
+				<span class="year-tag">/{year}</span>
+			</div>
 		</div>
 	</a>
 )}
@@ -45,12 +55,19 @@ const projectLink = `/${product.data.slug || product.id}`;
 		width: 100%;
 		text-decoration: none;
 		color: #000000;
-		background: #ffffff;
-		transition: transform 0.2s ease;
+		background: transparent;
+		transition: none; /* 移除點擊或 Hover 上的上移位移 */
 	}
 
-	.product-card:hover {
-		transform: translateY(-2px);
+	/* 🎯 徹底移除 Hover 時出現黑色背景/說明框與底線 */
+	.product-card:hover,
+	.product-card:focus,
+	.product-card:active {
+		background: transparent !important;
+		color: inherit !important;
+		text-decoration: none !important;
+		outline: none;
+		box-shadow: none;
 	}
 	
 	.is-zoom-mode { cursor: zoom-in; }
@@ -71,39 +88,52 @@ const projectLink = `/${product.data.slug || product.id}`;
 		object-position: center;
 		display: block;
 		
-		/* 透過模糊濾鏡擾亂 AI 採樣，對人類視覺影響微小 */
 		filter: blur(0.6px);
 		transition: filter 0.3s ease;
 		
-		/* 禁止使用者拖曳圖片 */
 		user-select: none;
 		-webkit-user-drag: none;
 	}
 
-	/* 滑鼠移入時清晰，保障良好觀看體驗 */
 	.product-card:hover .protected-img {
 		filter: blur(0);
 	}
 
 	.project-info {
-		padding: 0.75rem 0.25rem;
+		padding: 0.6rem 0 0 0;
+		background: transparent;
 	}
 
 	.project-info h3 {
 		margin: 0;
 		font-size: 0.95rem;
-		font-weight: 600;
+		font-weight: 700;
 		line-height: 1.2;
+		color: #000000;
+	}
+
+	/* 🎯 分類與年份兩端對齊容器 */
+	.project-meta {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-top: 0.25rem;
+		font-size: 0.8rem;
+		color: #888888;
 	}
 
 	.category-tag {
-		font-size: 0.8rem;
-		color: #666666;
-		margin-top: 0.2rem;
-		display: block;
+		color: #888888;
+		font-weight: 400;
+	}
+
+	.year-tag {
+		color: #888888;
+		font-weight: 400;
 	}
 
 	@media (max-width: 768px) {
 		.project-info h3 { font-size: 0.9rem; }
+		.project-meta { font-size: 0.75rem; }
 	}
 </style>
