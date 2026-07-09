@@ -11,10 +11,10 @@ const { activeCategory } = Astro.props;
 
 const currentPath = Astro.url.pathname;
 
-// 🎯 1. 統一將當前路徑結尾的斜線去掉
+// 🎯 1. 統一將當前路徑結尾的斜線去掉，避免路由判定錯誤
 const normalizedPath = currentPath.replace(/\/$/, "") || "/";
 
-// 🎯 2. 判斷邏輯：如果路徑是 /about 或 /contact，對應其選單；否則（包含首頁 / 以及所有作品內頁 /landing-page）一律歸類為 "Projects"
+// 🎯 2. 判斷邏輯：非 /about 與 /contact 的路徑（包含首頁 / 與作品內頁）皆歸為 Projects
 let currentTab = "Projects";
 if (normalizedPath === "/about") {
 	currentTab = "About";
@@ -22,12 +22,12 @@ if (normalizedPath === "/about") {
 	currentTab = "Contact";
 }
 
-// 🎯 3. 自動抓取 Content Collections 裡的所有專案分類與總數量
+// 🎯 3. 自動抓取 Content Collections 中的所有專案分類與總數量
 const allProjects = await getCollection("projects");
 const rawCategories = Array.from(new Set(allProjects.map((p) => p.data.category).filter(Boolean)));
 const categories = ["All", ...rawCategories];
 
-// 如果是在 Projects 頁面且沒傳入特定 category，預設為 "All"
+// 預設高亮分類
 const currentCategory = activeCategory || "All";
 ---
 
@@ -176,50 +176,4 @@ const currentCategory = activeCategory || "All";
 		left: 0;
 		bottom: -2px;
 		width: 100%;
-		height: 4px;
-		background-color: #000000;
-	}
-
-	ul a.current {
-		pointer-events: none;
-	}
-
-	/* 🎯 灰底二級過濾條樣式 */
-	.category-bar {
-		width: 100vw;
-		position: relative;
-		left: 50%;
-		right: 50%;
-		margin-left: -50vw;
-		margin-right: -50vw;
-		background-color: #e5e5e5;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.6rem 2rem;
-		box-sizing: border-box;
-		font-size: 0.85rem;
-	}
-
-	.category-list {
-		display: flex;
-		gap: 1.5rem;
-	}
-
-	.category-item {
-		text-decoration: none;
-		color: #999999;
-		font-weight: 500;
-		transition: color 0.2s ease;
-	}
-
-	.category-item:hover {
-		color: #000000;
-	}
-
-	.category-item.is-active {
-		color: #000000;
-		font-weight: 700;
-	}
-
-	.category-count {
+		height: 4px
