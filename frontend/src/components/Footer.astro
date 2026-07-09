@@ -16,7 +16,9 @@ const currentYear = new Date().getFullYear();
   }
   p {
     margin: 0;
-    font-weight: bold;
+    font-size: 0.85rem;        /* 🎯 調小字體 (原本約 1rem) */
+    font-weight: 400;          /* 🎯 改為正常/偏細粗細 (原本為 bold/700) */
+    opacity: 0.5;              /* 🎯 降低透明度，視覺上更輕盈 */
     line-height: 1.4;
     text-align: center;
     color: var(--color-text-alt);
