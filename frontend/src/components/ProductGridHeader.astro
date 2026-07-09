@@ -1,63 +1,66 @@
 ---
-import Separator from "../components/Separator.astro";
 import TextSlider from "../components/TextSlider.astro";
 
 type Props = {
-	productsTotal: number;
+	productsTotal?: number;
+	activeCategory?: string;
 };
 
-const { productsTotal } = Astro.props;
+const { productsTotal = 3, activeCategory = "all" } = Astro.props;
+
+// 預設分類清單
+const categories = [
+	{ id: "all", label: "All" },
+	{ id: "Brand", label: "Brand" },
+	{ id: "Visual", label: "Visual" },
+	{ id: "Packaging", label: "Packaging" },
+];
 ---
 
-<header class="project-filter">
-	<div class="categories">
-		<button data-filter="all" class="active">
-			<TextSlider content="All" />
-		</button>
+<div class="category-wrapper">
+	<header class="project-filter">
+		<div class="categories">
+			{categories.map((cat) => {
+				const isActive = cat.id.toLowerCase() === activeCategory.toLowerCase();
+				return (
+					<button 
+						data-filter={cat.id} 
+						class={isActive ? "active" : ""}
+					>
+						<TextSlider content={cat.label} />
+					</button>
+				);
+			})}
+		</div>
 
-		<button data-filter="Brand">
-			<TextSlider content="Brand" />
-		</button>
-
-		<button data-filter="Visual">
-			<TextSlider content="Visual" />
-		</button>
-
-		<button data-filter="Packaging">
-			<TextSlider content="Packaging" />
-		</button>
-	</div>
-
-	<span class="count">
-		<TextSlider content={`${productsTotal} Projects`} />
-	</span>
-</header>
-
-<Separator />
+		<span class="count">
+			<TextSlider content={`${productsTotal} Projects`} />
+		</span>
+	</header>
+</div>
 
 <script>
 	function initFilter() {
-		console.log("=== 🔍 篩選系統啟動 ===");
-		
 		const buttons = document.querySelectorAll('.categories button');
 		const cards = document.querySelectorAll('[data-category]') as NodeListOf<HTMLElement>;
-
-		console.log(`找到按鈕數量: ${buttons.length} 個`);
-		console.log(`找到蓋有印章的作品卡片數量: ${cards.length} 個`);
 
 		if (!buttons.length) return;
 
 		buttons.forEach(button => {
 			button.addEventListener('click', () => {
 				const filterValue = button.getAttribute('data-filter');
-				console.log(`👉 你點擊了分類: ${filterValue}`);
 
 				buttons.forEach(btn => btn.classList.remove('active'));
 				button.classList.add('active');
 
+				// 如果不在首頁，點擊分類按鈕時跳回首頁並帶上參數
+				if (window.location.pathname !== "/") {
+					window.location.href = filterValue === "all" ? "/" : `/?category=${filterValue}`;
+					return;
+				}
+
 				cards.forEach(card => {
 					const cardCategory = card.getAttribute('data-category');
-					console.log(`卡片對應的分類是: [${cardCategory}]`);
 
 					if (filterValue === 'all' || cardCategory === filterValue) {
 						card.style.display = '';
@@ -75,18 +78,41 @@ const { productsTotal } = Astro.props;
 </script>
 
 <style>
+	/* 🎯 全寬灰底容器 (破腹延伸至螢幕左右邊緣) */
+	.category-wrapper {
+		width: 100vw;
+		position: relative;
+		left: 50%;
+		right: 50%;
+		margin-left: -50vw;
+		margin-right: -50vw;
+		background-color: #e5e5e5; /* 灰色背景 */
+		margin-top: 1rem;
+		margin-bottom: 2rem;
+	}
+
 	.project-filter {
+		max-width: 1200px; /* 請根據你網站容器寬度微調 */
+		margin: 0 auto;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.75rem 0;
-		font-size: 0.9rem; 
+		padding: 0.6rem 2rem;
+		font-size: 0.85rem; 
+		box-sizing: border-box;
+		white-space: nowrap;
 	}
 
 	.categories {
 		display: flex;
 		align-items: center;
 		gap: 1.5rem;
+		overflow-x: auto;
+		scrollbar-width: none;
+	}
+
+	.categories::-webkit-scrollbar {
+		display: none;
 	}
 
 	.categories button {
@@ -99,39 +125,37 @@ const { productsTotal } = Astro.props;
 		font-weight: normal; 
 		
 		cursor: pointer;
-		color: #000000;
+		color: #888888; /* 未選中的灰字 */
 
-		transition: opacity 0.2s ease, font-weight 0.2s ease;
-		opacity: 0.4; 
+		transition: color 0.2s ease, font-weight 0.2s ease;
+		flex-shrink: 0;
 	}
 
+	/* 🎯 當前選中的分類（黑字 + 粗體） */
 	.categories button.active {
-		opacity: 1;
-		font-weight: 600;
+		color: #000000;
+		font-weight: 700;
 	}
 
 	.categories button:hover {
-		opacity: 0.8;
+		color: #000000;
 	}
 
 	.count {
 		font-weight: normal; 
-		color: #000000;
-		opacity: 1;
+		color: #888888;
 		white-space: nowrap;
+		flex-shrink: 0;
+		margin-left: 1rem;
 	}
 
 	@media (max-width: 768px) {
 		.project-filter {
-			flex-wrap: nowrap; 
+			padding: 0.6rem 1rem;
 		}
 
 		.categories {
-			gap: 0.75rem;
-		}
-
-		.categories button {
-			padding: 0.3rem 0;
+			gap: 1rem;
 		}
 	}
 </style>
