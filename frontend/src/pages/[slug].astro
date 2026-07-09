@@ -12,16 +12,26 @@ export async function getStaticPaths() {
 }
 
 const { project } = Astro.props;
+
+// 1. 安全防護：確認 project 存在
+if (!project) {
+	throw new Error("Project not found");
+}
+
 const { Content } = await render(project);
 
-// 🎯 取得所有作品總數（用來傳給 ProjectFilter 顯示 X Projects）
-const allProjects = await getCollection("projects");
+// 2. 安全防護：取得所有專案列表與數量，並處理空值
+const allProjects = (await getCollection("projects")) || [];
+const productsTotal = allProjects.length;
+
+// 3. 安全防護：確保 activeCategory 絕對不會是 undefined
+const activeCategory = project.data?.category || "all";
 ---
 
 <BaseLayout title={project.data.title}>
 	<ProjectFilter 
-		activeCategory={project.data.category} 
-		productsTotal={allProjects.length} 
+		activeCategory={activeCategory} 
+		productsTotal={productsTotal} 
 	/>
 
 	<main class="project-detail">
@@ -29,7 +39,9 @@ const allProjects = await getCollection("projects");
 			<h1>{project.data.title}</h1>
 		</header>
 
-		<img src={project.data.cover} alt={project.data.title} class="protected-img" />
+		{project.data.cover && (
+			<img src={project.data.cover} alt={project.data.title} class="protected-img" />
+		)}
 
 		<article class="prose">
 			<Content />
@@ -48,7 +60,6 @@ const allProjects = await getCollection("projects");
 		width: 100%;
 		border-radius: 8px;
 		margin-bottom: 2rem;
-		/* AI 防護與防盜設計 */
 		filter: blur(0.6px);
 		transition: filter 0.3s ease;
 		user-select: none;
@@ -59,7 +70,6 @@ const allProjects = await getCollection("projects");
 		filter: blur(0);
 	}
 
-	/* 處理 Markdown 內容排版 */
 	.prose {
 		line-height: 1.7;
 		color: #333333;
