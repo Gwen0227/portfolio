@@ -3,7 +3,7 @@ import type { CollectionEntry } from "astro:content";
 import { getSanityImage } from "../utils/getSanityImage";
 
 interface Props {
-	node: CollectionEntry<"products">["data"]["imageWithAlt"];
+	node: CollectionEntry<"projects">["data"]["imageWithAlt"];
 	width?: number;
 	fit?: "cover" | "contain";
 	aspectRatio?: "1-1" | "4-3" | "16-9" | "9-16";
