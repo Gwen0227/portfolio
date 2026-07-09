@@ -68,13 +68,14 @@ const grid = "projects";
 		overflow: hidden;
 		display: grid;
 		width: 100%;
-		grid-template-columns: repeat(3, 1fr);
-		/* 🎯 調整間距：上下距離 1rem，左右緊密間距 0.2rem */
+		/* 📱 預設 / 小螢幕（最小狀態）：一排 3 張 */
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		/* 完全保留你原本的間距設定 */
 		gap: 1rem 0.2rem; 
 		margin: 1rem 0 6rem;
 		min-height: 400px;
 	}
-
+       
 	.grid-item {
 		display: block;
 		width: 100%;
@@ -123,11 +124,17 @@ const grid = "projects";
 		cursor: pointer;
 	}
 
-	@media screen and (min-width: 50em) {
-		.product-grid { grid-template-columns: repeat(3, 1fr); }
+	/* 💻 中大螢幕（約 > 1024px）：一排 5 張 */
+	@media screen and (min-width: 64em) {
+		.product-grid { 
+			grid-template-columns: repeat(5, minmax(0, 1fr)) !important; 
+		}
 	}
 
+	/* 🖥️ 大螢幕 / 桌機（約 > 1280px）：一排 6 張 */
 	@media screen and (min-width: 80em) {
-		.product-grid { grid-template-columns: repeat(3, 1fr); }
+		.product-grid { 
+			grid-template-columns: repeat(6, minmax(0, 1fr)) !important; 
+		}
 	}
 </style>
