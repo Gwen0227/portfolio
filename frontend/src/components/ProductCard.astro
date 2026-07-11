@@ -41,6 +41,7 @@ const year = product.data.year || "2026";
 )}
 
 <style>
+	/* 基礎卡片樣式重置 */
 	.product-card,
 	.product-card *,
 	.product-card:hover,
@@ -57,37 +58,65 @@ const year = product.data.year || "2026";
 		width: 100% !important;
 		text-decoration: none !important;
 		color: #000000 !important;
+		opacity: 1 !important;
+		filter: none !important;
 	}
 
 	.is-zoom-mode { cursor: zoom-in; }
 	.is-page-mode { cursor: pointer; }
 
+	/* 圖片容器：設定黑色遮罩 */
 	.image-container {
 		width: 100% !important;
 		aspect-ratio: 1 / 1 !important;
 		height: auto !important;
 		overflow: hidden !important;
 		position: relative !important;
-		background: #ffffff !important; /* 🎯 背景改為純白，避免底色透出顯暗 */
+		background: #ffffff !important;
+		opacity: 1 !important;
+		filter: none !important;
 	}
 
+	/* 🎯 黑色遮罩層 (預設顯示) */
+	.image-container::after {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		background-color: rgba(0, 0, 0, 0.5); /* 黑色半透明，可調整 0.5 這個數字 */
+		opacity: 1;
+		transition: opacity 0.3s ease; /* 遮罩淡出動畫 */
+		z-index: 1; /* 確保在圖片上方 */
+	}
+
+	/* 圖片基礎樣式 */
 	.protected-img {
 		width: 100% !important;
 		height: 100% !important;
 		object-fit: cover !important;
 		display: block !important;
-		opacity: 1 !important; /* 🎯 確保透明度為 100% 不透明 */
-		filter: blur(0.6px) brightness(1) !important; /* 🎯 保持 100% 正常亮度 */
-		transition: filter 0.3s ease, opacity 0.3s ease;
+		opacity: 1 !important;
+		filter: blur(0.6px) brightness(1) contrast(1) !important;
+		transition: filter 0.3s ease;
 		user-select: none;
 		-webkit-user-drag: none;
+		z-index: 0; /* 在遮罩下方 */
 	}
 
+	/* 🎯 滑鼠懸停時：隱藏黑色遮罩 */
+	.product-card:hover .image-container::after {
+		opacity: 0; /* 遮罩變透明 */
+	}
+
+	/* 滑鼠懸停時：圖片變清晰 */
 	.product-card:hover .protected-img {
-		filter: blur(0) brightness(1) !important; /* 懸停時變清晰 */
+		filter: blur(0) brightness(1) contrast(1) !important;
 		opacity: 1 !important;
 	}
 
+	/* 項目資訊樣式 */
 	.project-info {
 		padding: 0.5rem 0 0 0 !important;
 		width: 100% !important;
@@ -123,6 +152,7 @@ const year = product.data.year || "2026";
 		color: #aaaaaa !important;
 	}
 
+	/* 手機版樣式 */
 	@media (max-width: 768px) {
 		.project-info h3 { font-size: 0.9rem !important; }
 		.category-tag { font-size: 0.75rem !important; }
