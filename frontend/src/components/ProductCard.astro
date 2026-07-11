@@ -68,7 +68,7 @@ const year = product.data.year || "2026";
 		height: auto !important;
 		overflow: hidden !important;
 		position: relative !important;
-		background: #f5f5f5 !important;
+		background: #ffffff !important; /* 🎯 背景改為純白，避免底色透出顯暗 */
 	}
 
 	.protected-img {
@@ -76,14 +76,16 @@ const year = product.data.year || "2026";
 		height: 100% !important;
 		object-fit: cover !important;
 		display: block !important;
-		filter: blur(1px);
-		transition: filter 0.3s ease;
+		opacity: 1 !important; /* 🎯 確保透明度為 100% 不透明 */
+		filter: blur(0.6px) brightness(1) !important; /* 🎯 保持 100% 正常亮度 */
+		transition: filter 0.3s ease, opacity 0.3s ease;
 		user-select: none;
 		-webkit-user-drag: none;
 	}
 
 	.product-card:hover .protected-img {
-		filter: blur(0);
+		filter: blur(0) brightness(1) !important; /* 懸停時變清晰 */
+		opacity: 1 !important;
 	}
 
 	.project-info {
@@ -119,7 +121,6 @@ const year = product.data.year || "2026";
 		font-size: 0.72rem !important;
 		font-weight: 400 !important;
 		color: #aaaaaa !important;
-		line-height: 1 !important;
 	}
 
 	@media (max-width: 768px) {
