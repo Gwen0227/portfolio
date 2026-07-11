@@ -17,7 +17,7 @@ type Props = {
 	description?: string;
 };
 
-const { title, description = "Players Club Concept" } = Astro.props;
+const { title, description = "Pei Jyuan Chen's Personal Portfolio" } = Astro.props;
 
 // Current page value (/home, /about, /404 ...)
 const currentPage =
@@ -96,15 +96,15 @@ const currentPage =
         width: 100%;
         max-width: 1200px;  /* 限制全站最大寬度 */
         margin: 0 auto;     /* 內容置中 */
-        padding-left: 2rem; /* 👈 桌機版左右留白 */
-        padding-right: 2rem;
+        padding-left: 1rem; /* 👈 桌機版左右留白 */
+        padding-right: 1rem;
         box-sizing: border-box;
       }
 
       @media (max-width: 768px) {
         .site-container {
-          padding-left: 1rem; /* 📱 手機版左右留白 */
-          padding-right: 1rem;
+          padding-left: 0.5rem; /* 📱 手機版左右留白 */
+          padding-right: 0.5rem;
         }
       }
     </style>
