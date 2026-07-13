@@ -2,7 +2,7 @@
 title: ccc
 slug: ccc
 year: 2026
-cover: /images/aboutme.jpg
+cover: /images/visual/bn-Tw Mansion-meat.jpg
 category: "Visual"
 mode: "zoom"  # 🎯 加上這一行，它才會走進 zoom 邏輯！
 tech:

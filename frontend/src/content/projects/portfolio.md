@@ -2,7 +2,7 @@
 title: Portfolio Website
 slug: portfolio
 year: 2026
-cover: /images/portfolio.jpg
+cover: /images/Packaging/Duct Tape Mockup.jpg
 category: "Packaging"
 tech:
   - Astro

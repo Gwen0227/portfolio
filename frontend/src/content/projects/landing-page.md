@@ -2,7 +2,7 @@
 title: Landing Page
 slug: landing-page
 year: 2026
-cover: /images/landing-page.jpg
+cover: /images/visual/bn-Tw Mansion-meat.jpg
 category: "Visual"
 tech:
   - Astro
