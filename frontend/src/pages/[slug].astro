@@ -66,41 +66,39 @@ const activeCategory = project.data?.category || "all";
 		margin-bottom: 1.5rem;
 	}
 
-	/* 主標題 (粗體大字) */
+	/* 🎯 文章主標題：使用 !important 確保字體能順利放大 */
 	.main-title {
-		font-size: 8rem;
-		font-weight: 500;
-		color: #000000;
-		margin: 0;
-		line-height: 1.3;
+		font-size: 3.2rem !important; /* 👈 可調整大標題大小 (例如 3rem, 3.5rem, 4rem) */
+		font-weight: 700 !important;
+		color: #000000 !important;
+		margin: 0 !important;
+		line-height: 1.2 !important;
+		letter-spacing: -0.02em !important;
 	}
 
-	/* 🎯 封面大圖容器：固定 16:9 比例 */
+	/* 🎯 封面大圖容器 (16:9 比例) */
 	.featured-image {
 		width: 100%;
-		aspect-ratio: 16 / 9; /* 👈 固定 16:9 比例 */
+		aspect-ratio: 16 / 9;
 		margin: 0 0 2.5rem 0;
 		overflow: hidden;
 		background: #f9f9f9;
 		border-radius: 4px;
 	}
 
-	/* 🎯 封面圖樣式：滿格與防止拉伸 */
 	.featured-image .protected-img {
 		width: 100%;
 		height: 100%;
-		object-fit: cover; /* 保持圖片比例並填滿 16:9 框，超出的部分自動裁切 */
+		object-fit: cover;
 		display: block;
 		user-select: none;
 		-webkit-user-drag: none;
-		
-		/* 防盜防擷取微模糊效果 */
 		filter: blur(0.6px);
 		transition: filter 0.3s ease;
 		margin-bottom: 0;
 	}
 
-	/* 🎯 Markdown 內文裡的圖片樣式 (維持原樣) */
+	/* 🎯 Markdown 內文裡的圖片樣式 */
 	.prose :global(img) {
 		width: 100%;
 		height: auto;
@@ -108,8 +106,6 @@ const activeCategory = project.data?.category || "all";
 		border-radius: 4px;
 		user-select: none;
 		-webkit-user-drag: none;
-		
-		/* 防盜防擷取微模糊效果 */
 		filter: blur(0.6px);
 		transition: filter 0.3s ease;
 		margin-bottom: 0.5rem;
@@ -128,45 +124,53 @@ const activeCategory = project.data?.category || "all";
 		line-height: 1.85;
 	}
 
-	/* 中標題 (h2) */
+	/* 🎯 Markdown 內文裡的大標題 (h1) 與中標題 (h2) 放大調整 */
+	.prose :global(h1) {
+		font-size: 2.5rem !important;
+		font-weight: 700 !important;
+		color: #000000 !important;
+		margin-top: 3.5rem !important;
+		margin-bottom: 1rem !important;
+		line-height: 1.25 !important;
+	}
+
 	.prose :global(h2) {
-		font-size: 1.2rem;
-		font-weight: 700;
-		color: #000000;
-		margin-top: 3rem;
-		margin-bottom: 0.5rem;
-		line-height: 1.4;
+		font-size: 1.6rem !important;
+		font-weight: 700 !important;
+		color: #000000 !important;
+		margin-top: 3rem !important;
+		margin-bottom: 0.75rem !important;
+		line-height: 1.35 !important;
+	}
+
+	.prose :global(h3) {
+		font-size: 1.2rem !important;
+		font-weight: 700 !important;
+		color: #000000 !important;
+		margin-top: 2rem !important;
+		margin-bottom: 0.75rem !important;
 	}
 
 	/* 🖤 獨立的黑色斜線裝飾元素 */
 	.prose :global(hr.slash) {
 		border: none;
 		outline: none;
-		width: 40px;          /* 斜線長度 */
-		height: 0.8px;         /* 🎯 線條更細 */
-		background-color: #000000; /* 純黑色 */
-		margin: 1.5rem 0 2.2rem 0; /* 🎯 距離拉大 */
+		width: 40px;
+		height: 0.8px;
+		background-color: #000000;
+		margin: 1.5rem 0 2.2rem 0;
 		transform: rotate(-25deg);
 		transform-origin: left center;
 	}
 
-	/* 小標題 (h3) */
-	.prose :global(h3) {
-		font-size: 1.05rem;
-		font-weight: 700;
-		color: #000000;
-		margin-top: 2rem;
-		margin-bottom: 1rem;
-	}
-
-	/* 段落內文 (兩端對齊) */
+	/* 段落內文 */
 	.prose :global(p) {
 		margin-bottom: 1.5rem;
 		text-align: justify;
 		word-break: break-word;
 	}
 
-	/* 🎯 圖片下方的圖說（灰色小字） */
+	/* 圖說（灰色小字） */
 	.prose :global(figcaption),
 	.prose :global(p img + em),
 	.prose :global(p img + br + em),
@@ -176,9 +180,9 @@ const activeCategory = project.data?.category || "all";
 		margin-bottom: 2.2rem;
 		font-style: normal;
 		font-size: 0.68rem !important;
-		color: #888888 !important;     /* 偏灰色 */
+		color: #888888 !important;
 		line-height: 1.5;
-		letter-spacing: 0.02em;        /* 微調字距提升質感 */
+		letter-spacing: 0.02em;
 	}
 
 	/* 清單樣式 */
@@ -192,14 +196,19 @@ const activeCategory = project.data?.category || "all";
 		margin-bottom: 0.4rem;
 	}
 
+	/* 📱 手機版調整 */
 	@media (max-width: 768px) {
 		.main-title {
-			font-size: 1.3rem;
+			font-size: 2rem !important;
+		}
+
+		.prose :global(h1) {
+			font-size: 1.8rem !important;
 		}
 
 		.prose :global(h2) {
-			font-size: 1.1rem;
-			margin-top: 2rem;
+			font-size: 1.3rem !important;
+			margin-top: 2rem !important;
 		}
 	}
 </style>
