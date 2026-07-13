@@ -91,19 +91,19 @@ const currentPage =
         pointer-events: none !important;
       }
 
-      /* 🎯 全局左右留白與最大寬度設定 */
+      /* 🎯 全局容器：解除 1200px 限制，讓所有頁面（Header, About, Contact, [slug]）統一對齊 */
       .site-container {
         width: 100%;
-        max-width: 1200px;  /* 限制全站最大寬度 */
-        margin: 0 auto;     /* 內容置中 */
-        padding-left: 1.5rem; /* 👈 桌機版左右留白 */
+        max-width: 100%;
+        margin: 0 auto;
+        padding-left: 1.5rem; /* 桌機版統一左右留白 */
         padding-right: 1.5rem;
         box-sizing: border-box;
       }
 
       @media (max-width: 768px) {
         .site-container {
-          padding-left: 0.5rem; /* 📱 手機版左右留白 */
+          padding-left: 0.5rem; /* 手機版統一左右留白 */
           padding-right: 0.5rem;
         }
       }
