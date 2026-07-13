@@ -13,7 +13,7 @@ const title = "About | Chen-Pei Jyuan";
 			based in Taiwan.
 		</p>
 
-		<p>
+		<p class="desc">
 			I focus on creating brand identities, visual systems, packaging,
 			editorial design and digital experiences that combine aesthetics with
 			clear communication.
@@ -46,31 +46,48 @@ const title = "About | Chen-Pei Jyuan";
 </BaseLayout>
 
 <style>
+	/* 🎯 主容器：100% 寬度，徹底對齊 Header */
 	.content {
-		max-width: 900px;
-		margin: 4rem auto;
-		padding: 0 1rem;
+		width: 100%;
+		margin: 1.5rem 0 6rem;
+		box-sizing: border-box;
 	}
 
 	h1 {
-		font-size: 3rem;
-		margin-bottom: 2rem;
+		font-size: 2rem;
+		font-weight: 700;
+		color: #000000;
+		margin: 0 0 1.5rem 0;
+		line-height: 1.3;
 	}
 
 	.intro {
-		font-size: 1.25rem;
-		margin-bottom: 1.5rem;
+		font-size: 1.15rem;
+		color: #111111;
+		margin-bottom: 1rem;
+		line-height: 1.6;
+	}
+
+	.desc {
+		font-size: 0.95rem;
+		color: #444444;
+		line-height: 1.85;
+		margin-bottom: 2.5rem;
 	}
 
 	.info {
 		display: grid;
 		grid-template-columns: repeat(2, 1fr);
-		gap: 4rem;
-		margin-top: 4rem;
+		gap: 3rem;
+		margin-top: 3rem;
+		padding-top: 2rem;
+		border-top: 1px solid #eeeeee;
 	}
 
 	h2 {
 		font-size: 1rem;
+		font-weight: 700;
+		color: #000000;
 		margin-bottom: 1rem;
 	}
 
@@ -78,10 +95,16 @@ const title = "About | Chen-Pei Jyuan";
 		list-style: none;
 		padding: 0;
 		margin: 0;
+		font-size: 0.9rem;
+		color: #555555;
 		line-height: 2;
 	}
 
-	@media (max-width:768px) {
+	@media (max-width: 768px) {
+		h1 {
+			font-size: 1.3rem;
+		}
+
 		.info {
 			grid-template-columns: 1fr;
 			gap: 2rem;

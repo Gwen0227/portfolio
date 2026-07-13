@@ -8,7 +8,7 @@ const title = "Contact | Chen-Pei Jyuan";
 	<section class="content">
 		<h1>Contact</h1>
 
-		<p>
+		<p class="desc">
 			I'm available for freelance projects, collaborations and full-time
 			opportunities.
 		</p>
@@ -46,45 +46,66 @@ const title = "Contact | Chen-Pei Jyuan";
 </BaseLayout>
 
 <style>
+	/* 🎯 主容器：100% 寬度，徹底對齊 Header */
 	.content {
-		max-width: 900px;
-		margin: 4rem auto;
-		padding: 0 1rem;
+		width: 100%;
+		margin: 1.5rem 0 6rem;
+		box-sizing: border-box;
 	}
 
 	h1 {
-		font-size: 3rem;
+		font-size: 2rem;
+		font-weight: 700;
+		color: #000000;
+		margin: 0 0 1.5rem 0;
+		line-height: 1.3;
+	}
+
+	.desc {
+		font-size: 0.95rem;
+		color: #444444;
+		line-height: 1.85;
 		margin-bottom: 2rem;
 	}
 
 	.contact-list {
-		margin-top: 3rem;
+		margin-top: 2rem;
+		border-top: 1px solid #eeeeee;
 	}
 
 	.contact-list div {
 		display: flex;
 		justify-content: space-between;
+		align-items: center;
 		padding: 1.25rem 0;
-		border-bottom: 1px solid #ddd;
+		border-bottom: 1px solid #eeeeee;
+		font-size: 0.9rem;
 	}
 
 	.contact-list span {
-		opacity: .5;
+		color: #888888;
 	}
 
 	a {
 		text-decoration: none;
-		color: inherit;
+		color: #000000;
+		font-weight: 500;
+		transition: opacity 0.2s ease;
 	}
 
 	a:hover {
-		opacity: .6;
+		opacity: 0.5;
 	}
 
-	@media (max-width:768px) {
+	@media (max-width: 768px) {
+		h1 {
+			font-size: 1.3rem;
+		}
+
 		.contact-list div {
 			flex-direction: column;
-			gap: .5rem;
+			align-items: flex-start;
+			gap: 0.3rem;
 		}
 	}
 </style>
