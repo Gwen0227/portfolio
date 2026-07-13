@@ -2,7 +2,7 @@
 title: "my-project"
 slug: "my-project"
 year: 2026
-cover: "/images/aboutme.jpg"
+cover: /images/brand/0000.png
 category: "Brand"
 tech:
   - Astro
