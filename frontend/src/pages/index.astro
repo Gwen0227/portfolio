@@ -26,60 +26,81 @@ const allProjects = await getCollection("projects");
 </BaseLayout>
 
 <script>
-  function initCategoryFilter() {
-    // 取得網址上的 category 參數 (預設為 all)
-    const urlParams = new URLSearchParams(window.location.search);
-    const rawCategory = urlParams.get("category") || "all";
-    const currentCategory = rawCategory.trim().toLowerCase();
+  // 核心篩選邏輯：傳入要篩選的分類名稱 (例如 'brand' 或 'all')
+  function filterCategory(categoryName) {
+    const targetCategory = (categoryName || "all").trim().toLowerCase();
 
-    // 1. 隱藏/顯示對應卡片
+    // 1. 隱藏/顯示作品卡片
     const cards = document.querySelectorAll("[data-card-category]");
     let visibleCount = 0;
 
     cards.forEach((card) => {
       const cardCat = (card.getAttribute("data-card-category") || "").trim().toLowerCase();
 
-      if (currentCategory === "all" || cardCat === currentCategory) {
-        (card as HTMLElement).style.display = "";
+      if (targetCategory === "all" || cardCat === targetCategory) {
+        (card as HTMLElement).style.display = "block";
         visibleCount++;
       } else {
         (card as HTMLElement).style.display = "none";
       }
     });
 
-    // 2. 高亮 Header 分類按鈕
+    // 2. 更新按鈕 Active 樣式
     const buttons = document.querySelectorAll(".categories a, .categories button");
     buttons.forEach((btn) => {
       const btnFilter = (btn.getAttribute("data-filter") || "").trim().toLowerCase();
-      if (btnFilter === currentCategory) {
+      if (btnFilter === targetCategory) {
         btn.classList.add("active");
       } else {
         btn.classList.remove("active");
       }
     });
 
-    // 3. 更新項目總數數字
+    // 3. 更新作品數量
     const countEl = document.querySelector(".count");
     if (countEl) {
       countEl.textContent = `${visibleCount} Projects`;
     }
   }
 
-  // 🎯 關鍵：監聽所有 ClientRouter 轉場與網址變化
-  document.addEventListener("astro:page-load", initCategoryFilter);
-  document.addEventListener("astro:after-swap", initCategoryFilter);
-  window.addEventListener("popstate", initCategoryFilter);
+  // 初始化與事件監聽
+  function initFilterSystem() {
+    // 讀取網址目前的 category 參數
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialCategory = urlParams.get("category") || "all";
+    filterCategory(initialCategory);
 
-  // 點擊分類按鈕時立即延遲微秒觸發，確保 ClientRouter 已更新網址
-  document.addEventListener("click", (e) => {
-    const target = e.target as HTMLElement;
-    if (target.closest(".categories a") || target.closest("#back-btn")) {
-      setTimeout(initCategoryFilter, 50);
+    // 🎯 攔截分類按鈕的點擊事件，直接觸發篩選，不依賴網址跳轉
+    const categoryNav = document.querySelector(".categories");
+    if (categoryNav) {
+      categoryNav.addEventListener("click", (e) => {
+        const targetLink = (e.target as HTMLElement).closest("[data-filter]") as HTMLAnchorElement;
+        if (!targetLink) return;
+
+        // 阻止預設的連結跳轉 behavior，改由 JS 直接過濾
+        e.preventDefault();
+
+        const selectedCat = targetLink.getAttribute("data-filter") || "all";
+        
+        // 更新瀏覽器網址 (不刷新頁面)
+        const newUrl = selectedCat === "all" ? "/" : `/?category=${selectedCat}`;
+        window.history.pushState({ category: selectedCat }, "", newUrl);
+
+        // 執行卡片切換
+        filterCategory(selectedCat);
+      });
     }
+  }
+
+  // 監聽歷史紀錄返回 (PopState)
+  window.addEventListener("popstate", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    filterCategory(urlParams.get("category") || "all");
   });
 
-  // 首次載入直接執行
-  initCategoryFilter();
+  // 支援 Astro 轉場生命週期
+  initFilterSystem();
+  document.addEventListener("astro:page-load", initFilterSystem);
 </script>
 
 <style>
