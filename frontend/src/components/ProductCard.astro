@@ -40,7 +40,7 @@ const year = product.data.year || "2026";
 	</a>
 )}
 
-<!-- 🎯 燈箱遮罩 Modal 結構 -->
+<!-- 🎯 燈箱 Modal 結構 -->
 <div id="lightbox-modal" class="lightbox-modal" aria-hidden="true">
 	<span class="lightbox-close">&times;</span>
 	<img class="lightbox-content" id="lightbox-img" alt="Zoomed view" />
@@ -54,22 +54,18 @@ const year = product.data.year || "2026";
 
 		if (!modal || !modalImg) return;
 
-		// 點擊燈箱模式的卡片開啟大圖
 		document.querySelectorAll('.is-zoom-mode').forEach((card) => {
 			card.addEventListener('click', () => {
 				const zoomSrc = card.getAttribute('data-zoom');
 				if (zoomSrc) {
 					modalImg.src = zoomSrc;
 					modal.classList.add('is-active');
-					document.body.style.overflow = 'hidden'; // 防止背景滾動
 				}
 			});
 		});
 
-		// 關閉燈箱
 		const closeModal = () => {
 			modal.classList.remove('is-active');
-			document.body.style.overflow = '';
 		};
 
 		if (closeBtn) {
@@ -94,7 +90,6 @@ const year = product.data.year || "2026";
 </script>
 
 <style>
-	/* 基礎卡片樣式重置 */
 	.product-card,
 	.product-card *,
 	.product-card:hover,
@@ -113,13 +108,11 @@ const year = product.data.year || "2026";
 		color: #000000 !important;
 		opacity: 1 !important;
 		filter: none !important;
-		box-sizing: border-box !important;
 	}
 
 	.is-zoom-mode { cursor: zoom-in; }
 	.is-page-mode { cursor: pointer; }
 
-	/* 圖片容器：設定黑色遮罩 */
 	.image-container {
 		width: 100% !important;
 		aspect-ratio: 1 / 1 !important;
@@ -129,10 +122,8 @@ const year = product.data.year || "2026";
 		background: #ffffff !important;
 		opacity: 1 !important;
 		filter: none !important;
-		box-sizing: border-box !important;
 	}
 
-	/* 🎯 黑色遮罩層 (預設顯示) */
 	.image-container::after {
 		content: "";
 		position: absolute;
@@ -146,7 +137,6 @@ const year = product.data.year || "2026";
 		z-index: 1;
 	}
 
-	/* 圖片基礎樣式 */
 	.protected-img {
 		width: 100% !important;
 		height: 100% !important;
@@ -160,22 +150,18 @@ const year = product.data.year || "2026";
 		z-index: 0;
 	}
 
-	/* 滑鼠懸停時：隱藏黑色遮罩 */
 	.product-card:hover .image-container::after {
 		opacity: 0;
 	}
 
-	/* 滑鼠懸停時：圖片變清晰 */
 	.product-card:hover .protected-img {
 		filter: blur(0) brightness(1) contrast(1) !important;
 		opacity: 1 !important;
 	}
 
-	/* 項目資訊樣式 */
 	.project-info {
 		padding: 0.5rem 0 0 0 !important;
 		width: 100% !important;
-		box-sizing: border-box !important;
 	}
 
 	.project-info h3 {
@@ -208,7 +194,6 @@ const year = product.data.year || "2026";
 		color: #aaaaaa !important;
 	}
 
-	/* 手機版樣式 */
 	@media (max-width: 768px) {
 		.project-info h3 { font-size: 0.9rem !important; }
 		.category-tag { font-size: 0.75rem !important; }
@@ -216,24 +201,18 @@ const year = product.data.year || "2026";
 	}
 </style>
 
-<!-- 🎯 燈箱 CSS 使用 is:global 獨立為全域定位，徹底防範擠壓主頁面 Margin/Padding -->
+<!-- 🎯 燈箱改用 inset: 0 來 100% 絕對覆蓋，不使用 100vw，徹底避免影響頁面留白與寬度計算 -->
 <style is:global>
 	.lightbox-modal {
 		display: none;
 		position: fixed !important;
-		top: 0 !important;
-		left: 0 !important;
-		width: 100vw !important;
-		height: 100vh !important;
+		inset: 0 !important;
 		z-index: 999999 !important;
 		background-color: rgba(0, 0, 0, 0.9) !important;
 		align-items: center;
 		justify-content: center;
 		backdrop-filter: blur(5px);
 		cursor: zoom-out;
-		margin: 0 !important;
-		padding: 0 !important;
-		box-sizing: border-box !important;
 	}
 
 	.lightbox-modal.is-active {

@@ -19,7 +19,6 @@ type Props = {
 
 const { title, description = "陳沛涓的個人作品集" } = Astro.props;
 
-// Current page value (/home, /about, /404 ...)
 const currentPage =
 	Astro.url.pathname.replace(/\/$/, "").split("/").pop() || "home";
 ---
@@ -39,7 +38,6 @@ const currentPage =
         },
       }}
       extend={{
-        // extending the default link tags
         link: [
           {
             rel: "icon",
@@ -68,7 +66,6 @@ const currentPage =
             crossorigin: "anonymous",
           },
         ],
-        // extending the default meta tags
         meta: [
           { name: "viewport", content: "width=device-width" },
           { name: "msapplication-TileColor", content: "#000000" },
@@ -80,10 +77,15 @@ const currentPage =
     <ClientRouter />
 
     <style is:global>
+      *, *::before, *::after {
+        box-sizing: border-box !important;
+      }
+
       html, body {
         height: 100%;
         margin: 0;
         padding: 0;
+        overflow-x: hidden; /* 防止任何元素超出導致左右留白消失 */
       }
 
       .hover-reveal,
@@ -97,20 +99,19 @@ const currentPage =
         pointer-events: none !important;
       }
 
-      /* 🎯 頁面外層容器：設定為最少 100vh 高度的 Flexbox 結構 */
+      /* 🎯 全局容器：強制固定左右留白 */
       .site-container {
-        width: 100%;
-        max-width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
-        margin: 0 auto;
-        padding-left: 1.5rem; /* 桌機版統一左右留白 */
-        padding-right: 1.5rem;
-        box-sizing: border-box;
+        margin: 0 auto !important;
+        padding-left: 2rem !important; /* 電腦版留白加大一點點，比較舒適 */
+        padding-right: 2rem !important;
+        box-sizing: border-box !important;
       }
 
-      /* 🎯 main 主區域：自動吸收所有剩餘空間，確保 Footer 永遠置底 */
       .site-container > main {
         flex: 1 0 auto;
         width: 100%;
@@ -118,8 +119,8 @@ const currentPage =
 
       @media (max-width: 768px) {
         .site-container {
-          padding-left: 0.5rem; /* 手機版統一左右留白 */
-          padding-right: 0.5rem;
+          padding-left: 1rem !important; /* 手機版留白 */
+          padding-right: 1rem !important;
         }
       }
     </style>
