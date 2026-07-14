@@ -103,14 +103,24 @@ const allProjects = await getCollection("projects");
 </script>
 
 <style>
-	.product-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-		gap: 2rem;
-		margin-top: 2rem;
-	}
+  .product-grid {
+    display: grid;
+    /* 預設（電腦版）：自動滿版，每張圖最小 300px */
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
 
-	.card-item-wrapper {
-		width: 100%;
-	}
+  .card-item-wrapper {
+    width: 100%;
+  }
+
+  /* 📱 手機版（螢幕寬度 768px 以下）：強制保持一行 3 張圖 */
+  @media (max-width: 768px) {
+    .product-grid {
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 0.5rem; /* 縮小手機版的圖案間距，避免擠壓 */
+      margin-top: 1rem;
+    }
+  }
 </style>
