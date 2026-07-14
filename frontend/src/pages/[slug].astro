@@ -23,8 +23,8 @@ const { Content } = await render(project);
 const allProjects = (await getCollection("projects")) || [];
 const productsTotal = allProjects.length;
 
-// 🎯 取得該作品的分類，若無則預設為 "all"
-const activeCategory = project.data?.category || "all";
+// 🎯 取得該作品的分類（轉為小寫），若無則預設為 "all"
+const activeCategory = (project.data?.category || "all").toLowerCase();
 ---
 
 <BaseLayout title={project.data.title}>
@@ -34,7 +34,7 @@ const activeCategory = project.data?.category || "all";
 	/>
 
 	<article class="project-detail">
-		<!-- 🎯 SVG 箭頭返回按鈕（備用 href 指向根目錄 /，避免 404） -->
+		<!-- 🎯 SVG 箭頭返回按鈕：帶上當前作品分類參數（/?category=...） -->
 		<a 
 			href={`/?category=${activeCategory}`} 
 			id="back-link" 
@@ -77,26 +77,24 @@ const activeCategory = project.data?.category || "all";
 </BaseLayout>
 
 <script>
-	// 🎯 支援 Astro ClientRouter 的事件監聽機制
+	// 🎯 確保返回按鈕直接引導瀏覽器前往帶有 category 參數的首頁
 	function setupBackButton() {
-		const backLink = document.getElementById('back-link');
-		
-		if (backLink) {
-			// 避免重複綁定事件
-			backLink.replaceWith(backLink.cloneNode(true));
-			const newBackLink = document.getElementById('back-link');
+		const backLink = document.getElementById('back-link') as HTMLAnchorElement;
+		if (!backLink) return;
 
-			newBackLink?.addEventListener('click', (e) => {
-				// 只要來源是同一個 domain 且上一頁紀錄存在，就直接返回上一頁（保持 BRAND 分類與滾動位置）
-				if (document.referrer && document.referrer.includes(window.location.host) && window.history.length > 1) {
-					e.preventDefault();
-					window.history.back();
-				}
-			});
-		}
+		// 複製節點避免在 View Transitions 下重複綁定事件
+		const newBackLink = backLink.cloneNode(true) as HTMLAnchorElement;
+		backLink.parentNode?.replaceChild(newBackLink, backLink);
+
+		newBackLink.addEventListener('click', (e) => {
+			const targetUrl = newBackLink.getAttribute('href');
+			if (targetUrl) {
+				e.preventDefault();
+				window.location.href = targetUrl;
+			}
+		});
 	}
 
-	// 初次載入與 Astro 切換頁面（page-load）時皆重新初始化
 	document.addEventListener('astro:page-load', setupBackButton);
 	setupBackButton();
 </script>
