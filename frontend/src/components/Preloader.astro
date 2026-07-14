@@ -1,19 +1,21 @@
-<div class="loading"></div>
-<style>
-  @media (scripting: enabled) {
-    .loading {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--color-bg);
-      display: grid;
-      place-items: center;
-      z-index: 1000;
-      overflow: hidden;
-      transition: opacity 0.2s ease-out;
-    }
+function hidePreloader() {
+  const preloader = document.getElementById('preloader');
+  if (preloader) {
+    // 加上淡出與穿透 class
+    preloader.classList.add('is-done');
   }
-</style>
-<script src="../scripts/preloader.js"></script>
+}
+
+// 1. 頁面圖片與資源載入完成時隱藏
+if (document.readyState === 'complete') {
+  hidePreloader();
+} else {
+  window.addEventListener('load', hidePreloader);
+}
+
+// 2. 🎯 支援 Astro View Transitions (當按下上一頁/返回時自動關閉 preloader)
+document.addEventListener('astro:page-load', hidePreloader);
+document.addEventListener('astro:after-swap', hidePreloader);
+
+// 3. 安全機制：超過 1.5 秒強制關閉，避免卡死
+setTimeout(hidePreloader, 1500);

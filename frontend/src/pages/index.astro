@@ -26,20 +26,21 @@ const allProjects = await getCollection("projects");
 </BaseLayout>
 
 <script>
-  function handleCategoryFilter() {
-    // 1. 從網址列取得當前的 category 參數 (例: /?category=brand)
+  // 🎯 核心過濾邏輯
+  function initCategoryFilter() {
+    // 1. 取得最新網址上的 category 參數
     const urlParams = new URLSearchParams(window.location.search);
     const rawCategory = urlParams.get("category") || "all";
     const currentCategory = rawCategory.trim().toLowerCase();
 
-    // 2. 抓取所有包裹卡片的外層容器
+    // 2. 搜尋畫面上所有的卡片外框
     const cards = document.querySelectorAll("[data-card-category]");
     let visibleCount = 0;
 
     cards.forEach((card) => {
       const cardCat = (card.getAttribute("data-card-category") || "").trim().toLowerCase();
 
-      // 如果是 all 或是分類吻合，就顯示，否則隱藏
+      // 比對分類：如果是 all 或是分類一致就顯示，否則隱藏
       if (currentCategory === "all" || cardCat === currentCategory) {
         (card as HTMLElement).style.display = "";
         visibleCount++;
@@ -48,7 +49,7 @@ const allProjects = await getCollection("projects");
       }
     });
 
-    // 3. 同步高亮 Header 上的對應分類按鈕
+    // 3. 高亮對應的 Header 按鈕
     const buttons = document.querySelectorAll(".categories a, .categories button");
     buttons.forEach((btn) => {
       const btnFilter = (btn.getAttribute("data-filter") || "").trim().toLowerCase();
@@ -66,11 +67,14 @@ const allProjects = await getCollection("projects");
     }
   }
 
-  // 第一次載入與 Astro 頁面切換、瀏覽器上一頁/下一頁時執行
-  handleCategoryFilter();
-  document.addEventListener("astro:page-load", handleCategoryFilter);
-  document.addEventListener("astro:after-swap", handleCategoryFilter);
-  window.addEventListener("popstate", handleCategoryFilter);
+  // 🎯 關鍵防護：支援 Astro ClientRouter (View Transitions) 的全生命週期監聽
+  // 避免 SPA 轉場時腳本失效
+  document.addEventListener("astro:page-load", initCategoryFilter);
+  document.addEventListener("astro:after-swap", initCategoryFilter);
+  window.addEventListener("popstate", initCategoryFilter);
+
+  // 首次直接執行一次
+  initCategoryFilter();
 </script>
 
 <style>
