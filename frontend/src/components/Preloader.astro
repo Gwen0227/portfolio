@@ -1,21 +1,68 @@
-function hidePreloader() {
-  const preloader = document.getElementById('preloader');
-  if (preloader) {
-    // 加上淡出與穿透 class
-    preloader.classList.add('is-done');
+---
+/* Preloader.astro */
+---
+
+<div id="preloader" class="loading">
+  <!-- 如果你有 Preloader 的動畫 HTML 放在這 -->
+</div>
+
+<script>
+  function setupPreloader() {
+    const preloader = document.getElementById("preloader");
+    if (!preloader) return;
+
+    // 關閉 Preloader 的函式
+    const dismiss = () => {
+      preloader.classList.add("is-done");
+      // 動畫結束後徹底移出 DOM，避免擋到滑鼠點擊
+      setTimeout(() => {
+        preloader.style.display = "none";
+      }, 500);
+    };
+
+    // 1. 如果圖片載入超時或失敗（例如 1 秒後），強制解鎖隱藏，絕不卡死頁面！
+    const safeTimer = setTimeout(() => {
+      dismiss();
+    }, 1200);
+
+    // 2. 監聽視窗載入完成
+    if (document.readyState === "complete") {
+      clearTimeout(safeTimer);
+      dismiss();
+    } else {
+      window.addEventListener("load", () => {
+        clearTimeout(safeTimer);
+        dismiss();
+      }, { once: true });
+    }
   }
-}
 
-// 1. 頁面圖片與資源載入完成時隱藏
-if (document.readyState === 'complete') {
-  hidePreloader();
-} else {
-  window.addEventListener('load', hidePreloader);
-}
+  // 支援一般載入與 Astro ClientRouter (View Transitions) 轉場
+  setupPreloader();
+  document.addEventListener("astro:page-load", setupPreloader);
+  document.addEventListener("astro:after-swap", setupPreloader);
+</script>
 
-// 2. 🎯 支援 Astro View Transitions (當按下上一頁/返回時自動關閉 preloader)
-document.addEventListener('astro:page-load', hidePreloader);
-document.addEventListener('astro:after-swap', hidePreloader);
+<style>
+  .loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: #ffffff; /* 或你的 var(--color-bg) */
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+    pointer-events: auto;
+  }
 
-// 3. 安全機制：超過 1.5 秒強制關閉，避免卡死
-setTimeout(hidePreloader, 1500);
+  /* 🎯 淡出並讓滑鼠穿透 */
+  .loading.is-done {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none !important;
+  }
+</style>
