@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
-import BaseLayout from "../../layouts/BaseLayout.astro"; // 請確認相對路徑
+import BaseLayout from "../../layouts/BaseLayout.astro"; // 請確認與項目的相對路徑
 import ProductGridHeader from "../../components/ProductGridHeader.astro";
 
 export async function getStaticPaths() {
@@ -22,27 +22,20 @@ const { Content } = await render(project);
 const allProjects = (await getCollection("projects")) || [];
 const productsTotal = allProjects.length;
 
-// 🎯 核心：直接從網址的 ?ref= 參數取得來源分類！
-const referrerCategory = Astro.url.searchParams.get("ref");
 const defaultCategory = (project.data?.category || "all").toLowerCase();
-
-// 如果有來源參數量用來源，沒有的話用作品本身分類
-const activeCategory = referrerCategory ? referrerCategory.toLowerCase() : defaultCategory;
-
-// 計算返回按鈕的連結
-const backUrl = activeCategory === "all" ? "/" : `/?category=${activeCategory}`;
 ---
 
 <BaseLayout title={project.data.title}>
 	<ProductGridHeader 
-		activeCategory={activeCategory} 
+		activeCategory={defaultCategory} 
 		productsTotal={productsTotal} 
 	/>
 
 	<article class="project-detail">
-		<!-- 🎯 原生超連結，網址在伺服器渲染時就精準鎖定 -->
+		<!-- 🎯 返回按鈕：預設 fallback 為首頁，點擊時優先觸發歷史紀錄返回 -->
 		<a 
-			href={backUrl} 
+			href="/" 
+			id="back-btn" 
 			class="back-btn" 
 			aria-label="Back to previous page"
 		>
@@ -80,6 +73,25 @@ const backUrl = activeCategory === "all" ? "/" : `/?category=${activeCategory}`;
 		</div>
 	</article>
 </BaseLayout>
+
+<script>
+	function setupBackNavigation() {
+		const backBtn = document.getElementById('back-btn');
+		if (!backBtn) return;
+
+		backBtn.addEventListener('click', (e) => {
+			// 🎯 判斷是否有上一頁歷史紀錄（同網站來源）
+			if (document.referrer && document.referrer.includes(window.location.host)) {
+				e.preventDefault(); // 攔截預設跳轉
+				history.back();     // 精準回到上一頁（保持分類與滾動位置）
+			}
+			// 如果是直接貼上 URL 進入內頁的，則不攔截，直接執行 href="/" 返回首頁
+		});
+	}
+
+	setupBackNavigation();
+	document.addEventListener('astro:page-load', setupBackNavigation);
+</script>
 
 <style>
 	.project-detail {
