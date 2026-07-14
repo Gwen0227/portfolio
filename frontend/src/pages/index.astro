@@ -4,30 +4,68 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import ProductGridHeader from "../components/ProductGridHeader.astro";
 import ProductCard from "../components/ProductCard.astro";
 
-// 1. 取得所有作品
 const allProjects = await getCollection("projects");
-
-// 2. 從 URL 讀取當前的分類 (預設為 'all')
-const currentCategory = (Astro.url.searchParams.get("category") || "all").toLowerCase();
-
-// 3. 伺服器端動態過濾作品
-const filteredProjects = currentCategory === "all"
-  ? allProjects
-  : allProjects.filter(project => (project.data.category || "").toLowerCase() === currentCategory);
 ---
 
 <BaseLayout title="Home">
   <ProductGridHeader 
-    activeCategory={currentCategory} 
-    productsTotal={filteredProjects.length} 
+    activeCategory="all" 
+    productsTotal={allProjects.length} 
   />
 
-  <section class="product-grid">
-    {filteredProjects.map((project) => (
-      <ProductCard project={project} />
+  <section class="product-grid" id="product-grid">
+    {allProjects.map((project) => (
+      <div data-card-category={(project.data.category || "").toLowerCase()}>
+        <ProductCard project={project} />
+      </div>
     ))}
   </section>
 </BaseLayout>
+
+<script>
+  function handleCategoryFilter() {
+    // 1. 讀取當前 URL 的 category 參數
+    const urlParams = new URLSearchParams(window.location.search);
+    const category = (urlParams.get("category") || "all").toLowerCase();
+
+    // 2. 篩選卡片
+    const cards = document.querySelectorAll("[data-card-category]");
+    let visibleCount = 0;
+
+    cards.forEach((card) => {
+      const cardCat = card.getAttribute("data-card-category") || "";
+      if (category === "all" || cardCat === category) {
+        (card as HTMLElement).style.display = "";
+        visibleCount++;
+      } else {
+        (card as HTMLElement).style.display = "none";
+      }
+    });
+
+    // 3. 高亮對應的分類按鈕
+    const buttons = document.querySelectorAll(".categories a, .categories button");
+    buttons.forEach((btn) => {
+      const btnFilter = (btn.getAttribute("data-filter") || "").toLowerCase();
+      if (btnFilter === category) {
+        btn.classList.add("active");
+      } else {
+        btn.classList.remove("active");
+      }
+    });
+
+    // 4. 更新項目總數顯示（如果有 count 標籤）
+    const countEl = document.querySelector(".count");
+    if (countEl) {
+      countEl.textContent = `${visibleCount} Projects`;
+    }
+  }
+
+  // 第一次進入頁面與 Astro 轉場時執行
+  handleCategoryFilter();
+  document.addEventListener("astro:page-load", handleCategoryFilter);
+  document.addEventListener("astro:after-swap", handleCategoryFilter);
+  window.addEventListener("popstate", handleCategoryFilter);
+</script>
 
 <style>
   .product-grid {
