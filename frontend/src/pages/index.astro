@@ -18,3 +18,38 @@ const title = "Pei Jyuan Personal Portfolio";
 
 	<ProductGrid projects={allProjects} />
 </BaseLayout>
+
+<script>
+	function syncCategoryFromUrl() {
+		// 1. 抓取網址上的 category 參數 (例如 /?category=brand)
+		const urlParams = new URLSearchParams(window.location.search);
+		const categoryParam = urlParams.get('category');
+
+		if (!categoryParam) return;
+
+		// 2. 尋找 ProductGridHeader 裡相對應的分類按鈕
+		// 會優先比對按鈕的 data-category 屬性、id、或是按鈕顯示文字
+		const buttons = document.querySelectorAll('button, a');
+		
+		let targetBtn: HTMLElement | null = null;
+
+		buttons.forEach((btn) => {
+			const btnText = btn.textContent?.trim().toLowerCase();
+			const btnData = btn.getAttribute('data-category')?.toLowerCase();
+			const targetCategory = categoryParam.toLowerCase();
+
+			if (btnData === targetCategory || btnText === targetCategory) {
+				targetBtn = btn as HTMLElement;
+			}
+		});
+
+		// 3. 自動模擬點擊該分類按鈕
+		if (targetBtn) {
+			(targetBtn as HTMLElement).click();
+		}
+	}
+
+	// 支援 Astro 轉場與一般頁面載入
+	document.addEventListener('astro:page-load', syncCategoryFromUrl);
+	syncCategoryFromUrl();
+</script>
