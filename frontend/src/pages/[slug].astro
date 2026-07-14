@@ -34,6 +34,28 @@ const activeCategory = project.data?.category || "all";
 	/>
 
 	<article class="project-detail">
+		<!-- 🎯 SVG 箭頭返回按鈕 -->
+		<a 
+			href={`/projects?category=${activeCategory}`} 
+			id="back-link" 
+			class="back-btn" 
+			aria-label="Back to previous page"
+		>
+			<svg 
+				width="20" 
+				height="20" 
+				viewBox="0 0 24 24" 
+				fill="none" 
+				stroke="currentColor" 
+				stroke-width="2" 
+				stroke-linecap="round" 
+				stroke-linejoin="round"
+			>
+				<line x1="19" y1="12" x2="5" y2="12"></line>
+				<polyline points="12 19 5 12 12 5"></polyline>
+			</svg>
+		</a>
+
 		<header class="project-header">
 			<h1 class="main-title">{project.data.title}</h1>
 		</header>
@@ -54,6 +76,20 @@ const activeCategory = project.data?.category || "all";
 	</article>
 </BaseLayout>
 
+<script>
+	// 🎯 精準返回上一頁與原本的分類狀態
+	const backLink = document.getElementById('back-link');
+	
+	if (backLink) {
+		backLink.addEventListener('click', (e) => {
+			if (document.referrer && document.referrer.includes(window.location.host)) {
+				e.preventDefault();
+				window.history.back();
+			}
+		});
+	}
+</script>
+
 <style>
 	/* 🎯 主容器：100% 貼合外層 Layout 的左右留白邊界 */
 	.project-detail {
@@ -62,13 +98,41 @@ const activeCategory = project.data?.category || "all";
 		box-sizing: border-box;
 	}
 
+	/* 🎯 箭頭返回按鈕樣式 */
+	.back-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		color: #222222;
+		background: transparent;
+		border-radius: 50%;
+		text-decoration: none;
+		margin-bottom: 1.2rem;
+		transition: all 0.2s ease;
+		cursor: pointer;
+	}
+
+	.back-btn:hover {
+		color: #000000;
+		background-color: #f2f2f2;
+		transform: translateX(-4px); /* Hover 時微向左滑動 */
+	}
+
+	.back-btn svg {
+		width: 20px;
+		height: 20px;
+		stroke: currentColor;
+	}
+
 	.project-header {
 		margin-bottom: 1.5rem;
 	}
 
 	/* 🎯 文章主標題：使用 !important 確保字體能順利放大 */
 	.main-title {
-		font-size: 3.2rem !important; /* 👈 可調整大標題大小 (例如 3rem, 3.5rem, 4rem) */
+		font-size: 3.2rem !important; /* 👈 可調整大標題大小 */
 		font-weight: 500 !important;
 		color: #000000 !important;
 		margin: 0 !important;
