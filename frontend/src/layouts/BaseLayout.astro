@@ -80,6 +80,12 @@ const currentPage =
     <ClientRouter />
 
     <style is:global>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
       .hover-reveal,
       [class*="hover-reveal"],
       [class*="cursor"],
@@ -91,14 +97,23 @@ const currentPage =
         pointer-events: none !important;
       }
 
-      /* 🎯 全局容器：解除 1200px 限制，讓所有頁面（Header, About, Contact, [slug]）統一對齊 */
+      /* 🎯 頁面外層容器：設定為最少 100vh 高度的 Flexbox 結構 */
       .site-container {
         width: 100%;
         max-width: 100%;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
         margin: 0 auto;
         padding-left: 1.5rem; /* 桌機版統一左右留白 */
         padding-right: 1.5rem;
         box-sizing: border-box;
+      }
+
+      /* 🎯 main 主區域：自動吸收所有剩餘空間，確保 Footer 永遠置底 */
+      .site-container > main {
+        flex: 1 0 auto;
+        width: 100%;
       }
 
       @media (max-width: 768px) {

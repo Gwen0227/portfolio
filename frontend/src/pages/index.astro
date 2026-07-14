@@ -101,13 +101,16 @@ const allProjects = await getCollection("projects");
 			});
 		}
 
-		// 點擊作品卡片時，記錄目前的捲軸高度
-		const projectLinks = document.querySelectorAll(".product-grid a");
-		projectLinks.forEach((link) => {
-			link.addEventListener("click", () => {
-				sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+		// 🎯 事件代理：點擊作品頁面連結時，記錄目前的捲軸高度
+		const gridContainer = document.getElementById("product-grid");
+		if (gridContainer) {
+			gridContainer.addEventListener("click", (e) => {
+				const cardLink = e.target.closest("a.is-page-mode");
+				if (cardLink) {
+					sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+				}
 			});
-		});
+		}
 	}
 
 	// 監聽歷史紀錄變更 (上一頁/下一頁)
@@ -131,7 +134,7 @@ const allProjects = await getCollection("projects");
 		/* 預設為電腦版：強制固定 6 欄 */
 		grid-template-columns: repeat(6, 1fr);
 		
-		/* 🎯 關鍵設定：無論視窗多大，圖片間距 (Gap) 永遠固定為 1.5rem (約 24px) */
+		/* 🎯 關鍵設定：無論視窗多大，圖片間距 (Gap) 固定為 1rem */
 		gap: 1rem; 
 		
 		width: 100%;
@@ -152,14 +155,14 @@ const allProjects = await getCollection("projects");
 	}
 
 	/* ===================================================
-	   響應式斷點 (斷點切換時 gap 依然精準維持)
+	   響應式斷點 (斷點切換時 gap 精準維持)
 	   =================================================== */
 
 	/* 💻 大螢幕/中等螢幕 (1200px 以下)：調整為一行 4 張圖 */
 	@media (max-width: 1200px) {
 		.product-grid {
 			grid-template-columns: repeat(4, 1fr);
-			gap: 1rem; /* 間距維持不變 */
+			gap: 1rem;
 		}
 	}
 
@@ -167,7 +170,7 @@ const allProjects = await getCollection("projects");
 	@media (max-width: 860px) {
 		.product-grid {
 			grid-template-columns: repeat(3, 1fr);
-			gap: 1rem; /* 平板稍微微調適當間距 */
+			gap: 1rem;
 		}
 	}
 
@@ -175,7 +178,7 @@ const allProjects = await getCollection("projects");
 	@media (max-width: 600px) {
 		.product-grid {
 			grid-template-columns: repeat(3, 1fr) !important;
-			gap: 0.5rem !important; /* 手機螢幕窄，使用小間距避免擠壓圖片 */
+			gap: 0.5rem !important; /* 手機螢幕窄，適當調小間距避免壓縮圖片 */
 			margin-top: 1rem;
 			margin-bottom: 3rem;
 		}

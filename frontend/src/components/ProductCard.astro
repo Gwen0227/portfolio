@@ -40,6 +40,60 @@ const year = product.data.year || "2026";
 	</a>
 )}
 
+<!-- 🎯 燈箱遮罩 Modal 結構 -->
+<div id="lightbox-modal" class="lightbox-modal" aria-hidden="true">
+	<span class="lightbox-close">&times;</span>
+	<img class="lightbox-content" id="lightbox-img" alt="Zoomed view" />
+</div>
+
+<script>
+	function setupLightbox() {
+		const modal = document.getElementById('lightbox-modal');
+		const modalImg = document.getElementById('lightbox-img') as HTMLImageElement;
+		const closeBtn = document.querySelector('.lightbox-close');
+
+		if (!modal || !modalImg) return;
+
+		// 點擊燈箱模式的卡片開啟大圖
+		document.querySelectorAll('.is-zoom-mode').forEach((card) => {
+			card.addEventListener('click', () => {
+				const zoomSrc = card.getAttribute('data-zoom');
+				if (zoomSrc) {
+					modalImg.src = zoomSrc;
+					modal.classList.add('is-active');
+					document.body.style.overflow = 'hidden'; // 防止背景滾動
+				}
+			});
+		});
+
+		// 關閉燈箱（點擊背景或關閉按鈕）
+		const closeModal = () => {
+			modal.classList.remove('is-active');
+			document.body.style.overflow = '';
+		};
+
+		if (closeBtn) {
+			closeBtn.addEventListener('click', closeModal);
+		}
+
+		modal.addEventListener('click', (e) => {
+			if (e.target === modal || e.target === modalImg) {
+				closeModal();
+			}
+		});
+
+		// ESC 鍵關閉
+		window.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape' && modal.classList.contains('is-active')) {
+				closeModal();
+			}
+		});
+	}
+
+	setupLightbox();
+	document.addEventListener('astro:page-load', setupLightbox);
+</script>
+
 <style>
 	/* 基礎卡片樣式重置 */
 	.product-card,
@@ -85,10 +139,10 @@ const year = product.data.year || "2026";
 		left: 0;
 		width: 100%;
 		height: 100%;
-		background-color: rgba(0, 0, 0, 0.25); /* 黑色半透明，可調整 0.5 這個數字 */
+		background-color: rgba(0, 0, 0, 0.25);
 		opacity: 1;
-		transition: opacity 0.3s ease; /* 遮罩淡出動畫 */
-		z-index: 1; /* 確保在圖片上方 */
+		transition: opacity 0.3s ease;
+		z-index: 1;
 	}
 
 	/* 圖片基礎樣式 */
@@ -102,12 +156,12 @@ const year = product.data.year || "2026";
 		transition: filter 0.3s ease;
 		user-select: none;
 		-webkit-user-drag: none;
-		z-index: 0; /* 在遮罩下方 */
+		z-index: 0;
 	}
 
 	/* 🎯 滑鼠懸停時：隱藏黑色遮罩 */
 	.product-card:hover .image-container::after {
-		opacity: 0; /* 遮罩變透明 */
+		opacity: 0;
 	}
 
 	/* 滑鼠懸停時：圖片變清晰 */
@@ -150,6 +204,52 @@ const year = product.data.year || "2026";
 		font-size: 0.72rem !important;
 		font-weight: 400 !important;
 		color: #aaaaaa !important;
+	}
+
+	/* 🎯 燈箱 CSS 樣式 */
+	.lightbox-modal {
+		display: none;
+		position: fixed;
+		z-index: 99999;
+		left: 0;
+		top: 0;
+		width: 100vw;
+		height: 100vh;
+		background-color: rgba(0, 0, 0, 0.9);
+		align-items: center;
+		justify-content: center;
+		backdrop-filter: blur(5px);
+		cursor: zoom-out;
+	}
+
+	.lightbox-modal.is-active {
+		display: flex;
+	}
+
+	.lightbox-content {
+		max-width: 90vw;
+		max-height: 90vh;
+		object-fit: contain;
+		border-radius: 4px;
+		box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+		user-select: none;
+		-webkit-user-drag: none;
+	}
+
+	.lightbox-close {
+		position: absolute;
+		top: 20px;
+		right: 35px;
+		color: #ffffff;
+		font-size: 40px;
+		font-weight: 300;
+		cursor: pointer;
+		line-height: 1;
+		transition: opacity 0.2s ease;
+	}
+
+	.lightbox-close:hover {
+		opacity: 0.7;
 	}
 
 	/* 手機版樣式 */
