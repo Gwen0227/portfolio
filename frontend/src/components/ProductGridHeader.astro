@@ -48,29 +48,55 @@ const categories = [
 
 		if (!buttons.length) return;
 
+		// 🎯 核心函式：執行實際的卡片隱藏/顯示
+		function applyFilter(filterValue: string) {
+			cards.forEach(card => {
+				const cardCategory = card.getAttribute('data-category');
+
+				if (!filterValue || filterValue.toLowerCase() === 'all' || (cardCategory && cardCategory.toLowerCase() === filterValue.toLowerCase())) {
+					card.style.display = '';
+					card.style.opacity = '1';
+				} else {
+					card.style.display = 'none';
+				}
+			});
+		}
+
+		// 🎯 1. 頁面載入時：檢查 URL 參數並立即執行篩選
+		const urlParams = new URLSearchParams(window.location.search);
+		const currentCategory = urlParams.get('category') || 'all';
+
+		buttons.forEach(btn => {
+			const filterVal = btn.getAttribute('data-filter') || '';
+			if (filterVal.toLowerCase() === currentCategory.toLowerCase()) {
+				btn.classList.add('active');
+			} else {
+				btn.classList.remove('active');
+			}
+		});
+
+		// 立即執行卡片隱藏/顯示
+		applyFilter(currentCategory);
+
+		// 🎯 2. 點擊按鈕事件
 		buttons.forEach(button => {
 			button.addEventListener('click', () => {
-				const filterValue = button.getAttribute('data-filter');
+				const filterValue = button.getAttribute('data-filter') || 'all';
 
 				buttons.forEach(btn => btn.classList.remove('active'));
 				button.classList.add('active');
 
 				// 如果不在首頁，點擊分類按鈕時跳回首頁並帶上參數
 				if (window.location.pathname !== "/") {
-					window.location.href = filterValue === "all" ? "/" : `/?category=${filterValue}`;
+					window.location.href = filterValue.toLowerCase() === "all" ? "/" : `/?category=${filterValue}`;
 					return;
 				}
 
-				cards.forEach(card => {
-					const cardCategory = card.getAttribute('data-category');
+				// 在首頁時：更新 URL 參數 (不刷新頁面) 並切換顯示
+				const newUrl = filterValue.toLowerCase() === 'all' ? '/' : `/?category=${filterValue}`;
+				window.history.replaceState({}, '', newUrl);
 
-					if (filterValue === 'all' || cardCategory === filterValue) {
-						card.style.display = '';
-						card.style.opacity = '1';
-					} else {
-						card.style.display = 'none';
-					}
-				});
+				applyFilter(filterValue);
 			});
 		});
 	}
@@ -108,7 +134,7 @@ const categories = [
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.15rem 0; /* 上下留少許內邊距 */
+		padding: 0.15rem 0;
 		font-size: 0.85rem; 
 		box-sizing: border-box;
 		white-space: nowrap;
