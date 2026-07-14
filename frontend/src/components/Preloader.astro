@@ -1,56 +1,64 @@
 ---
-/* Preloader.astro */
+/* src/components/Preloader.astro */
 ---
 
-<div id="preloader" class="loading">
-  <!-- 如果你有 Preloader 的動畫 HTML 放在這 -->
+<div id="preloader" class="preloader-overlay">
+  <div class="preloader-spinner"></div>
 </div>
 
 <script>
-  function setupPreloader() {
+  function initPreloader() {
     const preloader = document.getElementById("preloader");
     if (!preloader) return;
 
-    // 關閉 Preloader 的函式
-    const dismiss = () => {
-      preloader.classList.add("is-done");
-      // 動畫結束後徹底移出 DOM，避免擋到滑鼠點擊
+    // 關閉 Preloader 的統一函式
+    const hidePreloader = () => {
+      if (preloader.classList.contains("is-hidden")) return;
+      
+      preloader.classList.add("is-hidden");
+      
+      // 動畫結束後從 layout 中點擊穿透 & 徹底隱藏
       setTimeout(() => {
         preloader.style.display = "none";
       }, 500);
     };
 
-    // 1. 如果圖片載入超時或失敗（例如 1 秒後），強制解鎖隱藏，絕不卡死頁面！
-    const safeTimer = setTimeout(() => {
-      dismiss();
-    }, 1200);
+    // 🎯 1. 容錯機制：不論圖片成功或失敗，最多只等 1 秒（1000ms），時間到強制關閉 Preloader
+    const forceHideTimeout = setTimeout(() => {
+      console.warn("[Preloader] Timeout reached. Forcing preloader to hide.");
+      hidePreloader();
+    }, 1000);
 
-    // 2. 監聽視窗載入完成
+    // 🎯 2. 安全監聽：頁面資源 Ready 就立刻關閉
     if (document.readyState === "complete") {
-      clearTimeout(safeTimer);
-      dismiss();
+      clearTimeout(forceHideTimeout);
+      hidePreloader();
     } else {
-      window.addEventListener("load", () => {
-        clearTimeout(safeTimer);
-        dismiss();
-      }, { once: true });
+      window.addEventListener(
+        "load",
+        () => {
+          clearTimeout(forceHideTimeout);
+          hidePreloader();
+        },
+        { once: true }
+      );
     }
   }
 
-  // 支援一般載入與 Astro ClientRouter (View Transitions) 轉場
-  setupPreloader();
-  document.addEventListener("astro:page-load", setupPreloader);
-  document.addEventListener("astro:after-swap", setupPreloader);
+  // 🎯 3. 支援 Astro ClientRouter (View Transitions)
+  initPreloader();
+  document.addEventListener("astro:page-load", initPreloader);
+  document.addEventListener("astro:after-swap", initPreloader);
 </script>
 
 <style>
-  .loading {
+  .preloader-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: #ffffff; /* 或你的 var(--color-bg) */
+    background-color: var(--color-bg, #ffffff);
     z-index: 9999;
     display: flex;
     justify-content: center;
@@ -59,8 +67,8 @@
     pointer-events: auto;
   }
 
-  /* 🎯 淡出並讓滑鼠穿透 */
-  .loading.is-done {
+  /* 🎯 淡出樣式：關鍵在 pointer-events: none */
+  .preloader-overlay.is-hidden {
     opacity: 0;
     visibility: hidden;
     pointer-events: none !important;
