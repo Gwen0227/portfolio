@@ -22,7 +22,7 @@ const { Content } = await render(project);
 const allProjects = (await getCollection("projects")) || [];
 const productsTotal = allProjects.length;
 
-// 🎯 確保分類名稱乾淨（小寫）
+// 🎯 取得作品分類（轉小寫），作為返回首頁的參數
 const activeCategory = (project.data?.category || "all").toLowerCase();
 ---
 
@@ -33,10 +33,9 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 	/>
 
 	<article class="project-detail">
-		<!-- 🎯 返回按鈕：帶上 category 參數回到首頁 -->
+		<!-- 🎯 原生連結返回帶參數的首頁，無多餘 JavaScript 攔截 -->
 		<a 
 			href={`/?category=${activeCategory}`} 
-			id="back-link" 
 			class="back-btn" 
 			aria-label="Back to previous page"
 		>
@@ -74,24 +73,6 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 		</div>
 	</article>
 </BaseLayout>
-
-<script>
-	function setupBackButton() {
-		const backLink = document.getElementById('back-link');
-		if (!backLink) return;
-
-		backLink.addEventListener('click', (e) => {
-			const targetUrl = backLink.getAttribute('href');
-			if (targetUrl) {
-				e.preventDefault();
-				window.location.href = targetUrl;
-			}
-		});
-	}
-
-	document.addEventListener('astro:page-load', setupBackButton);
-	setupBackButton();
-</script>
 
 <style>
 	.project-detail {
