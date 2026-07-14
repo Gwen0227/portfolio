@@ -21,37 +21,40 @@ const title = "Pei Jyuan Personal Portfolio";
 
 <script>
 	function syncCategoryFromUrl() {
-		// 1. 抓取網址上的 category 參數 (例如 /?category=all 或 /?category=brand)
+		// 1. 取得網址上的 category 參數 (例如 /?category=all 或 /?category=brand)
 		const urlParams = new URLSearchParams(window.location.search);
-		const categoryParam = urlParams.get('category')?.toLowerCase();
+		const categoryParam = urlParams.get('category')?.trim().toLowerCase();
 
 		if (!categoryParam) return;
 
-		// 2. 搜尋所有分類按鈕
+		// 2. 獲取頁面上所有的按鈕/連結元素
 		const buttons = document.querySelectorAll('button, a');
 		let targetBtn: HTMLElement | null = null;
 
 		buttons.forEach((btn) => {
-			const btnText = btn.textContent?.trim().toLowerCase();
+			const btnText = btn.textContent?.trim();
+			const btnTextLower = btnText?.toLowerCase();
 			const btnData = btn.getAttribute('data-category')?.toLowerCase();
 
-			// 比對按鈕文字、data-category，或比對包含 "all" 的重置按鈕
-			if (
-				btnData === categoryParam || 
-				btnText === categoryParam ||
-				(categoryParam === 'all' && (btnText === 'all' || btnData === 'all'))
-			) {
+			// 🎯 針對 "All" 按鈕精準比對 (無論大寫 All, ALL 或小寫 all)
+			if (categoryParam === 'all') {
+				if (btnText === 'All' || btnTextLower === 'all' || btnData === 'all') {
+					targetBtn = btn as HTMLElement;
+				}
+			} 
+			// 🎯 其他分類比對 (如 BRAND, UI/UX 等)
+			else if (btnData === categoryParam || btnTextLower === categoryParam) {
 				targetBtn = btn as HTMLElement;
 			}
 		});
 
-		// 3. 自動模擬點擊該分類按鈕
+		// 3. 自動模擬點擊目標分類按鈕
 		if (targetBtn) {
 			(targetBtn as HTMLElement).click();
 		}
 	}
 
-	// 支援 Astro 轉場與一般頁面載入
+	// 支援 Astro View Transitions (ClientRouter) 與首次載入
 	document.addEventListener('astro:page-load', syncCategoryFromUrl);
 	syncCategoryFromUrl();
 </script>
