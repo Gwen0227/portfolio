@@ -1,6 +1,6 @@
 ---
 import { getCollection, render } from "astro:content";
-import BaseLayout from "../../layouts/BaseLayout.astro"; // 請確認與項目的相對路徑
+import BaseLayout from "../../layouts/BaseLayout.astro";
 import ProductGridHeader from "../../components/ProductGridHeader.astro";
 
 export async function getStaticPaths() {
@@ -32,7 +32,6 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 	/>
 
 	<article class="project-detail">
-		<!-- 🎯 返回按鈕：預設 fallback 為首頁，點擊時優先觸發歷史紀錄返回 -->
 		<a 
 			href="/" 
 			id="back-btn" 
@@ -75,22 +74,20 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 </BaseLayout>
 
 <script>
-	function setupBackNavigation() {
-		const backBtn = document.getElementById('back-btn');
-		if (!backBtn) return;
+	function setupBackBtn() {
+		const btn = document.getElementById('back-btn');
+		if (!btn) return;
 
-		backBtn.addEventListener('click', (e) => {
-			// 🎯 判斷是否有上一頁歷史紀錄（同網站來源）
+		btn.addEventListener('click', (e) => {
 			if (document.referrer && document.referrer.includes(window.location.host)) {
-				e.preventDefault(); // 攔截預設跳轉
-				history.back();     // 精準回到上一頁（保持分類與滾動位置）
+				e.preventDefault();
+				history.back();
 			}
-			// 如果是直接貼上 URL 進入內頁的，則不攔截，直接執行 href="/" 返回首頁
 		});
 	}
 
-	setupBackNavigation();
-	document.addEventListener('astro:page-load', setupBackNavigation);
+	setupBackBtn();
+	document.addEventListener('astro:page-load', setupBackBtn);
 </script>
 
 <style>

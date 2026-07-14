@@ -1,23 +1,39 @@
 ---
 import { getCollection } from "astro:content";
-import Preloader from "../components/Preloader.astro";
-import ProductGrid from "../components/ProductGrid.astro";
-import ProductGridHeader from "../components/ProductGridHeader.astro";
 import BaseLayout from "../layouts/BaseLayout.astro";
+import ProductGridHeader from "../components/ProductGridHeader.astro";
+import ProductCard from "../components/ProductCard.astro";
 
+// 1. 取得所有作品
 const allProjects = await getCollection("projects");
-const projectsTotal = allProjects.length;
 
-// 取得 URL 上的 category 參數
-const currentCategory = Astro.url.searchParams.get("category") || "all";
+// 2. 從 URL 讀取當前的分類 (預設為 'all')
+const currentCategory = (Astro.url.searchParams.get("category") || "all").toLowerCase();
 
-const title = "Pei Jyuan Personal Portfolio";
+// 3. 伺服器端動態過濾作品
+const filteredProjects = currentCategory === "all"
+  ? allProjects
+  : allProjects.filter(project => (project.data.category || "").toLowerCase() === currentCategory);
 ---
 
-<BaseLayout title={title}>
-	<Preloader />
+<BaseLayout title="Home">
+  <ProductGridHeader 
+    activeCategory={currentCategory} 
+    productsTotal={filteredProjects.length} 
+  />
 
-	<ProductGridHeader activeCategory={currentCategory} productsTotal={projectsTotal} />
-
-	<ProductGrid projects={allProjects} />
+  <section class="product-grid">
+    {filteredProjects.map((project) => (
+      <ProductCard project={project} />
+    ))}
+  </section>
 </BaseLayout>
+
+<style>
+  .product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+</style>
