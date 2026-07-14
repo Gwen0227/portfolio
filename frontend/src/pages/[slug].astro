@@ -22,20 +22,21 @@ const { Content } = await render(project);
 const allProjects = (await getCollection("projects")) || [];
 const productsTotal = allProjects.length;
 
-// 🎯 取得作品分類（轉小寫），作為返回首頁的參數
-const activeCategory = (project.data?.category || "all").toLowerCase();
+// 作品本身的預設分類
+const defaultCategory = (project.data?.category || "all").toLowerCase();
 ---
 
 <BaseLayout title={project.data.title}>
 	<ProductGridHeader 
-		activeCategory={activeCategory} 
+		activeCategory={defaultCategory} 
 		productsTotal={productsTotal} 
 	/>
 
 	<article class="project-detail">
-		<!-- 🎯 原生連結返回帶參數的首頁，無多餘 JavaScript 攔截 -->
+		<!-- 🎯 預設 fallback 連結 -->
 		<a 
-			href={`/?category=${activeCategory}`} 
+			href={`/?category=${defaultCategory}`} 
+			id="back-btn"
 			class="back-btn" 
 			aria-label="Back to previous page"
 		>
@@ -73,6 +74,28 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 		</div>
 	</article>
 </BaseLayout>
+
+<script>
+	function setupBackLink() {
+		const backBtn = document.getElementById('back-btn') as HTMLAnchorElement;
+		if (!backBtn) return;
+
+		// 🎯 讀取使用者點進來前最後選擇的分類
+		const refCat = sessionStorage.getItem('referrer_category');
+
+		if (refCat) {
+			const cleanCat = refCat.toLowerCase();
+			if (cleanCat === 'all') {
+				backBtn.href = '/?category=all';
+			} else {
+				backBtn.href = `/?category=${cleanCat}`;
+			}
+		}
+	}
+
+	setupBackLink();
+	document.addEventListener('astro:page-load', setupBackLink);
+</script>
 
 <style>
 	.project-detail {

@@ -48,8 +48,11 @@ const categories = [
 
 		if (!buttons.length) return;
 
-		// 🎯 核心函式：執行實際的卡片隱藏/顯示
+		// 🎯 執行卡片隱藏 / 顯示
 		function applyFilter(filterValue: string) {
+			// 記錄當前分類到 sessionStorage，讓內頁返回按鈕知道是從哪裡點進來的
+			sessionStorage.setItem('referrer_category', filterValue);
+
 			cards.forEach(card => {
 				const cardCategory = card.getAttribute('data-category');
 
@@ -62,7 +65,7 @@ const categories = [
 			});
 		}
 
-		// 🎯 1. 頁面載入時：檢查 URL 參數並立即執行篩選
+		// 1. 頁面載入時：判斷 URL 參數
 		const urlParams = new URLSearchParams(window.location.search);
 		const currentCategory = urlParams.get('category') || 'all';
 
@@ -75,10 +78,10 @@ const categories = [
 			}
 		});
 
-		// 立即執行卡片隱藏/顯示
+		// 執行篩選並存入狀態
 		applyFilter(currentCategory);
 
-		// 🎯 2. 點擊按鈕事件
+		// 2. 點擊分類按鈕事件
 		buttons.forEach(button => {
 			button.addEventListener('click', () => {
 				const filterValue = button.getAttribute('data-filter') || 'all';
@@ -86,13 +89,13 @@ const categories = [
 				buttons.forEach(btn => btn.classList.remove('active'));
 				button.classList.add('active');
 
-				// 如果不在首頁，點擊分類按鈕時跳回首頁並帶上參數
+				// 若不在首頁則跳回首頁並帶參數
 				if (window.location.pathname !== "/") {
 					window.location.href = filterValue.toLowerCase() === "all" ? "/" : `/?category=${filterValue}`;
 					return;
 				}
 
-				// 在首頁時：更新 URL 參數 (不刷新頁面) 並切換顯示
+				// 更新 URL 參數
 				const newUrl = filterValue.toLowerCase() === 'all' ? '/' : `/?category=${filterValue}`;
 				window.history.replaceState({}, '', newUrl);
 
@@ -106,7 +109,6 @@ const categories = [
 </script>
 
 <style>
-	/* 🎯 主容器：跟網頁主內容寬度完全一致 */
 	.category-wrapper {
 		position: relative;
 		width: 100%;
@@ -114,7 +116,6 @@ const categories = [
 		margin-bottom: 0.5rem;
 	}
 
-	/* 🎯 滿版灰底：用 absolute 獨立延伸出去，不影響內文排版 */
 	.full-width-bg {
 		position: absolute;
 		top: 0;
@@ -126,7 +127,6 @@ const categories = [
 		z-index: 0;
 	}
 
-	/* 🎯 文字選單內容：貼齊左右邊緣，且層級比灰底高 */
 	.project-filter {
 		position: relative;
 		z-index: 1;
@@ -156,14 +156,11 @@ const categories = [
 		background: transparent;
 		border: none;
 		padding: 0.2rem 0;
-
 		font-family: inherit;
 		font-size: inherit;
 		font-weight: normal; 
-		
 		cursor: pointer;
 		color: #888888;
-
 		transition: color 0.2s ease, font-weight 0.2s ease;
 		flex-shrink: 0;
 	}
