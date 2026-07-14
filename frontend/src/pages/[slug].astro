@@ -34,9 +34,9 @@ const activeCategory = project.data?.category || "all";
 	/>
 
 	<article class="project-detail">
-		<!-- 🎯 SVG 箭頭返回按鈕 -->
+		<!-- 🎯 SVG 箭頭返回按鈕（備用 href 指向根目錄 /，避免 404） -->
 		<a 
-			href={`/projects?category=${activeCategory}`} 
+			href={`/?category=${activeCategory}`} 
 			id="back-link" 
 			class="back-btn" 
 			aria-label="Back to previous page"
@@ -77,17 +77,28 @@ const activeCategory = project.data?.category || "all";
 </BaseLayout>
 
 <script>
-	// 🎯 精準返回上一頁與原本的分類狀態
-	const backLink = document.getElementById('back-link');
-	
-	if (backLink) {
-		backLink.addEventListener('click', (e) => {
-			if (document.referrer && document.referrer.includes(window.location.host)) {
-				e.preventDefault();
-				window.history.back();
-			}
-		});
+	// 🎯 支援 Astro ClientRouter 的事件監聽機制
+	function setupBackButton() {
+		const backLink = document.getElementById('back-link');
+		
+		if (backLink) {
+			// 避免重複綁定事件
+			backLink.replaceWith(backLink.cloneNode(true));
+			const newBackLink = document.getElementById('back-link');
+
+			newBackLink?.addEventListener('click', (e) => {
+				// 只要來源是同一個 domain 且上一頁紀錄存在，就直接返回上一頁（保持 BRAND 分類與滾動位置）
+				if (document.referrer && document.referrer.includes(window.location.host) && window.history.length > 1) {
+					e.preventDefault();
+					window.history.back();
+				}
+			});
+		}
 	}
+
+	// 初次載入與 Astro 切換頁面（page-load）時皆重新初始化
+	document.addEventListener('astro:page-load', setupBackButton);
+	setupBackButton();
 </script>
 
 <style>
@@ -132,7 +143,7 @@ const activeCategory = project.data?.category || "all";
 
 	/* 🎯 文章主標題：使用 !important 確保字體能順利放大 */
 	.main-title {
-		font-size: 3.2rem !important; /* 👈 可調整大標題大小 */
+		font-size: 3.2rem !important;
 		font-weight: 500 !important;
 		color: #000000 !important;
 		margin: 0 !important;
