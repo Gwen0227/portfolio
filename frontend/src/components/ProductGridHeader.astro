@@ -48,10 +48,10 @@ const categories = [
 
 		if (!buttons.length) return;
 
-		// 🎯 執行卡片隱藏 / 顯示
+		// 🎯 執行卡片隱藏 / 顯示，並記錄當前分類
 		function applyFilter(filterValue: string) {
-			// 記錄當前分類到 sessionStorage，讓內頁返回按鈕知道是從哪裡點進來的
-			sessionStorage.setItem('referrer_category', filterValue);
+			// 關鍵修正：無論是點擊還是網址帶入，都同步寫入 sessionStorage
+			sessionStorage.setItem('referrer_category', filterValue.toLowerCase());
 
 			cards.forEach(card => {
 				const cardCategory = card.getAttribute('data-category');
@@ -65,10 +65,11 @@ const categories = [
 			});
 		}
 
-		// 1. 頁面載入時：判斷 URL 參數
+		// 1. 頁面初始化：優先讀取 URL 上的 category 參數
 		const urlParams = new URLSearchParams(window.location.search);
 		const currentCategory = urlParams.get('category') || 'all';
 
+		// 高亮對應按鈕
 		buttons.forEach(btn => {
 			const filterVal = btn.getAttribute('data-filter') || '';
 			if (filterVal.toLowerCase() === currentCategory.toLowerCase()) {
@@ -78,7 +79,7 @@ const categories = [
 			}
 		});
 
-		// 執行篩選並存入狀態
+		// 🎯 立即執行篩選，將當前的 Brand/Visual/All 存入記憶體
 		applyFilter(currentCategory);
 
 		// 2. 點擊分類按鈕事件
@@ -95,7 +96,7 @@ const categories = [
 					return;
 				}
 
-				// 更新 URL 參數
+				// 在首頁時更新 URL 參數 (不刷頁)
 				const newUrl = filterValue.toLowerCase() === 'all' ? '/' : `/?category=${filterValue}`;
 				window.history.replaceState({}, '', newUrl);
 
