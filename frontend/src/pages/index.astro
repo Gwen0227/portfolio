@@ -26,11 +26,10 @@ const allProjects = await getCollection("projects");
 </BaseLayout>
 
 <script>
-	// 核心篩選邏輯：傳入要篩選的分類名稱 (例如 'brand' 或 'all')
 	function filterCategory(categoryName) {
 		const targetCategory = (categoryName || "all").trim().toLowerCase();
 
-		// 1. 隱藏/顯示作品卡片
+		// 1. 切換卡片顯示（不破壞原本的 CSS 排版）
 		const cards = document.querySelectorAll("[data-card-category]");
 		let visibleCount = 0;
 
@@ -38,14 +37,14 @@ const allProjects = await getCollection("projects");
 			const cardCat = (card.getAttribute("data-card-category") || "").trim().toLowerCase();
 
 			if (targetCategory === "all" || cardCat === targetCategory) {
-				card.style.display = "block";
+				card.style.display = ""; // 恢復 CSS 排版
 				visibleCount++;
 			} else {
 				card.style.display = "none";
 			}
 		});
 
-		// 2. 更新按鈕 Active 樣式
+		// 2. 高亮目前選中的分類按鈕
 		const buttons = document.querySelectorAll(".categories a, .categories button");
 		buttons.forEach((btn) => {
 			const btnFilter = (btn.getAttribute("data-filter") || "").trim().toLowerCase();
@@ -56,21 +55,20 @@ const allProjects = await getCollection("projects");
 			}
 		});
 
-		// 3. 更新作品數量
+		// 3. 更新作品計數
 		const countEl = document.querySelector(".count");
 		if (countEl) {
 			countEl.textContent = `${visibleCount} Projects`;
 		}
 	}
 
-	// 初始化與事件監聽
 	function initFilterSystem() {
-		// 讀取網址目前的 category 參數
+		// 讀取 URL 參數，還原分類
 		const urlParams = new URLSearchParams(window.location.search);
 		const initialCategory = urlParams.get("category") || "all";
 		filterCategory(initialCategory);
 
-		// 攔截分類按鈕點擊
+		// 分類按鈕點擊攔截
 		const categoryNav = document.querySelector(".categories");
 		if (categoryNav) {
 			categoryNav.addEventListener("click", (e) => {
@@ -80,50 +78,43 @@ const allProjects = await getCollection("projects");
 				e.preventDefault();
 
 				const selectedCat = targetLink.getAttribute("data-filter") || "all";
-				
-				// 更新網址但不重新載入頁面
 				const newUrl = selectedCat === "all" ? "/" : `/?category=${selectedCat}`;
 				window.history.pushState({ category: selectedCat }, "", newUrl);
 
-				// 執行卡片篩選
 				filterCategory(selectedCat);
 			});
 		}
 	}
 
-	// 監聽瀏覽器歷史紀錄變更 (按下一頁/上一頁)
+	// 監聽歷史紀錄返回（上一頁/下一頁）
 	window.addEventListener("popstate", () => {
 		const urlParams = new URLSearchParams(window.location.search);
 		filterCategory(urlParams.get("category") || "all");
 	});
 
-	// 初始化與支援 Astro 頁面轉場
 	initFilterSystem();
 	document.addEventListener("astro:page-load", initFilterSystem);
 </script>
 
 <style>
-	/* 1. 確保卡片外容器採用 flex/grid 來撐開高度，防止 Footer 貼上去或位移 */
-	#product-grid {
+	.product-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
 		gap: 2rem;
 		margin-top: 2rem;
-		margin-bottom: 4rem; /* 增加底部留白，避免 Footer 黏在一起 */
+		margin-bottom: 4rem;
 		width: 100%;
-		clear: both;
 	}
 
 	.card-item-wrapper {
 		width: 100%;
-		box-sizing: border-box;
 	}
 
-	/* 2. 📱 手機版（768px 以下）：強制保持一行 3 張圖 */
+	/* 📱 手機版：維持一行 3 張圖，並適度調整間距 */
 	@media (max-width: 768px) {
-		#product-grid {
+		.product-grid {
 			grid-template-columns: repeat(3, 1fr) !important;
-			gap: 0.75rem !important;
+			gap: 0.5rem !important;
 			margin-top: 1rem;
 			margin-bottom: 3rem;
 		}
