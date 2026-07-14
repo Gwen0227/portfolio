@@ -26,6 +26,9 @@ const currentPage =
 <!doctype html>
 <html lang="en" data-page={currentPage}>
   <head>
+    <!-- 阻擋 AI 爬蟲抓取 -->
+    <meta name="robots" content="noai, noimageai" />
+    <meta name="tdm-reservation" content="1" />
     <SEO
       title={title}
       description={description}
