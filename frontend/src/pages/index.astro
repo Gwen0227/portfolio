@@ -8,110 +8,109 @@ const allProjects = await getCollection("projects");
 ---
 
 <BaseLayout title="Home">
-  <ProductGridHeader 
-    activeCategory="all" 
-    productsTotal={allProjects.length} 
-  />
+	<ProductGridHeader 
+		activeCategory="all" 
+		productsTotal={allProjects.length} 
+	/>
 
-  <section class="product-grid" id="product-grid">
-    {allProjects.map((project) => (
-      <div 
-        class="card-item-wrapper" 
-        data-card-category={(project.data.category || "Visual").toLowerCase()}
-      >
-        <ProductCard product={project} />
-      </div>
-    ))}
-  </section>
+	<section class="product-grid" id="product-grid">
+		{allProjects.map((project) => (
+			<div 
+				class="card-item-wrapper" 
+				data-card-category={(project.data.category || "Visual").toLowerCase()}
+			>
+				<ProductCard product={project} />
+			</div>
+		))}
+	</section>
 </BaseLayout>
 
 <script>
-  // 核心篩選邏輯：傳入要篩選的分類名稱 (例如 'brand' 或 'all')
-  function filterCategory(categoryName) {
-    const targetCategory = (categoryName || "all").trim().toLowerCase();
+	// 核心篩選邏輯：傳入要篩選的分類名稱 (例如 'brand' 或 'all')
+	function filterCategory(categoryName) {
+		const targetCategory = (categoryName || "all").trim().toLowerCase();
 
-    // 1. 隱藏/顯示作品卡片
-    const cards = document.querySelectorAll("[data-card-category]");
-    let visibleCount = 0;
+		// 1. 隱藏/顯示作品卡片
+		const cards = document.querySelectorAll("[data-card-category]");
+		let visibleCount = 0;
 
-    cards.forEach((card) => {
-      const cardCat = (card.getAttribute("data-card-category") || "").trim().toLowerCase();
+		cards.forEach((card) => {
+			const cardCat = (card.getAttribute("data-card-category") || "").trim().toLowerCase();
 
-      if (targetCategory === "all" || cardCat === targetCategory) {
-        (card as HTMLElement).style.display = "block";
-        visibleCount++;
-      } else {
-        (card as HTMLElement).style.display = "none";
-      }
-    });
+			if (targetCategory === "all" || cardCat === targetCategory) {
+				card.style.display = "block";
+				visibleCount++;
+			} else {
+				card.style.display = "none";
+			}
+		});
 
-    // 2. 更新按鈕 Active 樣式
-    const buttons = document.querySelectorAll(".categories a, .categories button");
-    buttons.forEach((btn) => {
-      const btnFilter = (btn.getAttribute("data-filter") || "").trim().toLowerCase();
-      if (btnFilter === targetCategory) {
-        btn.classList.add("active");
-      } else {
-        btn.classList.remove("active");
-      }
-    });
+		// 2. 更新按鈕 Active 樣式
+		const buttons = document.querySelectorAll(".categories a, .categories button");
+		buttons.forEach((btn) => {
+			const btnFilter = (btn.getAttribute("data-filter") || "").trim().toLowerCase();
+			if (btnFilter === targetCategory) {
+				btn.classList.add("active");
+			} else {
+				btn.classList.remove("active");
+			}
+		});
 
-    // 3. 更新作品數量
-    const countEl = document.querySelector(".count");
-    if (countEl) {
-      countEl.textContent = `${visibleCount} Projects`;
-    }
-  }
+		// 3. 更新作品數量
+		const countEl = document.querySelector(".count");
+		if (countEl) {
+			countEl.textContent = `${visibleCount} Projects`;
+		}
+	}
 
-  // 初始化與事件監聽
-  function initFilterSystem() {
-    // 讀取網址目前的 category 參數
-    const urlParams = new URLSearchParams(window.location.search);
-    const initialCategory = urlParams.get("category") || "all";
-    filterCategory(initialCategory);
+	// 初始化與事件監聽
+	function initFilterSystem() {
+		// 讀取網址目前的 category 參數
+		const urlParams = new URLSearchParams(window.location.search);
+		const initialCategory = urlParams.get("category") || "all";
+		filterCategory(initialCategory);
 
-    // 🎯 攔截分類按鈕的點擊事件，直接觸發篩選，不依賴網址跳轉
-    const categoryNav = document.querySelector(".categories");
-    if (categoryNav) {
-      categoryNav.addEventListener("click", (e) => {
-        const targetLink = (e.target as HTMLElement).closest("[data-filter]") as HTMLAnchorElement;
-        if (!targetLink) return;
+		// 攔截分類按鈕點擊
+		const categoryNav = document.querySelector(".categories");
+		if (categoryNav) {
+			categoryNav.addEventListener("click", (e) => {
+				const targetLink = e.target.closest("[data-filter]");
+				if (!targetLink) return;
 
-        // 阻止預設的連結跳轉 behavior，改由 JS 直接過濾
-        e.preventDefault();
+				e.preventDefault();
 
-        const selectedCat = targetLink.getAttribute("data-filter") || "all";
-        
-        // 更新瀏覽器網址 (不刷新頁面)
-        const newUrl = selectedCat === "all" ? "/" : `/?category=${selectedCat}`;
-        window.history.pushState({ category: selectedCat }, "", newUrl);
+				const selectedCat = targetLink.getAttribute("data-filter") || "all";
+				
+				// 更新網址但不重新載入頁面
+				const newUrl = selectedCat === "all" ? "/" : `/?category=${selectedCat}`;
+				window.history.pushState({ category: selectedCat }, "", newUrl);
 
-        // 執行卡片切換
-        filterCategory(selectedCat);
-      });
-    }
-  }
+				// 執行卡片篩選
+				filterCategory(selectedCat);
+			});
+		}
+	}
 
-  // 監聽歷史紀錄返回 (PopState)
-  window.addEventListener("popstate", () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    filterCategory(urlParams.get("category") || "all");
-  });
+	// 監聽瀏覽器歷史紀錄變更 (按下一頁/上一頁)
+	window.addEventListener("popstate", () => {
+		const urlParams = new URLSearchParams(window.location.search);
+		filterCategory(urlParams.get("category") || "all");
+	});
 
-  // 支援 Astro 轉場生命週期
-  initFilterSystem();
-  document.addEventListener("astro:page-load", initFilterSystem);
+	// 初始化與支援 Astro 頁面轉場
+	initFilterSystem();
+	document.addEventListener("astro:page-load", initFilterSystem);
 </script>
 
 <style>
-  .product-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
-  }
+	.product-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 2rem;
+		margin-top: 2rem;
+	}
 
-  .card-item-wrapper {
-    width: 100%;
-  }
+	.card-item-wrapper {
+		width: 100%;
+	}
 </style>
