@@ -8,7 +8,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 const allProjects = await getCollection("projects");
 const projectsTotal = allProjects.length;
 
-// 🎯 抓取網址中的 category 參數 (例如 /?category=brand)
+// 取得 URL 上的 category 參數
 const currentCategory = Astro.url.searchParams.get("category") || "all";
 
 const title = "Pei Jyuan Personal Portfolio";
@@ -17,29 +17,7 @@ const title = "Pei Jyuan Personal Portfolio";
 <BaseLayout title={title}>
 	<Preloader />
 
-	{/* 🎯 把目前的分類直接帶給 ProductGridHeader */}
 	<ProductGridHeader activeCategory={currentCategory} productsTotal={projectsTotal} />
 
-	<ProductGrid projects={allProjects} activeCategory={currentCategory} />
+	<ProductGrid projects={allProjects} />
 </BaseLayout>
-
-<script>
-	// 前端備用：若頁面是用 ClientRouter / SPA 方式切換網址時自動點擊選單
-	function syncCategory() {
-		const urlParams = new URLSearchParams(window.location.search);
-		const cat = (urlParams.get('category') || 'all').toLowerCase();
-
-		const elements = Array.from(document.querySelectorAll('button, a, span, li'));
-		const target = elements.find(el => {
-			const txt = el.textContent?.trim().toLowerCase();
-			const data = el.getAttribute('data-category')?.toLowerCase();
-			return txt === cat || data === cat;
-		});
-
-		if (target) {
-			(target as HTMLElement).click();
-		}
-	}
-
-	document.addEventListener('astro:page-load', syncCategory);
-</script>
