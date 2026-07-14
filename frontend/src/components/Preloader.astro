@@ -11,40 +11,28 @@
     const preloader = document.getElementById("preloader");
     if (!preloader) return;
 
-    // 關閉 Preloader 的函式
     const hidePreloader = () => {
       if (preloader.classList.contains("is-hidden")) return;
-      
       preloader.classList.add("is-hidden");
-      
-      // 動畫結束後徹底隱藏，避免擋住滑鼠點擊
       setTimeout(() => {
         preloader.style.display = "none";
       }, 500);
     };
 
-    // 🎯 1. 容錯保險：最多只等 1 秒（1000ms），時間一到強制隱藏，絕不卡死頁面
-    const forceHideTimer = setTimeout(() => {
-      hidePreloader();
-    }, 1000);
+    // 🎯 1 秒超時強制關閉防爆，避免圖片 404 時卡住畫面
+    const forceHideTimer = setTimeout(hidePreloader, 1000);
 
-    // 🎯 2. 頁面 Ready 就立刻關閉
     if (document.readyState === "complete") {
       clearTimeout(forceHideTimer);
       hidePreloader();
     } else {
-      window.addEventListener(
-        "load",
-        () => {
-          clearTimeout(forceHideTimer);
-          hidePreloader();
-        },
-        { once: true }
-      );
+      window.addEventListener("load", () => {
+        clearTimeout(forceHideTimer);
+        hidePreloader();
+      }, { once: true });
     }
   }
 
-  // 🎯 3. 支援一般載入與 Astro ClientRouter (View Transitions)
   setupPreloader();
   document.addEventListener("astro:page-load", setupPreloader);
   document.addEventListener("astro:after-swap", setupPreloader);
@@ -66,7 +54,6 @@
     pointer-events: auto;
   }
 
-  /* 🎯 淡出樣式：關鍵在 pointer-events: none */
   .preloader-overlay.is-hidden {
     opacity: 0;
     visibility: hidden;

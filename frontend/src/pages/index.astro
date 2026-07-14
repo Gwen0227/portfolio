@@ -26,21 +26,19 @@ const allProjects = await getCollection("projects");
 </BaseLayout>
 
 <script>
-  // 🎯 核心過濾邏輯
   function initCategoryFilter() {
-    // 1. 取得最新網址上的 category 參數
+    // 取得網址上的 category 參數 (預設為 all)
     const urlParams = new URLSearchParams(window.location.search);
     const rawCategory = urlParams.get("category") || "all";
     const currentCategory = rawCategory.trim().toLowerCase();
 
-    // 2. 搜尋畫面上所有的卡片外框
+    // 1. 隱藏/顯示對應卡片
     const cards = document.querySelectorAll("[data-card-category]");
     let visibleCount = 0;
 
     cards.forEach((card) => {
       const cardCat = (card.getAttribute("data-card-category") || "").trim().toLowerCase();
 
-      // 比對分類：如果是 all 或是分類一致就顯示，否則隱藏
       if (currentCategory === "all" || cardCat === currentCategory) {
         (card as HTMLElement).style.display = "";
         visibleCount++;
@@ -49,7 +47,7 @@ const allProjects = await getCollection("projects");
       }
     });
 
-    // 3. 高亮對應的 Header 按鈕
+    // 2. 高亮 Header 分類按鈕
     const buttons = document.querySelectorAll(".categories a, .categories button");
     buttons.forEach((btn) => {
       const btnFilter = (btn.getAttribute("data-filter") || "").trim().toLowerCase();
@@ -60,20 +58,27 @@ const allProjects = await getCollection("projects");
       }
     });
 
-    // 4. 更新項目總數
+    // 3. 更新項目總數數字
     const countEl = document.querySelector(".count");
     if (countEl) {
       countEl.textContent = `${visibleCount} Projects`;
     }
   }
 
-  // 🎯 關鍵防護：支援 Astro ClientRouter (View Transitions) 的全生命週期監聽
-  // 避免 SPA 轉場時腳本失效
+  // 🎯 關鍵：監聽所有 ClientRouter 轉場與網址變化
   document.addEventListener("astro:page-load", initCategoryFilter);
   document.addEventListener("astro:after-swap", initCategoryFilter);
   window.addEventListener("popstate", initCategoryFilter);
 
-  // 首次直接執行一次
+  // 點擊分類按鈕時立即延遲微秒觸發，確保 ClientRouter 已更新網址
+  document.addEventListener("click", (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest(".categories a") || target.closest("#back-btn")) {
+      setTimeout(initCategoryFilter, 50);
+    }
+  });
+
+  // 首次載入直接執行
   initCategoryFilter();
 </script>
 
