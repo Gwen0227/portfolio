@@ -21,40 +21,43 @@ const title = "Pei Jyuan Personal Portfolio";
 
 <script>
 	function syncCategoryFromUrl() {
-		// 1. 取得網址上的 category 參數 (例如 /?category=all 或 /?category=brand)
 		const urlParams = new URLSearchParams(window.location.search);
 		const categoryParam = urlParams.get('category')?.trim().toLowerCase();
 
 		if (!categoryParam) return;
 
-		// 2. 獲取頁面上所有的按鈕/連結元素
-		const buttons = document.querySelectorAll('button, a');
-		let targetBtn: HTMLElement | null = null;
+		// 給予一點點延遲，確保 ProductGridHeader 的 JS 元件已完全載入並綁定好點擊事件
+		setTimeout(() => {
+			// 抓取 ProductGridHeader 內所有的可點擊元素
+			const allClickables = document.querySelectorAll('header *, nav *, [class*="header"] *, [class*="category"] *');
+			let targetBtn: HTMLElement | null = null;
 
-		buttons.forEach((btn) => {
-			const btnText = btn.textContent?.trim();
-			const btnTextLower = btnText?.toLowerCase();
-			const btnData = btn.getAttribute('data-category')?.toLowerCase();
+			allClickables.forEach((el) => {
+				const text = el.textContent?.trim().toLowerCase();
+				const dataCat = el.getAttribute('data-category')?.toLowerCase();
 
-			// 🎯 針對 "All" 按鈕精準比對 (無論大寫 All, ALL 或小寫 all)
-			if (categoryParam === 'all') {
-				if (btnText === 'All' || btnTextLower === 'all' || btnData === 'all') {
-					targetBtn = btn as HTMLElement;
+				if (categoryParam === 'all') {
+					if (text === 'all' || dataCat === 'all') {
+						targetBtn = el as HTMLElement;
+					}
+				} else {
+					if (text === categoryParam || dataCat === categoryParam) {
+						targetBtn = el as HTMLElement;
+					}
 				}
-			} 
-			// 🎯 其他分類比對 (如 BRAND, UI/UX 等)
-			else if (btnData === categoryParam || btnTextLower === categoryParam) {
-				targetBtn = btn as HTMLElement;
-			}
-		});
+			});
 
-		// 3. 自動模擬點擊目標分類按鈕
-		if (targetBtn) {
-			(targetBtn as HTMLElement).click();
-		}
+			if (targetBtn) {
+				(targetBtn as HTMLElement).click();
+			}
+		}, 50);
 	}
 
-	// 支援 Astro View Transitions (ClientRouter) 與首次載入
 	document.addEventListener('astro:page-load', syncCategoryFromUrl);
-	syncCategoryFromUrl();
+	// 如果沒有觸發 page-load，預備DOMContentLoaded
+	if (document.readyState === 'loading') {
+		document.addEventListener('DOMContentLoaded', syncCategoryFromUrl);
+	} else {
+		syncCategoryFromUrl();
+	}
 </script>
