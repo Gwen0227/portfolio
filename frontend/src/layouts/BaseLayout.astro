@@ -26,9 +26,6 @@ const currentPage =
 <!doctype html>
 <html lang="en" data-page={currentPage}>
   <head>
-    <!-- 阻擋 AI 爬蟲抓取 -->
-    <meta name="robots" content="noai, noimageai" />
-    <meta name="tdm-reservation" content="1" />
     <SEO
       title={title}
       description={description}
@@ -74,6 +71,9 @@ const currentPage =
           { name: "msapplication-TileColor", content: "#000000" },
           { name: "theme-color", content: "#ffffff" },
           { name: "generator", content: Astro.generator },
+          // 🎯 阻擋 AI 爬蟲訓練與抓取標籤
+          { name: "robots", content: "noai, noimageai" },
+          { name: "tdm-reservation", content: "1" },
         ],
       }}
     />
@@ -84,7 +84,7 @@ const currentPage =
         box-sizing: border-box !important;
       }
 
-      /* 🎯 關鍵修復：釋放 html/body 的固定 height，否則 SmoothScroll 滾輪會被鎖死 */
+      /* 🎯 釋放 html/body 固定高度，確保 SmoothScroll 平滑滾動與 mouse wheel 正常發揮 */
       html, body {
         margin: 0;
         padding: 0;
@@ -103,7 +103,7 @@ const currentPage =
         pointer-events: none !important;
       }
 
-      /* 🎯 全局容器：左右留白 + 保證 Footer 在最底部 */
+      /* 🎯 全局容器：個別控制左右留白邊距 + 保證 Footer 自動置底 */
       .site-container {
         width: 100% !important;
         max-width: 100% !important;
@@ -111,8 +111,13 @@ const currentPage =
         display: flex;
         flex-direction: column;
         margin: 0 auto !important;
-        padding-left: 2rem !important;
-        padding-right: 2rem !important;
+        
+        /* ---------------------------------------------------- */
+        /* 👇 電腦版左右留白設定 (可依照需求各自調整數值，如 2rem, 30px 等) */
+        padding-left: 2.5rem !important;  /* 左側邊距 */
+        padding-right: 2.5rem !important; /* 右側邊距 */
+        /* ---------------------------------------------------- */
+
         box-sizing: border-box !important;
       }
 
@@ -121,10 +126,11 @@ const currentPage =
         width: 100%;
       }
 
+      /* 📱 手機版 (768px 以下) 個別留白調整 */
       @media (max-width: 768px) {
         .site-container {
-          padding-left: 1rem !important;
-          padding-right: 1rem !important;
+          padding-left: 1rem !important;  /* 手機版左側邊距 */
+          padding-right: 1rem !important; /* 手機版右側邊距 */
         }
       }
     </style>
