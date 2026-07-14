@@ -135,6 +135,7 @@ const year = product.data.year || "2026";
 		opacity: 1;
 		transition: opacity 0.3s ease;
 		z-index: 1;
+		pointer-events: none; /* 防止遮罩干擾滑鼠事件 */
 	}
 
 	.protected-img {
@@ -201,7 +202,7 @@ const year = product.data.year || "2026";
 	}
 </style>
 
-<!-- 🎯 燈箱改用 inset: 0 來 100% 絕對覆蓋，不使用 100vw，徹底避免影響頁面留白與寬度計算 -->
+<!-- 🎯 燈箱預設設為 pointer-events: none，隱藏時絕對不吃掉滑鼠滾輪事件 -->
 <style is:global>
 	.lightbox-modal {
 		display: none;
@@ -213,10 +214,12 @@ const year = product.data.year || "2026";
 		justify-content: center;
 		backdrop-filter: blur(5px);
 		cursor: zoom-out;
+		pointer-events: none;
 	}
 
 	.lightbox-modal.is-active {
 		display: flex !important;
+		pointer-events: auto !important;
 	}
 
 	.lightbox-content {

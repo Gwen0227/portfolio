@@ -81,11 +81,12 @@ const currentPage =
         box-sizing: border-box !important;
       }
 
+      /* 🎯 關鍵修復：釋放 html/body 的固定 height，否則 SmoothScroll 滾輪會被鎖死 */
       html, body {
-        height: 100%;
         margin: 0;
         padding: 0;
-        overflow-x: hidden; /* 防止任何元素超出導致左右留白消失 */
+        width: 100%;
+        min-height: 100vh;
       }
 
       .hover-reveal,
@@ -99,7 +100,7 @@ const currentPage =
         pointer-events: none !important;
       }
 
-      /* 🎯 全局容器：強制固定左右留白 */
+      /* 🎯 全局容器：左右留白 + 保證 Footer 在最底部 */
       .site-container {
         width: 100% !important;
         max-width: 100% !important;
@@ -107,7 +108,7 @@ const currentPage =
         display: flex;
         flex-direction: column;
         margin: 0 auto !important;
-        padding-left: 2rem !important; /* 電腦版留白加大一點點，比較舒適 */
+        padding-left: 2rem !important;
         padding-right: 2rem !important;
         box-sizing: border-box !important;
       }
@@ -119,7 +120,7 @@ const currentPage =
 
       @media (max-width: 768px) {
         .site-container {
-          padding-left: 1rem !important; /* 手機版留白 */
+          padding-left: 1rem !important;
           padding-right: 1rem !important;
         }
       }
