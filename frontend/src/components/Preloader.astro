@@ -7,37 +7,36 @@
 </div>
 
 <script>
-  function initPreloader() {
+  function setupPreloader() {
     const preloader = document.getElementById("preloader");
     if (!preloader) return;
 
-    // 關閉 Preloader 的統一函式
+    // 關閉 Preloader 的函式
     const hidePreloader = () => {
       if (preloader.classList.contains("is-hidden")) return;
       
       preloader.classList.add("is-hidden");
       
-      // 動畫結束後從 layout 中點擊穿透 & 徹底隱藏
+      // 動畫結束後徹底隱藏，避免擋住滑鼠點擊
       setTimeout(() => {
         preloader.style.display = "none";
       }, 500);
     };
 
-    // 🎯 1. 容錯機制：不論圖片成功或失敗，最多只等 1 秒（1000ms），時間到強制關閉 Preloader
-    const forceHideTimeout = setTimeout(() => {
-      console.warn("[Preloader] Timeout reached. Forcing preloader to hide.");
+    // 🎯 1. 容錯保險：最多只等 1 秒（1000ms），時間一到強制隱藏，絕不卡死頁面
+    const forceHideTimer = setTimeout(() => {
       hidePreloader();
     }, 1000);
 
-    // 🎯 2. 安全監聽：頁面資源 Ready 就立刻關閉
+    // 🎯 2. 頁面 Ready 就立刻關閉
     if (document.readyState === "complete") {
-      clearTimeout(forceHideTimeout);
+      clearTimeout(forceHideTimer);
       hidePreloader();
     } else {
       window.addEventListener(
         "load",
         () => {
-          clearTimeout(forceHideTimeout);
+          clearTimeout(forceHideTimer);
           hidePreloader();
         },
         { once: true }
@@ -45,10 +44,10 @@
     }
   }
 
-  // 🎯 3. 支援 Astro ClientRouter (View Transitions)
-  initPreloader();
-  document.addEventListener("astro:page-load", initPreloader);
-  document.addEventListener("astro:after-swap", initPreloader);
+  // 🎯 3. 支援一般載入與 Astro ClientRouter (View Transitions)
+  setupPreloader();
+  document.addEventListener("astro:page-load", setupPreloader);
+  document.addEventListener("astro:after-swap", setupPreloader);
 </script>
 
 <style>
