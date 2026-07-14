@@ -8,7 +8,6 @@ type Props = {
 
 const { productsTotal = 3, activeCategory = "all" } = Astro.props;
 
-// 預設分類清單
 const categories = [
 	{ id: "all", label: "All" },
 	{ id: "Brand", label: "Brand" },
@@ -42,34 +41,24 @@ const categories = [
 </div>
 
 <script>
+	function updateCardLinks(category: string) {
+		const links = document.querySelectorAll('a[href*="/projects/"]') as NodeListOf<HTMLAnchorElement>;
+		links.forEach(link => {
+			const cleanUrl = link.href.split('?')[0];
+			link.href = `${cleanUrl}?ref=${category.toLowerCase()}`;
+		});
+	}
+
 	function initFilter() {
 		const buttons = document.querySelectorAll('.categories button');
 		const cards = document.querySelectorAll('[data-category]') as NodeListOf<HTMLElement>;
 
 		if (!buttons.length) return;
 
-		// 🎯 執行卡片隱藏 / 顯示，並記錄當前分類
-		function applyFilter(filterValue: string) {
-			// 關鍵修正：無論是點擊還是網址帶入，都同步寫入 sessionStorage
-			sessionStorage.setItem('referrer_category', filterValue.toLowerCase());
-
-			cards.forEach(card => {
-				const cardCategory = card.getAttribute('data-category');
-
-				if (!filterValue || filterValue.toLowerCase() === 'all' || (cardCategory && cardCategory.toLowerCase() === filterValue.toLowerCase())) {
-					card.style.display = '';
-					card.style.opacity = '1';
-				} else {
-					card.style.display = 'none';
-				}
-			});
-		}
-
-		// 1. 頁面初始化：優先讀取 URL 上的 category 參數
+		// 🎯 1. 初始化讀取 URL
 		const urlParams = new URLSearchParams(window.location.search);
 		const currentCategory = urlParams.get('category') || 'all';
 
-		// 高亮對應按鈕
 		buttons.forEach(btn => {
 			const filterVal = btn.getAttribute('data-filter') || '';
 			if (filterVal.toLowerCase() === currentCategory.toLowerCase()) {
@@ -79,28 +68,44 @@ const categories = [
 			}
 		});
 
-		// 🎯 立即執行篩選，將當前的 Brand/Visual/All 存入記憶體
-		applyFilter(currentCategory);
+		// 隱藏卡片並更新卡片連結的 ?ref= 參數
+		cards.forEach(card => {
+			const cardCategory = card.getAttribute('data-category');
+			if (!currentCategory || currentCategory.toLowerCase() === 'all' || (cardCategory && cardCategory.toLowerCase() === currentCategory.toLowerCase())) {
+				card.style.display = '';
+			} else {
+				card.style.display = 'none';
+			}
+		});
 
-		// 2. 點擊分類按鈕事件
+		updateCardLinks(currentCategory);
+
+		// 🎯 2. 按鈕點擊切換
 		buttons.forEach(button => {
 			button.addEventListener('click', () => {
-				const filterValue = button.getAttribute('data-filter') || 'all';
+				const filterValue = (button.getAttribute('data-filter') || 'all').toLowerCase();
 
 				buttons.forEach(btn => btn.classList.remove('active'));
 				button.classList.add('active');
 
-				// 若不在首頁則跳回首頁並帶參數
 				if (window.location.pathname !== "/") {
-					window.location.href = filterValue.toLowerCase() === "all" ? "/" : `/?category=${filterValue}`;
+					window.location.href = filterValue === "all" ? "/" : `/?category=${filterValue}`;
 					return;
 				}
 
-				// 在首頁時更新 URL 參數 (不刷頁)
-				const newUrl = filterValue.toLowerCase() === 'all' ? '/' : `/?category=${filterValue}`;
+				const newUrl = filterValue === 'all' ? '/' : `/?category=${filterValue}`;
 				window.history.replaceState({}, '', newUrl);
 
-				applyFilter(filterValue);
+				cards.forEach(card => {
+					const cardCategory = card.getAttribute('data-category');
+					if (filterValue === 'all' || (cardCategory && cardCategory.toLowerCase() === filterValue)) {
+						card.style.display = '';
+					} else {
+						card.style.display = 'none';
+					}
+				});
+
+				updateCardLinks(filterValue);
 			});
 		});
 	}

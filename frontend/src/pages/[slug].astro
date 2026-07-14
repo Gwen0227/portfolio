@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
-import BaseLayout from "../layouts/BaseLayout.astro";
-import ProductGridHeader from "../components/ProductGridHeader.astro";
+import BaseLayout from "../../layouts/BaseLayout.astro"; // 請確認相對路徑
+import ProductGridHeader from "../../components/ProductGridHeader.astro";
 
 export async function getStaticPaths() {
 	const projects = await getCollection("projects");
@@ -22,21 +22,27 @@ const { Content } = await render(project);
 const allProjects = (await getCollection("projects")) || [];
 const productsTotal = allProjects.length;
 
-// 作品本身的預設分類
+// 🎯 核心：直接從網址的 ?ref= 參數取得來源分類！
+const referrerCategory = Astro.url.searchParams.get("ref");
 const defaultCategory = (project.data?.category || "all").toLowerCase();
+
+// 如果有來源參數量用來源，沒有的話用作品本身分類
+const activeCategory = referrerCategory ? referrerCategory.toLowerCase() : defaultCategory;
+
+// 計算返回按鈕的連結
+const backUrl = activeCategory === "all" ? "/" : `/?category=${activeCategory}`;
 ---
 
 <BaseLayout title={project.data.title}>
 	<ProductGridHeader 
-		activeCategory={defaultCategory} 
+		activeCategory={activeCategory} 
 		productsTotal={productsTotal} 
 	/>
 
 	<article class="project-detail">
-		<!-- 🎯 預設 fallback 連結 -->
+		<!-- 🎯 原生超連結，網址在伺服器渲染時就精準鎖定 -->
 		<a 
-			href={`/?category=${defaultCategory}`} 
-			id="back-btn"
+			href={backUrl} 
 			class="back-btn" 
 			aria-label="Back to previous page"
 		>
@@ -74,28 +80,6 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 		</div>
 	</article>
 </BaseLayout>
-
-<script>
-	function setupBackLink() {
-		const backBtn = document.getElementById('back-btn') as HTMLAnchorElement;
-		if (!backBtn) return;
-
-		// 🎯 讀取使用者點進來前最後選擇的分類
-		const refCat = sessionStorage.getItem('referrer_category');
-
-		if (refCat) {
-			const cleanCat = refCat.toLowerCase();
-			if (cleanCat === 'all') {
-				backBtn.href = '/?category=all';
-			} else {
-				backBtn.href = `/?category=${cleanCat}`;
-			}
-		}
-	}
-
-	setupBackLink();
-	document.addEventListener('astro:page-load', setupBackLink);
-</script>
 
 <style>
 	.project-detail {
