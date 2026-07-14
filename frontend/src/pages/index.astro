@@ -123,38 +123,59 @@ const allProjects = await getCollection("projects");
 </script>
 
 <style>
-	/* 🖥️ 電腦版與預設：視窗最大時一行 6 張圖 */
+	/* ===================================================
+	   網格核心設定
+	   =================================================== */
 	.product-grid {
 		display: grid;
+		/* 預設為電腦版：強制固定 6 欄 */
 		grid-template-columns: repeat(6, 1fr);
-		gap: 1.5rem;
+		
+		/* 🎯 關鍵設定：無論視窗多大，圖片間距 (Gap) 永遠固定為 1.5rem (約 24px) */
+		gap: 1rem; 
+		
+		width: 100%;
 		margin-top: 2rem;
 		margin-bottom: 4rem;
-		width: 100%;
+		box-sizing: border-box;
 	}
 
+	/* 卡片包覆容器：寬度自動填滿格線 */
 	.card-item-wrapper {
 		width: 100%;
+		box-sizing: border-box;
 	}
 
-	/* 被過濾隱藏的卡片 */
+	/* 隱藏過濾卡片的 CSS，絕對不破壞 Grid 排版結構 */
 	.card-item-wrapper[data-hidden="true"] {
 		display: none !important;
 	}
 
-	/* 💻 平板螢幕 (1024px 以下)：一行 4 張圖 */
-	@media (max-width: 1024px) {
+	/* ===================================================
+	   響應式斷點 (斷點切換時 gap 依然精準維持)
+	   =================================================== */
+
+	/* 💻 大螢幕/中等螢幕 (1200px 以下)：調整為一行 4 張圖 */
+	@media (max-width: 1200px) {
 		.product-grid {
 			grid-template-columns: repeat(4, 1fr);
-			gap: 1.2rem;
+			gap: 1rem; /* 間距維持不變 */
 		}
 	}
 
-	/* 📱 手機版螢幕 (768px 以下)：強制保持一行 3 張圖 */
-	@media (max-width: 768px) {
+	/* 📱 平板螢幕 (860px 以下)：調整為一行 3 張圖 */
+	@media (max-width: 860px) {
+		.product-grid {
+			grid-template-columns: repeat(3, 1fr);
+			gap: 1rem; /* 平板稍微微調適當間距 */
+		}
+	}
+
+	/* 📱 手機版螢幕 (600px 以下)：強制保持一行 3 張圖 */
+	@media (max-width: 600px) {
 		.product-grid {
 			grid-template-columns: repeat(3, 1fr) !important;
-			gap: 0.5rem !important;
+			gap: 0.5rem !important; /* 手機螢幕窄，使用小間距避免擠壓圖片 */
 			margin-top: 1rem;
 			margin-bottom: 3rem;
 		}
