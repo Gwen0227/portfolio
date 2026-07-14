@@ -8,56 +8,38 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 const allProjects = await getCollection("projects");
 const projectsTotal = allProjects.length;
 
+// 🎯 抓取網址中的 category 參數 (例如 /?category=brand)
+const currentCategory = Astro.url.searchParams.get("category") || "all";
+
 const title = "Pei Jyuan Personal Portfolio";
 ---
 
 <BaseLayout title={title}>
 	<Preloader />
 
-	<ProductGridHeader productsTotal={projectsTotal} />
+	{/* 🎯 把目前的分類直接帶給 ProductGridHeader */}
+	<ProductGridHeader activeCategory={currentCategory} productsTotal={projectsTotal} />
 
-	<ProductGrid projects={allProjects} />
+	<ProductGrid projects={allProjects} activeCategory={currentCategory} />
 </BaseLayout>
 
 <script>
-	function syncCategoryFromUrl() {
+	// 前端備用：若頁面是用 ClientRouter / SPA 方式切換網址時自動點擊選單
+	function syncCategory() {
 		const urlParams = new URLSearchParams(window.location.search);
-		const categoryParam = urlParams.get('category')?.trim().toLowerCase();
+		const cat = (urlParams.get('category') || 'all').toLowerCase();
 
-		if (!categoryParam) return;
+		const elements = Array.from(document.querySelectorAll('button, a, span, li'));
+		const target = elements.find(el => {
+			const txt = el.textContent?.trim().toLowerCase();
+			const data = el.getAttribute('data-category')?.toLowerCase();
+			return txt === cat || data === cat;
+		});
 
-		// 給予一點點延遲，確保 ProductGridHeader 的 JS 元件已完全載入並綁定好點擊事件
-		setTimeout(() => {
-			// 抓取 ProductGridHeader 內所有的可點擊元素
-			const allClickables = document.querySelectorAll('header *, nav *, [class*="header"] *, [class*="category"] *');
-			let targetBtn: HTMLElement | null = null;
-
-			allClickables.forEach((el) => {
-				const text = el.textContent?.trim().toLowerCase();
-				const dataCat = el.getAttribute('data-category')?.toLowerCase();
-
-				if (categoryParam === 'all') {
-					if (text === 'all' || dataCat === 'all') {
-						targetBtn = el as HTMLElement;
-					}
-				} else {
-					if (text === categoryParam || dataCat === categoryParam) {
-						targetBtn = el as HTMLElement;
-					}
-				}
-			});
-
-			if (targetBtn) {
-				(targetBtn as HTMLElement).click();
-			}
-		}, 50);
+		if (target) {
+			(target as HTMLElement).click();
+		}
 	}
 
-	document.addEventListener('astro:page-load', syncCategoryFromUrl);
-	// 如果沒有觸發 page-load，預備DOMContentLoaded
-	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', syncCategoryFromUrl);
-	} else {
-		syncCategoryFromUrl();
-	}
+	document.addEventListener('astro:page-load', syncCategory);
 </script>

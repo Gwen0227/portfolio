@@ -19,11 +19,10 @@ if (!project) {
 
 const { Content } = await render(project);
 
-// 🎯 取得所有專案列表與數量
 const allProjects = (await getCollection("projects")) || [];
 const productsTotal = allProjects.length;
 
-// 🎯 取得該作品的分類（轉為小寫），若無則預設為 "all"
+// 🎯 確保分類名稱乾淨（小寫）
 const activeCategory = (project.data?.category || "all").toLowerCase();
 ---
 
@@ -34,7 +33,7 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 	/>
 
 	<article class="project-detail">
-		<!-- 🎯 SVG 箭頭返回按鈕：帶上當前作品分類參數（/?category=...） -->
+		<!-- 🎯 返回按鈕：帶上 category 參數回到首頁 -->
 		<a 
 			href={`/?category=${activeCategory}`} 
 			id="back-link" 
@@ -77,17 +76,12 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 </BaseLayout>
 
 <script>
-	// 🎯 確保返回按鈕直接引導瀏覽器前往帶有 category 參數的首頁
 	function setupBackButton() {
-		const backLink = document.getElementById('back-link') as HTMLAnchorElement;
+		const backLink = document.getElementById('back-link');
 		if (!backLink) return;
 
-		// 複製節點避免在 View Transitions 下重複綁定事件
-		const newBackLink = backLink.cloneNode(true) as HTMLAnchorElement;
-		backLink.parentNode?.replaceChild(newBackLink, backLink);
-
-		newBackLink.addEventListener('click', (e) => {
-			const targetUrl = newBackLink.getAttribute('href');
+		backLink.addEventListener('click', (e) => {
+			const targetUrl = backLink.getAttribute('href');
 			if (targetUrl) {
 				e.preventDefault();
 				window.location.href = targetUrl;
@@ -100,14 +94,12 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 </script>
 
 <style>
-	/* 🎯 主容器：100% 貼合外層 Layout 的左右留白邊界 */
 	.project-detail {
 		width: 100%;
 		margin: 1.5rem 0 6rem;
 		box-sizing: border-box;
 	}
 
-	/* 🎯 箭頭返回按鈕樣式 */
 	.back-btn {
 		display: inline-flex;
 		align-items: center;
@@ -126,7 +118,7 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 	.back-btn:hover {
 		color: #000000;
 		background-color: #f2f2f2;
-		transform: translateX(-4px); /* Hover 時微向左滑動 */
+		transform: translateX(-4px);
 	}
 
 	.back-btn svg {
@@ -139,7 +131,6 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 		margin-bottom: 1.5rem;
 	}
 
-	/* 🎯 文章主標題：使用 !important 確保字體能順利放大 */
 	.main-title {
 		font-size: 3.2rem !important;
 		font-weight: 500 !important;
@@ -149,7 +140,6 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 		letter-spacing: -0.02em !important;
 	}
 
-	/* 🎯 封面大圖容器 (16:9 比例) */
 	.featured-image {
 		width: 100%;
 		aspect-ratio: 16 / 9;
@@ -171,7 +161,6 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 		margin-bottom: 0;
 	}
 
-	/* 🎯 Markdown 內文裡的圖片樣式 */
 	.prose :global(img) {
 		width: 100%;
 		height: auto;
@@ -189,7 +178,6 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 		filter: blur(0);
 	}
 
-	/* 🎯 Markdown 內文排版 (.prose) */
 	.prose {
 		width: 100%;
 		color: #222222;
@@ -197,7 +185,6 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 		line-height: 1.85;
 	}
 
-	/* 🎯 Markdown 內文裡的大標題 (h1) 與中標題 (h2) 放大調整 */
 	.prose :global(h1) {
 		font-size: 2.5rem !important;
 		font-weight: 700 !important;
@@ -224,7 +211,6 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 		margin-bottom: 0.75rem !important;
 	}
 
-	/* 🖤 獨立的黑色斜線裝飾元素 */
 	.prose :global(hr.slash) {
 		border: none;
 		outline: none;
@@ -236,14 +222,12 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 		transform-origin: left center;
 	}
 
-	/* 段落內文 */
 	.prose :global(p) {
 		margin-bottom: 1.5rem;
 		text-align: justify;
 		word-break: break-word;
 	}
 
-	/* 圖說（灰色小字） */
 	.prose :global(figcaption),
 	.prose :global(p img + em),
 	.prose :global(p img + br + em),
@@ -258,7 +242,6 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 		letter-spacing: 0.02em;
 	}
 
-	/* 清單樣式 */
 	.prose :global(ul), 
 	.prose :global(ol) {
 		margin-left: 1.2rem;
@@ -269,7 +252,6 @@ const activeCategory = (project.data?.category || "all").toLowerCase();
 		margin-bottom: 0.4rem;
 	}
 
-	/* 📱 手機版調整 */
 	@media (max-width: 768px) {
 		.main-title {
 			font-size: 2rem !important;
