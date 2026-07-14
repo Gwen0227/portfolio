@@ -15,8 +15,11 @@ const allProjects = await getCollection("projects");
 
   <section class="product-grid" id="product-grid">
     {allProjects.map((project) => (
-      <div data-card-category={(project.data.category || "").toLowerCase()}>
-        <ProductCard project={project} />
+      <div 
+        class="card-item-wrapper" 
+        data-card-category={(project.data.category || "Visual").toLowerCase()}
+      >
+        <ProductCard product={project} />
       </div>
     ))}
   </section>
@@ -24,17 +27,20 @@ const allProjects = await getCollection("projects");
 
 <script>
   function handleCategoryFilter() {
-    // 1. 讀取當前 URL 的 category 參數
+    // 1. 從網址列取得當前的 category 參數 (例: /?category=brand)
     const urlParams = new URLSearchParams(window.location.search);
-    const category = (urlParams.get("category") || "all").toLowerCase();
+    const rawCategory = urlParams.get("category") || "all";
+    const currentCategory = rawCategory.trim().toLowerCase();
 
-    // 2. 篩選卡片
+    // 2. 抓取所有包裹卡片的外層容器
     const cards = document.querySelectorAll("[data-card-category]");
     let visibleCount = 0;
 
     cards.forEach((card) => {
-      const cardCat = card.getAttribute("data-card-category") || "";
-      if (category === "all" || cardCat === category) {
+      const cardCat = (card.getAttribute("data-card-category") || "").trim().toLowerCase();
+
+      // 如果是 all 或是分類吻合，就顯示，否則隱藏
+      if (currentCategory === "all" || cardCat === currentCategory) {
         (card as HTMLElement).style.display = "";
         visibleCount++;
       } else {
@@ -42,25 +48,25 @@ const allProjects = await getCollection("projects");
       }
     });
 
-    // 3. 高亮對應的分類按鈕
+    // 3. 同步高亮 Header 上的對應分類按鈕
     const buttons = document.querySelectorAll(".categories a, .categories button");
     buttons.forEach((btn) => {
-      const btnFilter = (btn.getAttribute("data-filter") || "").toLowerCase();
-      if (btnFilter === category) {
+      const btnFilter = (btn.getAttribute("data-filter") || "").trim().toLowerCase();
+      if (btnFilter === currentCategory) {
         btn.classList.add("active");
       } else {
         btn.classList.remove("active");
       }
     });
 
-    // 4. 更新項目總數顯示（如果有 count 標籤）
+    // 4. 更新項目總數
     const countEl = document.querySelector(".count");
     if (countEl) {
       countEl.textContent = `${visibleCount} Projects`;
     }
   }
 
-  // 第一次進入頁面與 Astro 轉場時執行
+  // 第一次載入與 Astro 頁面切換、瀏覽器上一頁/下一頁時執行
   handleCategoryFilter();
   document.addEventListener("astro:page-load", handleCategoryFilter);
   document.addEventListener("astro:after-swap", handleCategoryFilter);
@@ -73,5 +79,9 @@ const allProjects = await getCollection("projects");
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 2rem;
     margin-top: 2rem;
+  }
+
+  .card-item-wrapper {
+    width: 100%;
   }
 </style>

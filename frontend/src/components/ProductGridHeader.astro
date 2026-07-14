@@ -22,12 +22,14 @@ const categories = [
 	<header class="project-filter">
 		<div class="categories">
 			{categories.map((cat) => {
-				const isActive = cat.id.toLowerCase() === activeCategory.toLowerCase();
-				const href = cat.id.toLowerCase() === "all" ? "/" : `/?category=${cat.id.toLowerCase()}`;
+				const catId = cat.id.toLowerCase();
+				const isActive = catId === activeCategory.toLowerCase();
+				const href = catId === "all" ? "/" : `/?category=${catId}`;
 				
 				return (
 					<a 
 						href={href} 
+						data-filter={catId}
 						class={`category-btn ${isActive ? "active" : ""}`}
 					>
 						<TextSlider content={cat.label} />
