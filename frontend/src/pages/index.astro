@@ -29,7 +29,7 @@ const allProjects = await getCollection("projects");
 	function filterCategory(categoryName) {
 		const targetCategory = (categoryName || "all").trim().toLowerCase();
 
-		// 1. 切換卡片顯示（不破壞原本的 CSS 排版）
+		// 1. 用 CSS 自訂屬性控制隱藏與顯示，不干擾原生 CSS Grid 佈局
 		const cards = document.querySelectorAll("[data-card-category]");
 		let visibleCount = 0;
 
@@ -37,14 +37,14 @@ const allProjects = await getCollection("projects");
 			const cardCat = (card.getAttribute("data-card-category") || "").trim().toLowerCase();
 
 			if (targetCategory === "all" || cardCat === targetCategory) {
-				card.style.display = ""; // 恢復 CSS 排版
+				card.removeAttribute("data-hidden");
 				visibleCount++;
 			} else {
-				card.style.display = "none";
+				card.setAttribute("data-hidden", "true");
 			}
 		});
 
-		// 2. 高亮目前選中的分類按鈕
+		// 2. 高亮選中的分類按鈕
 		const buttons = document.querySelectorAll(".categories a, .categories button");
 		buttons.forEach((btn) => {
 			const btnFilter = (btn.getAttribute("data-filter") || "").trim().toLowerCase();
@@ -63,12 +63,26 @@ const allProjects = await getCollection("projects");
 	}
 
 	function initFilterSystem() {
-		// 讀取 URL 參數，還原分類
+		// 優先讀取 sessionStorage 紀錄的分類
+		const savedCategory = sessionStorage.getItem("activeCategory");
 		const urlParams = new URLSearchParams(window.location.search);
-		const initialCategory = urlParams.get("category") || "all";
-		filterCategory(initialCategory);
+		const currentCategory = savedCategory || urlParams.get("category") || "all";
 
-		// 分類按鈕點擊攔截
+		filterCategory(currentCategory);
+
+		// 還原剛才點擊作品時的「捲軸高度」
+		const savedScrollPos = sessionStorage.getItem("scrollPosition");
+		if (savedScrollPos) {
+			setTimeout(() => {
+				window.scrollTo({
+					top: parseInt(savedScrollPos, 10),
+					behavior: "instant"
+				});
+				sessionStorage.removeItem("scrollPosition");
+			}, 50);
+		}
+
+		// 分類按鈕點擊事件
 		const categoryNav = document.querySelector(".categories");
 		if (categoryNav) {
 			categoryNav.addEventListener("click", (e) => {
@@ -76,20 +90,32 @@ const allProjects = await getCollection("projects");
 				if (!targetLink) return;
 
 				e.preventDefault();
-
 				const selectedCat = targetLink.getAttribute("data-filter") || "all";
+
+				sessionStorage.setItem("activeCategory", selectedCat);
+
 				const newUrl = selectedCat === "all" ? "/" : `/?category=${selectedCat}`;
 				window.history.pushState({ category: selectedCat }, "", newUrl);
 
 				filterCategory(selectedCat);
 			});
 		}
+
+		// 點擊作品卡片時，記錄目前的捲軸高度
+		const projectLinks = document.querySelectorAll(".product-grid a");
+		projectLinks.forEach((link) => {
+			link.addEventListener("click", () => {
+				sessionStorage.setItem("scrollPosition", window.scrollY.toString());
+			});
+		});
 	}
 
-	// 監聽歷史紀錄返回（上一頁/下一頁）
+	// 監聽歷史紀錄變更 (上一頁/下一頁)
 	window.addEventListener("popstate", () => {
 		const urlParams = new URLSearchParams(window.location.search);
-		filterCategory(urlParams.get("category") || "all");
+		const cat = urlParams.get("category") || "all";
+		sessionStorage.setItem("activeCategory", cat);
+		filterCategory(cat);
 	});
 
 	initFilterSystem();
@@ -97,10 +123,11 @@ const allProjects = await getCollection("projects");
 </script>
 
 <style>
+	/* 🖥️ 電腦版與預設：視窗最大時一行 6 張圖 */
 	.product-grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-		gap: 2rem;
+		grid-template-columns: repeat(6, 1fr);
+		gap: 1.5rem;
 		margin-top: 2rem;
 		margin-bottom: 4rem;
 		width: 100%;
@@ -110,7 +137,20 @@ const allProjects = await getCollection("projects");
 		width: 100%;
 	}
 
-	/* 📱 手機版：維持一行 3 張圖，並適度調整間距 */
+	/* 被過濾隱藏的卡片 */
+	.card-item-wrapper[data-hidden="true"] {
+		display: none !important;
+	}
+
+	/* 💻 平板螢幕 (1024px 以下)：一行 4 張圖 */
+	@media (max-width: 1024px) {
+		.product-grid {
+			grid-template-columns: repeat(4, 1fr);
+			gap: 1.2rem;
+		}
+	}
+
+	/* 📱 手機版螢幕 (768px 以下)：強制保持一行 3 張圖 */
 	@media (max-width: 768px) {
 		.product-grid {
 			grid-template-columns: repeat(3, 1fr) !important;

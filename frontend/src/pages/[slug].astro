@@ -79,10 +79,14 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 		if (!btn) return;
 
 		btn.addEventListener('click', (e) => {
-			if (document.referrer && document.referrer.includes(window.location.host)) {
-				e.preventDefault();
-				history.back();
-			}
+			e.preventDefault();
+			
+			// 讀取暫存的分類
+			const savedCat = sessionStorage.getItem('activeCategory') || 'all';
+			const targetUrl = savedCat === 'all' ? '/' : `/?category=${savedCat}`;
+			
+			// 返回至上一頁該分類
+			window.location.href = targetUrl;
 		});
 	}
 
