@@ -11,31 +11,30 @@
     const preloader = document.getElementById("preloader");
     if (!preloader) return;
 
-    const hidePreloader = () => {
-      if (preloader.classList.contains("is-hidden")) return;
+    const hide = () => {
       preloader.classList.add("is-hidden");
       setTimeout(() => {
         preloader.style.display = "none";
-      }, 500);
+      }, 400);
     };
 
-    // 🎯 1 秒超時強制關閉防爆，避免圖片 404 時卡住畫面
-    const forceHideTimer = setTimeout(hidePreloader, 1000);
+    // 🎯 超時防護：不論圖片有沒有破圖，最長只等 800ms 強制關閉 Preloader
+    const timer = setTimeout(hide, 800);
 
     if (document.readyState === "complete") {
-      clearTimeout(forceHideTimer);
-      hidePreloader();
+      clearTimeout(timer);
+      hide();
     } else {
       window.addEventListener("load", () => {
-        clearTimeout(forceHideTimer);
-        hidePreloader();
+        clearTimeout(timer);
+        hide();
       }, { once: true });
     }
   }
 
+  // 執行並綁定 Astro 生命週期
   setupPreloader();
   document.addEventListener("astro:page-load", setupPreloader);
-  document.addEventListener("astro:after-swap", setupPreloader);
 </script>
 
 <style>
@@ -50,10 +49,10 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    transition: opacity 0.4s ease, visibility 0.4s ease;
-    pointer-events: auto;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
   }
 
+  /* 🎯 關鍵：隱藏後強制解除所有阻擋 */
   .preloader-overlay.is-hidden {
     opacity: 0;
     visibility: hidden;
