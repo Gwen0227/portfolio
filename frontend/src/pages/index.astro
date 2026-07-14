@@ -103,24 +103,29 @@ const allProjects = await getCollection("projects");
 </script>
 
 <style>
-  .product-grid {
-    display: grid;
-    /* 預設（電腦版）：自動滿版，每張圖最小 300px */
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
-  }
+	/* 1. 確保卡片外容器採用 flex/grid 來撐開高度，防止 Footer 貼上去或位移 */
+	#product-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+		gap: 2rem;
+		margin-top: 2rem;
+		margin-bottom: 4rem; /* 增加底部留白，避免 Footer 黏在一起 */
+		width: 100%;
+		clear: both;
+	}
 
-  .card-item-wrapper {
-    width: 100%;
-  }
+	.card-item-wrapper {
+		width: 100%;
+		box-sizing: border-box;
+	}
 
-  /* 📱 手機版（螢幕寬度 768px 以下）：強制保持一行 3 張圖 */
-  @media (max-width: 768px) {
-    .product-grid {
-      grid-template-columns: repeat(3, 1fr) !important;
-      gap: 0.5rem; /* 縮小手機版的圖案間距，避免擠壓 */
-      margin-top: 1rem;
-    }
-  }
+	/* 2. 📱 手機版（768px 以下）：強制保持一行 3 張圖 */
+	@media (max-width: 768px) {
+		#product-grid {
+			grid-template-columns: repeat(3, 1fr) !important;
+			gap: 0.75rem !important;
+			margin-top: 1rem;
+			margin-bottom: 3rem;
+		}
+	}
 </style>
