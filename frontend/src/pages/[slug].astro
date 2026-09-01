@@ -32,28 +32,27 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 	/>
 
 	<article class="project-detail">
-		<a 
-			href="/" 
-			id="back-btn" 
-			class="back-btn" 
-			aria-label="Back to previous page"
-		>
-			<svg 
-				width="20" 
-				height="20" 
-				viewBox="0 0 24 24" 
-				fill="none" 
-				stroke="currentColor" 
-				stroke-width="2" 
-				stroke-linecap="round" 
-				stroke-linejoin="round"
-			>
-				<line x1="19" y1="12" x2="5" y2="12"></line>
-				<polyline points="12 19 5 12 12 5"></polyline>
-			</svg>
-		</a>
-
 		<header class="project-header">
+			<a 
+				href="/" 
+				id="back-btn" 
+				class="back-btn" 
+				aria-label="Back to previous page"
+			>
+				<svg 
+					width="20" 
+					height="20" 
+					viewBox="0 0 24 24" 
+					fill="none" 
+					stroke="currentColor" 
+					stroke-width="2" 
+					stroke-linecap="round" 
+					stroke-linejoin="round"
+				>
+					<line x1="19" y1="12" x2="5" y2="12"></line>
+					<polyline points="12 19 5 12 12 5"></polyline>
+				</svg>
+			</a>
 			<h1 class="main-title">{project.data.title}</h1>
 		</header>
 
@@ -101,6 +100,13 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 		box-sizing: border-box;
 	}
 
+	.project-header {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+		margin-bottom: 1.5rem;
+	}
+
 	.back-btn {
 		display: inline-flex;
 		align-items: center;
@@ -111,7 +117,8 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 		background: transparent;
 		border-radius: 50%;
 		text-decoration: none;
-		margin-bottom: 1.2rem;
+		margin-bottom: 0 !important;
+		flex-shrink: 0;
 		transition: all 0.2s ease;
 		cursor: pointer;
 	}
@@ -126,10 +133,6 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 		width: 20px;
 		height: 20px;
 		stroke: currentColor;
-	}
-
-	.project-header {
-		margin-bottom: 1.5rem;
 	}
 
 	.main-title {
