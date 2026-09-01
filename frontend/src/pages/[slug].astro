@@ -114,7 +114,7 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 		width: 36px;
 		height: 36px;
 		color: #222222;
-		background: transparent;
+		background-color: #f2f2f2; /* 預設淺灰底 */
 		border-radius: 50%;
 		text-decoration: none;
 		margin-bottom: 0 !important;
@@ -124,8 +124,8 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 	}
 
 	.back-btn:hover {
-		color: #000000;
-		background-color: #f2f2f2;
+		color: #ffffff;            /* Hover 時圖示改白字 */
+		background-color: #000000; /* Hover 時改黑底 */
 		transform: translateX(-4px);
 	}
 
