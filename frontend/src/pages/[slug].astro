@@ -32,27 +32,28 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 	/>
 
 	<article class="project-detail">
-		<header class="project-header">
-			<a 
-				href="/" 
-				id="back-btn" 
-				class="back-btn" 
-				aria-label="Back to previous page"
+		<a 
+			href="/" 
+			id="back-btn" 
+			class="back-btn" 
+			aria-label="Back to previous page"
+		>
+			<svg 
+				width="20" 
+				height="20" 
+				viewBox="0 0 24 24" 
+				fill="none" 
+				stroke="currentColor" 
+				stroke-width="2" 
+				stroke-linecap="round" 
+				stroke-linejoin="round"
 			>
-				<svg 
-					width="20" 
-					height="20" 
-					viewBox="0 0 24 24" 
-					fill="none" 
-					stroke="currentColor" 
-					stroke-width="2" 
-					stroke-linecap="round" 
-					stroke-linejoin="round"
-				>
-					<line x1="19" y1="12" x2="5" y2="12"></line>
-					<polyline points="12 19 5 12 12 5"></polyline>
-				</svg>
-			</a>
+				<line x1="19" y1="12" x2="5" y2="12"></line>
+				<polyline points="12 19 5 12 12 5"></polyline>
+			</svg>
+		</a>
+
+		<header class="project-header">
 			<h1 class="main-title">{project.data.title}</h1>
 		</header>
 
@@ -100,13 +101,6 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 		box-sizing: border-box;
 	}
 
-	.project-header {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		margin-bottom: 1.5rem;
-	}
-
 	.back-btn {
 		display: inline-flex;
 		align-items: center;
@@ -114,18 +108,17 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 		width: 36px;
 		height: 36px;
 		color: #222222;
-		background: transparent;
+		background-color: #f2f2f2;
 		border-radius: 50%;
 		text-decoration: none;
-		margin-bottom: 0 !important;
-		flex-shrink: 0;
+		margin-bottom: 1.2rem;
 		transition: all 0.2s ease;
 		cursor: pointer;
 	}
 
 	.back-btn:hover {
-		color: #000000;
-		background-color: #f2f2f2;
+		color: #ffffff;
+		background-color: #000000;
 		transform: translateX(-4px);
 	}
 
@@ -135,9 +128,13 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 		stroke: currentColor;
 	}
 
+	.project-header {
+		margin-bottom: 1.5rem;
+	}
+
 	.main-title {
 		font-size: 2rem !important;
-		font-weight: 500 !important;
+		font-weight: 450 !important;
 		color: #000000 !important;
 		margin: 0 !important;
 		line-height: 1.2 !important;
@@ -258,7 +255,7 @@ const defaultCategory = (project.data?.category || "all").toLowerCase();
 
 	@media (max-width: 768px) {
 		.main-title {
-			font-size: 2rem !important;
+			font-size: 1.6rem !important;
 		}
 
 		.prose :global(h1) {
