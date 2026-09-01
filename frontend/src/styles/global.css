@@ -233,7 +233,7 @@ dd {
 }
 
 .title-header--initial {
-	font-size: var(1.5rem);
+	font-size: var(--font-size-xl);
 
 	@media screen and (min-width: 50em) {
 		grid-template-columns: 20vw 1fr auto;
