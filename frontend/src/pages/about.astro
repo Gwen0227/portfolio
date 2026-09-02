@@ -6,27 +6,38 @@ const title = "About | Chen-Pei Jyuan";
 
 <BaseLayout title={title}>
 	<section class="content">
-		<h1>About</h1>
+		<!-- 🎯 文字與大頭照雙欄區塊 -->
+		<div class="about-hero">
+			<div class="about-text">
+				<h1>About</h1>
 
-		<p class="intro">
-			Hi , 我是沛涓 
-		</p>
+				<p class="intro">
+					Hi , 我是沛涓 
+				</p>
 
-		<p class="desc">
-			擅長在不同品牌調性中體現獨特美感，作品涵蓋品牌識別重塑、行銷視覺、書籍封面、活動主視覺及實體包裝設計。具備5年以上設計經驗，從前期概念提案、視覺統籌到後期各通路素材的設計能力。
+				<p class="desc">
+					擅長在不同品牌調性中體現獨特美感，作品涵蓋品牌識別重塑、行銷視覺、書籍封面、活動主視覺及實體包裝設計。具備5年以上設計經驗，從前期概念提案、視覺統籌到後期各通路素材的設計能力。
+				</p>
+			</div>
 
-		</p>
+			<div class="avatar-wrapper">
+				<img 
+					src="/images/profile.jpg" 
+					alt="Chen-Pei Jyuan" 
+					class="avatar-img protected-img" 
+				/>
+			</div>
+		</div>
 
 		<div class="info">
-
-            <div>
+			<div>
 				<h2>Education</h2>
 
 				<ul>
 					<li>2014 / 9月 - 2018 / 6月 </li>
-<li>國立台北教育大學 藝術與造形設計學系</li>
-<li>Bachelor of Fine Arts, B.F.A. 藝術學士 學位 | 畢業</li>
-<li>主修 藝術史 / 藝術理論 / 視覺設計</li>
+					<li>國立台北教育大學 藝術與造形設計學系</li>
+					<li>Bachelor of Fine Arts, B.F.A. 藝術學士 學位 | 畢業</li>
+					<li>主修 藝術史 / 藝術理論 / 視覺設計</li>
 				</ul>
 			</div>
 
@@ -49,7 +60,7 @@ const title = "About | Chen-Pei Jyuan";
 					<li>Adobe Photoshop</li>
 					<li>Adobe InDesign</li>
 					<li>Figma</li>
-                    <li>Mac OS</li>
+					<li>Mac OS</li>
 				</ul>
 			</div>
 		</div>
@@ -62,6 +73,19 @@ const title = "About | Chen-Pei Jyuan";
 		width: 100%;
 		margin: 1.5rem 0 6rem;
 		box-sizing: border-box;
+	}
+
+	/* 🎯 文字與照片排版 */
+	.about-hero {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		gap: 3rem;
+		margin-bottom: 2.5rem;
+	}
+
+	.about-text {
+		flex: 1;
 	}
 
 	h1 {
@@ -83,7 +107,32 @@ const title = "About | Chen-Pei Jyuan";
 		font-size: 0.95rem;
 		color: #444444;
 		line-height: 1.85;
-		margin-bottom: 2.5rem;
+		margin: 0;
+	}
+
+	/* 🎯 響應式圓形照片容器 (隨視窗比例縮放) */
+	.avatar-wrapper {
+		flex-shrink: 0;
+		width: clamp(140px, 18vw, 220px);
+		height: clamp(140px, 18vw, 220px);
+		border-radius: 50%;
+		overflow: hidden;
+		background-color: #f9f9f9;
+	}
+
+	.avatar-img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+		user-select: none;
+		-webkit-user-drag: none;
+		filter: blur(0.6px);
+		transition: filter 0.3s ease;
+	}
+
+	.avatar-img:hover {
+		filter: blur(0);
 	}
 
 	.info {
@@ -112,6 +161,17 @@ const title = "About | Chen-Pei Jyuan";
 	}
 
 	@media (max-width: 768px) {
+		.about-hero {
+			flex-direction: column-reverse;
+			align-items: flex-start;
+			gap: 2rem;
+		}
+
+		.avatar-wrapper {
+			width: clamp(120px, 35vw, 180px);
+			height: clamp(120px, 35vw, 180px);
+		}
+
 		h1 {
 			font-size: 1.3rem;
 		}
