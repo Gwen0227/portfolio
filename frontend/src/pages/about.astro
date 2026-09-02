@@ -6,7 +6,6 @@ const title = "About | Chen-Pei Jyuan";
 
 <BaseLayout title={title}>
 	<section class="content">
-		<!-- 🎯 文字與大頭照雙欄區塊 -->
 		<div class="about-hero">
 			<div class="about-text">
 				<h1>About</h1>
@@ -80,14 +79,14 @@ const title = "About | Chen-Pei Jyuan";
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
-		gap: 4rem;
+		gap: 3rem;
 		margin-bottom: 3rem;
 		width: 100%;
 	}
 
 	.about-text {
-		flex: 1;
-		min-width: 0; /* 避免 flex 子元素擠壓溢出 */
+		flex: 1 1 60%; /* 佔用剩餘空間，讓文字彈性擴展 */
+		min-width: 0;  /* 防止文字溢出 */
 	}
 
 	h1 {
@@ -114,14 +113,15 @@ const title = "About | Chen-Pei Jyuan";
 
 	/* 🎯 彈性變寬的圓形照片容器 */
 	.avatar-wrapper {
-		flex-shrink: 0;
-		/* 👈 關鍵修改：允許在大視窗下隨螢幕放寬（最高可達 380px） */
-		width: clamp(160px, 22vw, 380px);
-		aspect-ratio: 1 / 1;
-		height: auto;
+		flex: 0 0 auto;
+		width: 28%;            /* 👈 關鍵：直接用容器百分比，視窗拉大時圖片一定會跟著拉大 */
+		min-width: 160px;      /* 最小邊長 */
+		max-width: 360px;      /* 最大邊長（可依需求調整，例如 400px） */
+		aspect-ratio: 1 / 1;   /* 保持正圓形 */
 		border-radius: 50%;
 		overflow: hidden;
 		background-color: #f9f9f9;
+		margin-left: auto;     /* 👈 強制貼緊右側對齊 */
 	}
 
 	.avatar-img {
@@ -173,9 +173,9 @@ const title = "About | Chen-Pei Jyuan";
 		}
 
 		.avatar-wrapper {
-			width: clamp(120px, 32vw, 180px);
-			align-self: flex-end;
-			margin-left: auto;
+			width: 35%;
+			min-width: 120px;
+			max-width: 180px;
 			margin-bottom: 0.5rem;
 		}
 
