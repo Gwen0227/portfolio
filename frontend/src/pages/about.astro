@@ -80,12 +80,14 @@ const title = "About | Chen-Pei Jyuan";
 		display: flex;
 		justify-content: space-between;
 		align-items: flex-start;
-		gap: 3rem;
-		margin-bottom: 2.5rem;
+		gap: 4rem;
+		margin-bottom: 3rem;
+		width: 100%;
 	}
 
 	.about-text {
 		flex: 1;
+		min-width: 0; /* 避免 flex 子元素擠壓溢出 */
 	}
 
 	h1 {
@@ -110,10 +112,11 @@ const title = "About | Chen-Pei Jyuan";
 		margin: 0;
 	}
 
-	/* 🎯 響應式圓形照片容器 */
+	/* 🎯 彈性變寬的圓形照片容器 */
 	.avatar-wrapper {
 		flex-shrink: 0;
-		width: clamp(140px, 18vw, 220px);
+		/* 👈 關鍵修改：允許在大視窗下隨螢幕放寬（最高可達 380px） */
+		width: clamp(160px, 22vw, 380px);
 		aspect-ratio: 1 / 1;
 		height: auto;
 		border-radius: 50%;
@@ -161,18 +164,18 @@ const title = "About | Chen-Pei Jyuan";
 		line-height: 2;
 	}
 
-	/* 📱 手機與窄螢幕修復 */
+	/* 📱 手機與窄螢幕 */
 	@media (max-width: 768px) {
 		.about-hero {
-			flex-direction: column-reverse; /* 文字在下，照片在上 */
-			align-items: stretch;           /* 讓子元素填滿寬度以便靠右 */
+			flex-direction: column-reverse;
+			align-items: stretch;
 			gap: 1.5rem;
 		}
 
 		.avatar-wrapper {
-			width: clamp(120px, 32vw, 160px);
-			align-self: flex-end;            /* 👈 強制靠右對齊 */
-			margin-left: auto;               /* 👈 輔助推至最右側 */
+			width: clamp(120px, 32vw, 180px);
+			align-self: flex-end;
+			margin-left: auto;
 			margin-bottom: 0.5rem;
 		}
 
