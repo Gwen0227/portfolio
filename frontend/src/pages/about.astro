@@ -110,11 +110,12 @@ const title = "About | Chen-Pei Jyuan";
 		margin: 0;
 	}
 
-	/* 🎯 響應式圓形照片容器 (隨視窗比例縮放) */
+	/* 🎯 響應式圓形照片容器 */
 	.avatar-wrapper {
 		flex-shrink: 0;
 		width: clamp(140px, 18vw, 220px);
-		height: clamp(140px, 18vw, 220px);
+		aspect-ratio: 1 / 1;
+		height: auto;
 		border-radius: 50%;
 		overflow: hidden;
 		background-color: #f9f9f9;
@@ -160,20 +161,27 @@ const title = "About | Chen-Pei Jyuan";
 		line-height: 2;
 	}
 
+	/* 📱 手機與窄螢幕修復 */
 	@media (max-width: 768px) {
 		.about-hero {
-			flex-direction: column-reverse;
-			align-items: flex-start;
-			gap: 2rem;
+			flex-direction: column-reverse; /* 文字在下，照片在上 */
+			align-items: stretch;           /* 讓子元素填滿寬度以便靠右 */
+			gap: 1.5rem;
 		}
 
 		.avatar-wrapper {
-			width: clamp(120px, 35vw, 180px);
-			height: clamp(120px, 35vw, 180px);
+			width: clamp(120px, 32vw, 160px);
+			align-self: flex-end;            /* 👈 強制靠右對齊 */
+			margin-left: auto;               /* 👈 輔助推至最右側 */
+			margin-bottom: 0.5rem;
+		}
+
+		.about-text {
+			width: 100%;
 		}
 
 		h1 {
-			font-size: 1.3rem;
+			font-size: 1.5rem;
 		}
 
 		.info {
