@@ -6,6 +6,7 @@ const title = "About | Chen-Pei Jyuan";
 
 <BaseLayout title={title}>
 	<section class="content">
+		<!-- 🎯 文字與大頭照雙欄區塊 -->
 		<div class="about-hero">
 			<div class="about-text">
 				<h1>About</h1>
@@ -73,18 +74,20 @@ const title = "About | Chen-Pei Jyuan";
 		box-sizing: border-box;
 	}
 
-	/* 🎯 關鍵修正：改用 Grid 徹底撐開左右兩端 */
+	/* 🎯 使用 Flexbox 確保左側文字區塊完全吃滿剩餘空間 */
 	.about-hero {
-		display: grid;
-		grid-template-columns: minmax(300px, 1fr) auto;
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
 		gap: 3rem;
-		align-items: start;
 		margin-bottom: 3rem;
 		width: 100%;
 	}
 
 	.about-text {
+		flex: 1 1 auto;      /* 👈 強制文字區塊隨視窗伸縮 */
 		width: 100%;
+		max-width: 100%;     /* 👈 取消固定寬度限制，讓文字自動順排 */
 	}
 
 	h1 {
@@ -107,18 +110,21 @@ const title = "About | Chen-Pei Jyuan";
 		color: #444444;
 		line-height: 1.85;
 		margin: 0;
+		width: 100%;
+		max-width: 100%;    /* 👈 確保段落文字會一路排到圓形邊界 */
 	}
 
-	/* 🎯 關鍵修正：圖片邊長會隨視窗寬度變化（最寬可達 420px），且必定貼緊最右側 */
+	/* 🎯 圓形照片：固定佔據視窗比例（最高 400px），並貼緊最右側 */
 	.avatar-wrapper {
-		justify-self: end;
-		width: 25vw;
-		min-width: 180px;
-		max-width: 420px;
+		flex: 0 0 auto;
+		width: 22vw;
+		min-width: 160px;
+		max-width: 400px;
 		aspect-ratio: 1 / 1;
 		border-radius: 50%;
 		overflow: hidden;
 		background-color: #f9f9f9;
+		margin-left: auto;
 	}
 
 	.avatar-img {
@@ -164,15 +170,16 @@ const title = "About | Chen-Pei Jyuan";
 	/* 📱 手機與窄螢幕 */
 	@media (max-width: 768px) {
 		.about-hero {
-			grid-template-columns: 1fr;
+			flex-direction: column-reverse;
+			align-items: stretch;
 			gap: 1.5rem;
 		}
 
 		.avatar-wrapper {
-			grid-row: 1; /* 手機版排在最上方 */
 			width: 35vw;
 			min-width: 130px;
 			max-width: 180px;
+			margin-bottom: 0.5rem;
 		}
 
 		h1 {
