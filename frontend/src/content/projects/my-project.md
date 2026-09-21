@@ -24,7 +24,7 @@ tech:
 
 ![第二張作品圖片](/images/brand/0000.png)
 
-![第三張作品圖片](/images/brand/0001.png)
+![第三張作品圖片](/images/brand/0000.png)
 
 </div>
 _這是第二張與第三張圖片的共同圖說文字（選填）_
