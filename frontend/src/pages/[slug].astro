@@ -36,12 +36,17 @@ const activeCategory = project.data?.category || "all";
 
 	<article class="project-detail">
 
-		<!-- 專案標題 -->
+		<!-- ========================================
+		     專案標題
+		======================================== -->
 		<header class="project-header">
 			<h1 class="main-title">{project.data.title}</h1>
 		</header>
 
-		<!-- 封面 -->
+
+		<!-- ========================================
+		     封面
+		======================================== -->
 		{project.data.cover && (
 			<figure class="featured-image">
 				<img
@@ -52,13 +57,17 @@ const activeCategory = project.data?.category || "all";
 			</figure>
 		)}
 
-		<!-- Markdown / MDX 內容 -->
+
+		<!-- ========================================
+		     Markdown / MDX 內容
+		======================================== -->
 		<div class="prose">
 			<Content />
 		</div>
 
 	</article>
 </BaseLayout>
+
 
 <style>
 	/* ========================================
@@ -73,18 +82,21 @@ const activeCategory = project.data?.category || "all";
 
 
 	/* ========================================
-	   標題
+	   專案標題
 	======================================== */
 
 	.project-header {
+		width: 100%;
 		margin-bottom: 1.5rem;
 	}
 
 	.main-title {
+		width: 100%;
 		font-size: 3.2rem !important;
 		font-weight: 500 !important;
 		color: #000000 !important;
 		margin: 0 !important;
+		padding: 0 !important;
 		line-height: 1.2 !important;
 		letter-spacing: -0.02em !important;
 	}
@@ -98,9 +110,11 @@ const activeCategory = project.data?.category || "all";
 		width: 100%;
 		aspect-ratio: 16 / 9;
 		margin: 0 0 2.5rem 0;
+		padding: 0;
 		overflow: hidden;
 		background: #f9f9f9;
 		border-radius: 4px;
+		box-sizing: border-box;
 	}
 
 	.featured-image .protected-img {
@@ -108,11 +122,12 @@ const activeCategory = project.data?.category || "all";
 		height: 100%;
 		object-fit: cover;
 		display: block;
+		margin: 0;
+		padding: 0;
 		user-select: none;
 		-webkit-user-drag: none;
 		filter: blur(0.6px);
 		transition: filter 0.3s ease;
-		margin: 0;
 	}
 
 	.featured-image .protected-img:hover {
@@ -140,8 +155,20 @@ const activeCategory = project.data?.category || "all";
 	.prose :global(p) {
 		width: 100%;
 		margin: 0 0 1.5rem;
+		padding: 0;
 		text-align: justify;
 		word-break: break-word;
+		box-sizing: border-box;
+	}
+
+
+	/* ========================================
+	   文字段落
+	======================================== */
+
+	.prose :global(p:not(:has(> img))) {
+		width: 100%;
+		display: block;
 	}
 
 
@@ -150,58 +177,33 @@ const activeCategory = project.data?.category || "all";
 	======================================== */
 
 	/*
-		只有一張圖片的段落：
-		保持滿版
-	*/
+		Markdown：
 
-	.prose :global(p:has(> img:only-child)) {
-		width: 100%;
-		margin: 0 0 1.5rem;
-		display: block;
-	}
+		![圖片 1](...)
+		
+		![圖片 2](...)
 
+		Astro 會產生兩個 <p>。
 
-	/* ========================================
-	   連續圖片自動並排
-	======================================== */
-
-	/*
-		兩個連續的圖片 <p>：
-		在桌面版變成左右兩欄。
-	*/
-
-	.prose :global(p:has(> img:only-child) + p:has(> img:only-child)) {
-		margin-top: 0;
-	}
-
-	/*
-		第一張圖片段落
-	*/
-
-	.prose :global(
-		p:has(> img:only-child):not(:has(+ p:has(> img:only-child)))
-	) {
-		display: block;
-	}
-
-
-	/*
-		只要圖片段落後面還有圖片段落，
-		就讓兩張圖片使用 inline-block。
+		這裡把連續的圖片段落
+		變成兩欄。
 	*/
 
 	.prose :global(p:has(> img:only-child)) {
 		display: inline-block;
 		vertical-align: top;
 		width: calc(50% - 0.75rem);
-		margin-right: 1.5rem;
+		margin: 0 1.5rem 1.5rem 0;
+		padding: 0;
+		text-align: left;
 		box-sizing: border-box;
 	}
 
-	/*
-		每第二張圖片取消右邊距，
-		讓左右兩張剛好填滿。
-	*/
+
+	/* ========================================
+	   每組圖片中的偶數張
+	   取消右邊距
+	======================================== */
 
 	.prose :global(
 		p:has(> img:only-child) + p:has(> img:only-child)
@@ -217,9 +219,10 @@ const activeCategory = project.data?.category || "all";
 	.prose :global(p:has(> img:only-child) > img) {
 		display: block;
 		width: 100%;
-		height: auto;
 		max-width: 100%;
+		height: auto;
 		margin: 0;
+		padding: 0;
 		border-radius: 4px;
 		object-fit: cover;
 		box-sizing: border-box;
@@ -229,16 +232,49 @@ const activeCategory = project.data?.category || "all";
 		transition: filter 0.3s ease;
 	}
 
+
 	.prose :global(p:has(> img:only-child) > img:hover) {
 		filter: blur(0);
 	}
 
 
 	/* ========================================
-	   避免圖片後面的文字被並排影響
+	   非圖片段落後面的圖片
+	   確保重新開始一行
 	======================================== */
 
-	.prose :global(p:has(> img:only-child) + p:not(:has(> img:only-child))) {
+	.prose :global(
+		p:not(:has(> img)) + p:has(> img:only-child)
+	) {
+		clear: both;
+	}
+
+
+	/* ========================================
+	   圖片後面的普通文字
+	   重新開始一行
+	======================================== */
+
+	.prose :global(
+		p:has(> img:only-child) + p:not(:has(> img))
+	) {
+		clear: both;
+	}
+
+
+	/* ========================================
+	   圖片後的標題
+	======================================== */
+
+	.prose :global(
+		p:has(> img:only-child) + h1
+	),
+	.prose :global(
+		p:has(> img:only-child) + h2
+	),
+	.prose :global(
+		p:has(> img:only-child) + h3
+	) {
 		clear: both;
 	}
 
@@ -268,6 +304,7 @@ const activeCategory = project.data?.category || "all";
 		margin-top: 3.5rem !important;
 		margin-bottom: 1rem !important;
 		line-height: 1.25 !important;
+		clear: both;
 	}
 
 	.prose :global(h2) {
@@ -278,6 +315,7 @@ const activeCategory = project.data?.category || "all";
 		margin-top: 3rem !important;
 		margin-bottom: 0.75rem !important;
 		line-height: 1.35 !important;
+		clear: both;
 	}
 
 	.prose :global(h3) {
@@ -288,6 +326,7 @@ const activeCategory = project.data?.category || "all";
 		margin-top: 2rem !important;
 		margin-bottom: 0.75rem !important;
 		line-height: 1.35 !important;
+		clear: both;
 	}
 
 
@@ -305,6 +344,7 @@ const activeCategory = project.data?.category || "all";
 		margin: 1.5rem 0 2.2rem 0;
 		transform: rotate(-25deg);
 		transform-origin: left center;
+		clear: both;
 	}
 
 
@@ -312,15 +352,23 @@ const activeCategory = project.data?.category || "all";
 	   圖說
 	======================================== */
 
-	.prose :global(p:has(img) + p:has(em)) {
-		width: 100%;
+	/*
+		支援：
+
+		![圖片](...)
+
+		_圖說_
+	*/
+
+	.prose :global(p:has(> img:only-child) + p:has(> em)) {
 		display: block;
+		width: 100%;
 		margin-top: -0.5rem;
 		margin-bottom: 2.2rem;
 		clear: both;
 	}
 
-	.prose :global(p:has(img) + p:has(em) em) {
+	.prose :global(p:has(> img:only-child) + p:has(> em) em) {
 		font-style: normal;
 		font-size: 0.8rem !important;
 		color: #888888 !important;
@@ -334,7 +382,10 @@ const activeCategory = project.data?.category || "all";
 	======================================== */
 
 	.prose :global(figure) {
+		width: 100%;
 		margin: 0 0 2rem;
+		padding: 0;
+		clear: both;
 	}
 
 	.prose :global(figcaption) {
@@ -356,10 +407,38 @@ const activeCategory = project.data?.category || "all";
 		width: 100%;
 		margin-left: 1.2rem;
 		margin-bottom: 1.5rem;
+		clear: both;
 	}
 
 	.prose :global(li) {
 		margin-bottom: 0.4rem;
+	}
+
+
+	/* ========================================
+	   連結
+	======================================== */
+
+	.prose :global(a) {
+		word-break: break-word;
+	}
+
+
+	/* ========================================
+	   粗體
+	======================================== */
+
+	.prose :global(strong) {
+		font-weight: 700;
+	}
+
+
+	/* ========================================
+	   斜體
+	======================================== */
+
+	.prose :global(em) {
+		font-style: italic;
 	}
 
 
@@ -382,8 +461,15 @@ const activeCategory = project.data?.category || "all";
 			margin-top: 2rem !important;
 		}
 
+		.prose :global(h3) {
+			font-size: 1.1rem !important;
+			margin-top: 1.5rem !important;
+		}
 
-		/* 手機版所有圖片上下排列 */
+
+		/* ========================================
+		   手機版圖片全部上下排列
+		======================================== */
 
 		.prose :global(p:has(> img:only-child)) {
 			display: block;
