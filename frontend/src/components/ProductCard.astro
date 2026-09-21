@@ -15,33 +15,161 @@ const year = product.data.year || "2026";
 {mode === "zoom" ? (
 	<div class="product-card is-zoom-mode" data-zoom={product.data.cover}>
 		<div class="image-container">
-			<img src={product.data.cover} alt={product.data.title} loading="lazy" class="protected-img" />
+			<img
+				src={product.data.cover}
+				alt={product.data.title}
+				loading="lazy"
+				class="protected-img"
+			/>
 		</div>
+
 		<div class="project-info">
 			<h3>{product.data.title}</h3>
+
 			<div class="project-meta">
-				<span class="category-tag">{product.data.category || "Visual"}</span>
-				<span class="year-tag">/{year}</span>
+				<span class="category-tag">
+					{product.data.category || "Visual"}
+				</span>
+
+				<span class="year-tag">
+					/{year}
+				</span>
 			</div>
 		</div>
 	</div>
 ) : (
-	<a href={projectLink} class="product-card is-page-mode">
+	<a
+		href={projectLink}
+		class="product-card is-page-mode project-link"
+		data-project-link={projectLink}
+	>
 		<div class="image-container">
-			<img src={product.data.cover} alt={product.data.title} loading="lazy" class="protected-img" />
+			<img
+				src={product.data.cover}
+				alt={product.data.title}
+				loading="lazy"
+				class="protected-img"
+			/>
 		</div>
+
 		<div class="project-info">
 			<h3>{product.data.title}</h3>
+
 			<div class="project-meta">
-				<span class="category-tag">{product.data.category || "Visual"}</span>
-				<span class="year-tag">/{year}</span>
+				<span class="category-tag">
+					{product.data.category || "Visual"}
+				</span>
+
+				<span class="year-tag">
+					/{year}
+				</span>
 			</div>
 		</div>
 	</a>
 )}
 
+
+<script>
+	/**
+	 * =========================================================
+	 * 記錄進入作品之前的位置
+	 * =========================================================
+	 *
+	 * 使用者：
+	 *
+	 * 首頁
+	 * ↓
+	 * 選擇分類
+	 * ↓
+	 * 往下滑
+	 * ↓
+	 * 點作品
+	 *
+	 * 在這一瞬間記錄：
+	 *
+	 * 1. 原本 URL
+	 * 2. 原本 scrollY
+	 * 3. 原本分類
+	 */
+
+	function setupProjectLinks() {
+		const links =
+			document.querySelectorAll(
+				".project-link"
+			);
+
+		links.forEach((link) => {
+
+			/*
+			 * 使用 onclick 而不是 addEventListener，
+			 * 避免 Astro ClientRouter 重複綁定。
+			 */
+			(link as HTMLElement).onclick = () => {
+
+				/* -----------------------------------------
+				   記錄目前 URL
+				----------------------------------------- */
+
+				const currentUrl =
+					window.location.pathname +
+					window.location.search +
+					window.location.hash;
+
+
+				sessionStorage.setItem(
+					"projectReturnUrl",
+					currentUrl
+				);
+
+
+				/* -----------------------------------------
+				   記錄目前 Scroll
+				----------------------------------------- */
+
+				sessionStorage.setItem(
+					"projectReturnScrollY",
+					String(window.scrollY)
+				);
+
+
+				/* -----------------------------------------
+				   記錄目前分類
+				----------------------------------------- */
+
+				const activeCategory =
+					sessionStorage.getItem(
+						"activeCategory"
+					) || "all";
+
+
+				sessionStorage.setItem(
+					"projectReturnCategory",
+					activeCategory
+				);
+			};
+		});
+	}
+
+
+	/* 第一次載入 */
+
+	setupProjectLinks();
+
+
+	/* Astro ClientRouter / View Transitions */
+
+	document.addEventListener(
+		"astro:page-load",
+		setupProjectLinks
+	);
+</script>
+
+
 <style>
-	/* 基礎卡片樣式重置 */
+	/* ========================================
+	   基礎卡片樣式重置
+	======================================== */
+
 	.product-card,
 	.product-card *,
 	.product-card:hover,
@@ -52,110 +180,218 @@ const year = product.data.year || "2026";
 		border: none !important;
 	}
 
+
 	.product-card {
 		display: flex !important;
 		flex-direction: column !important;
+
 		width: 100% !important;
+
 		text-decoration: none !important;
+
 		color: #000000 !important;
+
 		opacity: 1 !important;
+
 		filter: none !important;
 	}
 
-	.is-zoom-mode { cursor: zoom-in; }
-	.is-page-mode { cursor: pointer; }
 
-	/* 圖片容器：設定黑色遮罩 */
+	.is-zoom-mode {
+		cursor: zoom-in;
+	}
+
+
+	.is-page-mode {
+		cursor: pointer;
+	}
+
+
+	/* ========================================
+	   圖片容器
+	======================================== */
+
 	.image-container {
 		width: 100% !important;
+
 		aspect-ratio: 1 / 1 !important;
+
 		height: auto !important;
+
 		overflow: hidden !important;
+
 		position: relative !important;
+
 		background: #ffffff !important;
+
 		opacity: 1 !important;
+
 		filter: none !important;
 	}
 
-	/* 🎯 黑色遮罩層 (預設顯示) */
+
+	/* ========================================
+	   黑色遮罩
+	======================================== */
+
 	.image-container::after {
 		content: "";
+
 		position: absolute;
+
 		top: 0;
 		left: 0;
+
 		width: 100%;
 		height: 100%;
-		background-color: rgba(0, 0, 0, 0.25); /* 黑色半透明，可調整 0.5 這個數字 */
+
+		background-color:
+			rgba(0, 0, 0, 0.25);
+
 		opacity: 1;
-		transition: opacity 0.3s ease; /* 遮罩淡出動畫 */
-		z-index: 1; /* 確保在圖片上方 */
+
+		transition:
+			opacity 0.3s ease;
+
+		z-index: 1;
 	}
 
-	/* 圖片基礎樣式 */
+
+	/* ========================================
+	   圖片
+	======================================== */
+
 	.protected-img {
 		width: 100% !important;
 		height: 100% !important;
+
 		object-fit: cover !important;
+
 		display: block !important;
+
 		opacity: 1 !important;
-		filter: blur(0.6px) brightness(1) contrast(1) !important;
-		transition: filter 0.3s ease;
+
+		filter:
+			blur(0.6px)
+			brightness(1)
+			contrast(1) !important;
+
+		transition:
+			filter 0.3s ease;
+
 		user-select: none;
+
 		-webkit-user-drag: none;
-		z-index: 0; /* 在遮罩下方 */
+
+		z-index: 0;
 	}
 
-	/* 🎯 滑鼠懸停時：隱藏黑色遮罩 */
-	.product-card:hover .image-container::after {
-		opacity: 0; /* 遮罩變透明 */
+
+	/* ========================================
+	   Hover → 移除遮罩
+	======================================== */
+
+	.product-card:hover
+	.image-container::after {
+		opacity: 0;
 	}
 
-	/* 滑鼠懸停時：圖片變清晰 */
-	.product-card:hover .protected-img {
-		filter: blur(0) brightness(1) contrast(1) !important;
+
+	/* ========================================
+	   Hover → 圖片變清晰
+	======================================== */
+
+	.product-card:hover
+	.protected-img {
+		filter:
+			blur(0)
+			brightness(1)
+			contrast(1) !important;
+
 		opacity: 1 !important;
 	}
 
-	/* 項目資訊樣式 */
+
+	/* ========================================
+	   項目資訊
+	======================================== */
+
 	.project-info {
 		padding: 0.5rem 0 0 0 !important;
+
 		width: 100% !important;
 	}
+
 
 	.project-info h3 {
 		margin: 0 !important;
+
 		font-size: 0.95rem !important;
+
 		font-weight: 700 !important;
+
 		line-height: 1.2 !important;
+
 		color: #000000 !important;
 	}
 
+
+	/* ========================================
+	   分類 + 年份
+	======================================== */
+
 	.project-meta {
 		display: flex !important;
+
 		flex-direction: row !important;
-		justify-content: space-between !important;
+
+		justify-content:
+			space-between !important;
+
 		align-items: baseline !important;
+
 		margin-top: 0.2rem !important;
+
 		width: 100% !important;
 	}
 
+
 	.category-tag {
 		font-size: 0.8rem !important;
+
 		font-weight: 400 !important;
+
 		color: #888888 !important;
+
 		line-height: 1 !important;
 	}
 
+
 	.year-tag {
 		font-size: 0.72rem !important;
+
 		font-weight: 400 !important;
+
 		color: #aaaaaa !important;
 	}
 
-	/* 手機版樣式 */
+
+	/* ========================================
+	   手機版
+	======================================== */
+
 	@media (max-width: 768px) {
-		.project-info h3 { font-size: 0.9rem !important; }
-		.category-tag { font-size: 0.75rem !important; }
-		.year-tag { font-size: 0.68rem !important; }
+
+		.project-info h3 {
+			font-size: 0.9rem !important;
+		}
+
+		.category-tag {
+			font-size: 0.75rem !important;
+		}
+
+		.year-tag {
+			font-size: 0.68rem !important;
+		}
 	}
 </style>
