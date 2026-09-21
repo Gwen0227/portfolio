@@ -29,6 +29,10 @@ const activeCategory = project.data?.category || "all";
 ---
 
 <BaseLayout title={project.data.title}>
+	<!-- ========================================
+	     作品分類
+	     保留原本的分類位置
+	======================================== -->
 	<ProductGridHeader
 		activeCategory={activeCategory}
 		productsTotal={productsTotal}
@@ -37,10 +41,27 @@ const activeCategory = project.data?.category || "all";
 	<article class="project-detail">
 
 		<!-- ========================================
-		     專案標題
+		     專案標題 + 返回按鈕
+		     
+		     [ ← ] my-project
 		======================================== -->
 		<header class="project-header">
-			<h1 class="main-title">{project.data.title}</h1>
+			<div class="project-title-row">
+
+				<button
+					id="back-btn"
+					class="back-btn"
+					type="button"
+					aria-label="返回上一頁"
+				>
+					<span class="back-arrow">←</span>
+				</button>
+
+				<h1 class="main-title">
+					{project.data.title}
+				</h1>
+
+			</div>
 		</header>
 
 
@@ -69,6 +90,55 @@ const activeCategory = project.data?.category || "all";
 </BaseLayout>
 
 
+<!-- ========================================
+     返回上一頁
+     
+     優先回到上一個瀏覽位置。
+     如果沒有上一頁，則回到作品首頁。
+======================================== -->
+
+<script>
+	function setupBackBtn() {
+		const btn = document.getElementById("back-btn");
+
+		if (!btn) return;
+
+		// 避免 Astro View Transitions
+		// 導致同一個按鈕重複綁定事件
+		btn.onclick = (event) => {
+			event.preventDefault();
+
+			// 如果瀏覽器有上一頁
+			if (window.history.length > 1) {
+				window.history.back();
+				return;
+			}
+
+			// 如果使用者是直接開啟作品網址
+			// 沒有上一頁，則回到原本分類
+			const savedCat =
+				sessionStorage.getItem("activeCategory") || "all";
+
+			const targetUrl =
+				savedCat === "all"
+					? "/"
+					: `/?category=${encodeURIComponent(savedCat)}`;
+
+			window.location.href = targetUrl;
+		};
+	}
+
+	setupBackBtn();
+
+	// Astro ClientRouter / View Transitions
+	// 每次頁面切換後重新設定按鈕
+	document.addEventListener(
+		"astro:page-load",
+		setupBackBtn
+	);
+</script>
+
+
 <style>
 	/* ========================================
 	   主容器
@@ -90,13 +160,87 @@ const activeCategory = project.data?.category || "all";
 		margin-bottom: 1.5rem;
 	}
 
-	.main-title {
+	/* 返回按鈕 + 專案標題 */
+
+	.project-title-row {
+		display: flex;
+		align-items: center;
 		width: 100%;
+		gap: 0.8rem;
+	}
+
+
+	/* ========================================
+	   返回按鈕
+	   
+	   [ ← ]
+	======================================== */
+
+	.back-btn {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+
+		width: 36px;
+		height: 36px;
+
+		flex-shrink: 0;
+
+		margin: 0;
+		padding: 0;
+
+		border: none;
+		border-radius: 0;
+
+		color: #222222;
+		background-color: #f2f2f2;
+
+		font-family: inherit;
+		font-size: 20px;
+		line-height: 1;
+
+		cursor: pointer;
+
+		transition:
+			color 0.2s ease,
+			background-color 0.2s ease,
+			transform 0.2s ease;
+	}
+
+
+	/* Hover → 黑色 */
+
+	.back-btn:hover {
+		color: #ffffff;
+		background-color: #000000;
+		transform: translateX(-4px);
+	}
+
+
+	/* 箭頭 */
+
+	.back-arrow {
+		display: block;
+		transform: translateY(-1px);
+	}
+
+
+	/* ========================================
+	   專案標題
+	======================================== */
+
+	.main-title {
+		flex: 1;
+		width: auto;
+
 		font-size: 2.3rem !important;
 		font-weight: 500 !important;
+
 		color: #000000 !important;
+
 		margin: 0 !important;
 		padding: 0 !important;
+
 		line-height: 1.2 !important;
 		letter-spacing: -0.02em !important;
 	}
@@ -109,24 +253,35 @@ const activeCategory = project.data?.category || "all";
 	.featured-image {
 		width: 100%;
 		aspect-ratio: 16 / 9;
+
 		margin: 0 0 2.5rem 0;
 		padding: 0;
+
 		overflow: hidden;
+
 		background: #f9f9f9;
+
 		border-radius: 0;
+
 		box-sizing: border-box;
 	}
 
 	.featured-image .protected-img {
 		width: 100%;
 		height: 100%;
+
 		object-fit: cover;
+
 		display: block;
+
 		margin: 0;
 		padding: 0;
+
 		user-select: none;
 		-webkit-user-drag: none;
+
 		filter: blur(0.6px);
+
 		transition: filter 0.3s ease;
 	}
 
@@ -141,9 +296,12 @@ const activeCategory = project.data?.category || "all";
 
 	.prose {
 		width: 100%;
+
 		color: #222222;
+
 		font-size: 0.95rem;
 		line-height: 1.85;
+
 		box-sizing: border-box;
 	}
 
@@ -154,10 +312,13 @@ const activeCategory = project.data?.category || "all";
 
 	.prose :global(p) {
 		width: 100%;
+
 		margin: 0 0 1.5rem;
 		padding: 0;
+
 		text-align: justify;
 		word-break: break-word;
+
 		box-sizing: border-box;
 	}
 
@@ -188,11 +349,17 @@ const activeCategory = project.data?.category || "all";
 
 	.prose :global(.image-grid) {
 		width: 100%;
+
 		display: grid;
-		grid-template-columns: repeat(2, minmax(0, 1fr));
+
+		grid-template-columns:
+			repeat(2, minmax(0, 1fr));
+
 		gap: 0.3rem;
+
 		margin: 2rem 0 2.5rem;
 		padding: 0;
+
 		box-sizing: border-box;
 	}
 
@@ -203,9 +370,12 @@ const activeCategory = project.data?.category || "all";
 
 	.prose :global(.image-grid p) {
 		width: 100%;
+
 		margin: 0;
 		padding: 0;
+
 		text-align: left;
+
 		box-sizing: border-box;
 	}
 
@@ -216,17 +386,26 @@ const activeCategory = project.data?.category || "all";
 
 	.prose :global(.image-grid img) {
 		display: block;
+
 		width: 100%;
 		max-width: 100%;
+
 		height: auto;
+
 		margin: 0;
 		padding: 0;
+
 		border-radius: 0;
+
 		object-fit: cover;
+
 		box-sizing: border-box;
+
 		user-select: none;
 		-webkit-user-drag: none;
+
 		filter: blur(0.6px);
+
 		transition:
 			filter 0.3s ease,
 			transform 0.3s ease;
@@ -250,15 +429,23 @@ const activeCategory = project.data?.category || "all";
 		> p > img:only-child
 	) {
 		display: block;
+
 		width: 100%;
 		max-width: 100%;
+
 		height: auto;
+
 		margin: 0 0 1.5rem;
+
 		border-radius: 0;
+
 		box-sizing: border-box;
+
 		user-select: none;
 		-webkit-user-drag: none;
+
 		filter: blur(0.6px);
+
 		transition: filter 0.3s ease;
 	}
 
@@ -277,7 +464,9 @@ const activeCategory = project.data?.category || "all";
 	.prose :global(img) {
 		max-width: 100%;
 		height: auto;
-		border-radius: 4px;
+
+		border-radius: 0;
+
 		user-select: none;
 		-webkit-user-drag: none;
 	}
@@ -289,34 +478,49 @@ const activeCategory = project.data?.category || "all";
 
 	.prose :global(h1) {
 		width: 100%;
+
 		font-size: 2.3rem !important;
 		font-weight: 700 !important;
+
 		color: #000000 !important;
+
 		margin-top: 3.5rem !important;
 		margin-bottom: 1rem !important;
+
 		line-height: 1.25 !important;
+
 		clear: both;
 	}
 
 	.prose :global(h2) {
 		width: 100%;
+
 		font-size: 1.6rem !important;
 		font-weight: 700 !important;
+
 		color: #000000 !important;
+
 		margin-top: 3rem !important;
 		margin-bottom: 0.75rem !important;
+
 		line-height: 1.35 !important;
+
 		clear: both;
 	}
 
 	.prose :global(h3) {
 		width: 100%;
+
 		font-size: 1.2rem !important;
 		font-weight: 700 !important;
+
 		color: #000000 !important;
+
 		margin-top: 2rem !important;
 		margin-bottom: 0.75rem !important;
+
 		line-height: 1.35 !important;
+
 		clear: both;
 	}
 
@@ -328,13 +532,19 @@ const activeCategory = project.data?.category || "all";
 	.prose :global(hr.slash) {
 		width: 40px;
 		height: 0.8px;
+
 		padding: 0;
+
 		border: none;
 		outline: none;
+
 		background-color: #000000;
+
 		margin: 1.5rem 0 2.2rem 0;
+
 		transform: rotate(-25deg);
 		transform-origin: left center;
+
 		clear: both;
 	}
 
@@ -345,16 +555,22 @@ const activeCategory = project.data?.category || "all";
 
 	.prose :global(p:has(> em)) {
 		width: 100%;
+
 		margin-top: -0.5rem;
 		margin-bottom: 2.2rem;
+
 		clear: both;
 	}
 
 	.prose :global(p > em) {
 		font-style: normal;
+
 		font-size: 0.8rem !important;
+
 		color: #888888 !important;
+
 		line-height: 1.5;
+
 		letter-spacing: 0.02em;
 	}
 
@@ -365,17 +581,24 @@ const activeCategory = project.data?.category || "all";
 
 	.prose :global(figure) {
 		width: 100%;
+
 		margin: 0 0 2rem;
 		padding: 0;
+
 		clear: both;
 	}
 
 	.prose :global(figcaption) {
 		margin-top: 0.5rem;
+
 		font-style: normal;
+
 		font-size: 0.8rem !important;
+
 		color: #888888 !important;
+
 		line-height: 1.5;
+
 		letter-spacing: 0.02em;
 	}
 
@@ -387,8 +610,10 @@ const activeCategory = project.data?.category || "all";
 	.prose :global(ul),
 	.prose :global(ol) {
 		width: 100%;
+
 		margin-left: 1.2rem;
 		margin-bottom: 1.5rem;
+
 		clear: both;
 	}
 
@@ -430,9 +655,28 @@ const activeCategory = project.data?.category || "all";
 
 	@media (max-width: 768px) {
 
+		/* 專案標題 */
+
+		.project-title-row {
+			gap: 0.6rem;
+		}
+
 		.main-title {
 			font-size: 2rem !important;
 		}
+
+
+		/* 返回按鈕 */
+
+		.back-btn {
+			width: 32px;
+			height: 32px;
+
+			font-size: 18px;
+		}
+
+
+		/* Markdown 標題 */
 
 		.prose :global(h1) {
 			font-size: 1.8rem !important;
@@ -456,16 +700,16 @@ const activeCategory = project.data?.category || "all";
 
 		.prose :global(.image-grid) {
 			grid-template-columns: 1fr;
+
 			gap: 0.5rem;
+
 			margin: 1.5rem 0 2rem;
 		}
-
 
 		.prose :global(.image-grid p) {
 			width: 100%;
 			margin: 0;
 		}
-
 
 		.prose :global(.image-grid img) {
 			width: 100%;
