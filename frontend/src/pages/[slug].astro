@@ -45,7 +45,7 @@ const activeCategory = project.data?.category || "all";
 
 
 		<!-- ========================================
-		     封面
+		     封面圖片
 		======================================== -->
 		{project.data.cover && (
 			<figure class="featured-image">
@@ -173,27 +173,37 @@ const activeCategory = project.data?.category || "all";
 
 
 	/* ========================================
-	   圖片段落
+	   圖片 Grid
+	   
+	   MDX 使用：
+
+	   <div class="image-grid">
+
+	   ![圖片 1](/images/brand/0000.png)
+
+	   ![圖片 2](/images/brand/0000.png)
+
+	   </div>
 	======================================== */
 
-	/*
-		Markdown：
+	.prose :global(.image-grid) {
+		width: 100%;
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 1.5rem;
+		margin: 2rem 0 2.5rem;
+		padding: 0;
+		box-sizing: border-box;
+	}
 
-		![圖片 1](...)
-		
-		![圖片 2](...)
 
-		Astro 會產生兩個 <p>。
+	/* ========================================
+	   Grid 裡面的圖片段落
+	======================================== */
 
-		這裡把連續的圖片段落
-		變成兩欄。
-	*/
-
-	.prose :global(p:has(> img:only-child)) {
-		display: inline-block;
-		vertical-align: top;
-		width: calc(50% - 0.75rem);
-		margin: 0 1.5rem 1.5rem 0;
+	.prose :global(.image-grid p) {
+		width: 100%;
+		margin: 0;
 		padding: 0;
 		text-align: left;
 		box-sizing: border-box;
@@ -201,22 +211,10 @@ const activeCategory = project.data?.category || "all";
 
 
 	/* ========================================
-	   每組圖片中的偶數張
-	   取消右邊距
+	   Grid 裡面的圖片
 	======================================== */
 
-	.prose :global(
-		p:has(> img:only-child) + p:has(> img:only-child)
-	) {
-		margin-right: 0;
-	}
-
-
-	/* ========================================
-	   圖片本身
-	======================================== */
-
-	.prose :global(p:has(> img:only-child) > img) {
+	.prose :global(.image-grid img) {
 		display: block;
 		width: 100%;
 		max-width: 100%;
@@ -229,53 +227,46 @@ const activeCategory = project.data?.category || "all";
 		user-select: none;
 		-webkit-user-drag: none;
 		filter: blur(0.6px);
-		transition: filter 0.3s ease;
+		transition:
+			filter 0.3s ease,
+			transform 0.3s ease;
 	}
 
 
-	.prose :global(p:has(> img:only-child) > img:hover) {
+	/* ========================================
+	   Grid 圖片 Hover
+	======================================== */
+
+	.prose :global(.image-grid img:hover) {
 		filter: blur(0);
 	}
 
 
 	/* ========================================
-	   非圖片段落後面的圖片
-	   確保重新開始一行
+	   Grid 外的一般圖片
 	======================================== */
 
 	.prose :global(
-		p:not(:has(> img)) + p:has(> img:only-child)
+		> p > img:only-child
 	) {
-		clear: both;
+		display: block;
+		width: 100%;
+		max-width: 100%;
+		height: auto;
+		margin: 0 0 1.5rem;
+		border-radius: 4px;
+		box-sizing: border-box;
+		user-select: none;
+		-webkit-user-drag: none;
+		filter: blur(0.6px);
+		transition: filter 0.3s ease;
 	}
 
 
-	/* ========================================
-	   圖片後面的普通文字
-	   重新開始一行
-	======================================== */
-
 	.prose :global(
-		p:has(> img:only-child) + p:not(:has(> img))
+		> p > img:only-child:hover
 	) {
-		clear: both;
-	}
-
-
-	/* ========================================
-	   圖片後的標題
-	======================================== */
-
-	.prose :global(
-		p:has(> img:only-child) + h1
-	),
-	.prose :global(
-		p:has(> img:only-child) + h2
-	),
-	.prose :global(
-		p:has(> img:only-child) + h3
-	) {
-		clear: both;
+		filter: blur(0);
 	}
 
 
@@ -352,23 +343,14 @@ const activeCategory = project.data?.category || "all";
 	   圖說
 	======================================== */
 
-	/*
-		支援：
-
-		![圖片](...)
-
-		_圖說_
-	*/
-
-	.prose :global(p:has(> img:only-child) + p:has(> em)) {
-		display: block;
+	.prose :global(p:has(> em)) {
 		width: 100%;
 		margin-top: -0.5rem;
 		margin-bottom: 2.2rem;
 		clear: both;
 	}
 
-	.prose :global(p:has(> img:only-child) + p:has(> em) em) {
+	.prose :global(p > em) {
 		font-style: normal;
 		font-size: 0.8rem !important;
 		color: #888888 !important;
@@ -468,20 +450,39 @@ const activeCategory = project.data?.category || "all";
 
 
 		/* ========================================
-		   手機版圖片全部上下排列
+		   手機版 Image Grid
+		   兩張圖片改成上下排列
 		======================================== */
 
-		.prose :global(p:has(> img:only-child)) {
-			display: block;
-			width: 100%;
-			margin-right: 0;
-			margin-bottom: 1.5rem;
+		.prose :global(.image-grid) {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+			margin: 1.5rem 0 2rem;
 		}
 
-		.prose :global(p:has(> img:only-child) > img) {
+
+		.prose :global(.image-grid p) {
+			width: 100%;
+			margin: 0;
+		}
+
+
+		.prose :global(.image-grid img) {
 			width: 100%;
 			max-width: 100%;
 			height: auto;
+		}
+
+
+		/* ========================================
+		   手機版一般圖片
+		======================================== */
+
+		.prose :global(
+			> p > img:only-child
+		) {
+			width: 100%;
+			max-width: 100%;
 		}
 	}
 </style>
