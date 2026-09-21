@@ -26,98 +26,260 @@ const currentPage =
 
 <!doctype html>
 <html lang="en" data-page={currentPage}>
-  <head>
-    <SEO
-      title={title}
-      description={description}
-      charset="UTF-8"
-      openGraph={{
-        basic: {
-          title: title,
-          type: "image/jpeg",
-          image: "/playersclub-og.jpg",
-        },
-      }}
-      extend={{
-        // extending the default link tags
-        link: [
-          {
-            rel: "icon",
-            type: "image/png",
-            sizes: "16x16",
-            href: "/favicon/favicon-16x16.png",
-          },
-          {
-            rel: "icon",
-            type: "image/png",
-            sizes: "32x32",
-            href: "/favicon/favicon-32x32.png",
-          },
-          {
-            rel: "apple-touch-icon",
-            sizes: "180x180",
-            href: "/favicon/apple-touch-icon.png",
-          },
-          { rel: "manifest", href: "/favicon/site.webmanifest" },
-          { rel: "sitemap", href: "/sitemap-index.xml" },
-          {
-            rel: "preload",
-            href: instrumentSansWoff2,
-            as: "font",
-            type: "font/woff2",
-            crossorigin: "anonymous",
-          },
-        ],
-        // extending the default meta tags
-        meta: [
-          { name: "viewport", content: "width=device-width" },
-          { name: "msapplication-TileColor", content: "#000000" },
-          { name: "theme-color", content: "#ffffff" },
-          { name: "generator", content: Astro.generator },
-        ],
-      }}
-    />
-    <ClientRouter />
+	<head>
+		<SEO
+			title={title}
+			description={description}
+			charset="UTF-8"
+			openGraph={{
+				basic: {
+					title: title,
+					type: "image/jpeg",
+					image: "/playersclub-og.jpg",
+				},
+			}}
+			extend={{
+				// extending the default link tags
+				link: [
+					{
+						rel: "icon",
+						type: "image/png",
+						sizes: "16x16",
+						href: "/favicon/favicon-16x16.png",
+					},
+					{
+						rel: "icon",
+						type: "image/png",
+						sizes: "32x32",
+						href: "/favicon/favicon-32x32.png",
+					},
+					{
+						rel: "apple-touch-icon",
+						sizes: "180x180",
+						href: "/favicon/apple-touch-icon.png",
+					},
+					{
+						rel: "manifest",
+						href: "/favicon/site.webmanifest",
+					},
+					{
+						rel: "sitemap",
+						href: "/sitemap-index.xml",
+					},
+					{
+						rel: "preload",
+						href: instrumentSansWoff2,
+						as: "font",
+						type: "font/woff2",
+						crossorigin: "anonymous",
+					},
+				],
 
-    <style is:global>
-      .hover-reveal,
-      [class*="hover-reveal"],
-      [class*="cursor"],
-      #cursor,
-      canvas.hover-canvas {
-        display: none !important;
-        opacity: 0 !important;
-        visibility: hidden !important;
-        pointer-events: none !important;
-      }
+				// extending the default meta tags
+				meta: [
+					{
+						name: "viewport",
+						content: "width=device-width",
+					},
+					{
+						name: "msapplication-TileColor",
+						content: "#000000",
+					},
+					{
+						name: "theme-color",
+						content: "#ffffff",
+					},
+					{
+						name: "generator",
+						content: Astro.generator,
+					},
+				],
+			}}
+		/>
 
-      /* 🎯 全局容器：解除 1200px 限制，讓所有頁面（Header, About, Contact, [slug]）統一對齊 */
-      .site-container {
-        width: 100%;
-        max-width: 1400px;
-        margin: 0 auto;
-        padding-left: 1.5rem; /* 桌機版統一左右留白 */
-        padding-right: 1.5rem;
-        box-sizing: border-box;
-      }
+		<ClientRouter />
 
-      @media (max-width: 768px) {
-        .site-container {
-          padding-left: 0.5rem; /* 手機版統一左右留白 */
-          padding-right: 0.5rem;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <SmoothScroll />
-    
-    <div class="site-container">
-      <Header />
-      <main>
-        <slot />
-      </main>
-      <Footer />
-    </div>
-  </body>
+		<style is:global>
+			/* ========================================
+			   關閉原本的 hover / cursor 效果
+			======================================== */
+
+			.hover-reveal,
+			[class*="hover-reveal"],
+			[class*="cursor"],
+			#cursor,
+			canvas.hover-canvas {
+				display: none !important;
+				opacity: 0 !important;
+				visibility: hidden !important;
+				pointer-events: none !important;
+			}
+
+
+			/* ========================================
+			   全局容器
+			   大螢幕最大寬度 1400px
+			======================================== */
+
+			.site-container {
+				width: 100%;
+				max-width: 1400px;
+				margin: 0 auto;
+				padding-left: 1.5rem;
+				padding-right: 1.5rem;
+				box-sizing: border-box;
+			}
+
+
+			/* ========================================
+			   返回按鈕
+
+			   [ ← ] my-project
+
+			   點擊後：
+			   回到使用者上一個瀏覽頁面
+			   並保留原本的瀏覽位置
+			======================================== */
+
+			.back-navigation {
+				display: flex;
+				align-items: center;
+				gap: 0.7rem;
+				width: fit-content;
+				margin: 1.5rem 0 2rem;
+			}
+
+
+			/* ========================================
+			   返回按鈕本體
+			======================================== */
+
+			.back-navigation-button {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+
+				width: 2.2rem;
+				height: 2.2rem;
+
+				padding: 0;
+				border: none;
+				border-radius: 0;
+
+				background: #e8e8e8;
+				color: #000000;
+
+				font-family: inherit;
+				font-size: 1rem;
+				line-height: 1;
+
+				cursor: pointer;
+
+				transition:
+					background-color 0.25s ease,
+					color 0.25s ease,
+					transform 0.25s ease;
+			}
+
+
+			/* ========================================
+			   Hover → 黑色
+			======================================== */
+
+			.back-navigation-button:hover {
+				background: #000000;
+				color: #ffffff;
+			}
+
+
+			/* ========================================
+			   按鈕箭頭
+			======================================== */
+
+			.back-navigation-arrow {
+				display: block;
+				transform: translateY(-1px);
+			}
+
+
+			/* ========================================
+			   my-project 文字
+			======================================== */
+
+			.back-navigation-title {
+				font-size: 0.9rem;
+				font-weight: 500;
+				color: #000000;
+				line-height: 1;
+				white-space: nowrap;
+			}
+
+
+			/* ========================================
+			   手機版
+			======================================== */
+
+			@media (max-width: 768px) {
+
+				.site-container {
+					padding-left: 0.5rem;
+					padding-right: 0.5rem;
+				}
+
+				.back-navigation {
+					margin-top: 1rem;
+					margin-bottom: 1.5rem;
+					gap: 0.6rem;
+				}
+
+				.back-navigation-button {
+					width: 2rem;
+					height: 2rem;
+				}
+
+				.back-navigation-title {
+					font-size: 0.85rem;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<SmoothScroll />
+
+		<div class="site-container">
+
+			<Header />
+
+			<!-- ========================================
+			     全站返回按鈕
+			======================================== -->
+
+			<nav
+				class="back-navigation"
+				aria-label="返回上一頁"
+			>
+				<button
+					class="back-navigation-button"
+					type="button"
+					aria-label="返回上一頁"
+					onclick="window.history.back()"
+				>
+					<span class="back-navigation-arrow">←</span>
+				</button>
+
+				<span class="back-navigation-title">
+					my-project
+				</span>
+			</nav>
+
+
+			<main>
+				<slot />
+			</main>
+
+			<Footer />
+
+		</div>
+	</body>
 </html>
