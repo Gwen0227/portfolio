@@ -132,7 +132,11 @@ const activeCategory = project.data?.category || "all";
 		box-sizing: border-box;
 	}
 
-	/* 一般段落 */
+
+	/* ========================================
+	   一般段落
+	======================================== */
+
 	.prose :global(p) {
 		width: 100%;
 		margin: 0 0 1.5rem;
@@ -140,41 +144,89 @@ const activeCategory = project.data?.category || "all";
 		word-break: break-word;
 	}
 
+
 	/* ========================================
-	   Markdown 圖片
+	   圖片段落
 	======================================== */
 
 	/*
-		圖片所在的 <p> 不再使用 display: contents。
-
-		這是原本第三張圖片容易出問題的主要地方。
+		只有一張圖片的段落：
+		保持滿版
 	*/
 
 	.prose :global(p:has(> img:only-child)) {
 		width: 100%;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 1.5rem;
 		margin: 0 0 1.5rem;
+		display: block;
+	}
+
+
+	/* ========================================
+	   連續圖片自動並排
+	======================================== */
+
+	/*
+		兩個連續的圖片 <p>：
+		在桌面版變成左右兩欄。
+	*/
+
+	.prose :global(p:has(> img:only-child) + p:has(> img:only-child)) {
+		margin-top: 0;
 	}
 
 	/*
-		每張圖片佔一半
+		第一張圖片段落
 	*/
 
-	.prose :global(p:has(> img:only-child) > img) {
-		width: calc(50% - 0.75rem);
-		height: auto;
-		flex: 0 0 calc(50% - 0.75rem);
+	.prose :global(
+		p:has(> img:only-child):not(:has(+ p:has(> img:only-child)))
+	) {
 		display: block;
+	}
+
+
+	/*
+		只要圖片段落後面還有圖片段落，
+		就讓兩張圖片使用 inline-block。
+	*/
+
+	.prose :global(p:has(> img:only-child)) {
+		display: inline-block;
+		vertical-align: top;
+		width: calc(50% - 0.75rem);
+		margin-right: 1.5rem;
+		box-sizing: border-box;
+	}
+
+	/*
+		每第二張圖片取消右邊距，
+		讓左右兩張剛好填滿。
+	*/
+
+	.prose :global(
+		p:has(> img:only-child) + p:has(> img:only-child)
+	) {
+		margin-right: 0;
+	}
+
+
+	/* ========================================
+	   圖片本身
+	======================================== */
+
+	.prose :global(p:has(> img:only-child) > img) {
+		display: block;
+		width: 100%;
+		height: auto;
+		max-width: 100%;
+		margin: 0;
 		border-radius: 4px;
 		object-fit: cover;
+		box-sizing: border-box;
 		user-select: none;
 		-webkit-user-drag: none;
 		filter: blur(0.6px);
 		transition: filter 0.3s ease;
-		margin: 0;
-		box-sizing: border-box;
 	}
 
 	.prose :global(p:has(> img:only-child) > img:hover) {
@@ -183,8 +235,16 @@ const activeCategory = project.data?.category || "all";
 
 
 	/* ========================================
+	   避免圖片後面的文字被並排影響
+	======================================== */
+
+	.prose :global(p:has(> img:only-child) + p:not(:has(> img:only-child))) {
+		clear: both;
+	}
+
+
+	/* ========================================
 	   一般圖片
-	   如果圖片不是單獨一個 <p>
 	======================================== */
 
 	.prose :global(img) {
@@ -227,6 +287,7 @@ const activeCategory = project.data?.category || "all";
 		color: #000000 !important;
 		margin-top: 2rem !important;
 		margin-bottom: 0.75rem !important;
+		line-height: 1.35 !important;
 	}
 
 
@@ -251,18 +312,12 @@ const activeCategory = project.data?.category || "all";
 	   圖說
 	======================================== */
 
-	/*
-		支援：
-
-		![圖片](...)
-
-		_圖說_
-	*/
-
 	.prose :global(p:has(img) + p:has(em)) {
 		width: 100%;
+		display: block;
 		margin-top: -0.5rem;
 		margin-bottom: 2.2rem;
+		clear: both;
 	}
 
 	.prose :global(p:has(img) + p:has(em) em) {
@@ -327,18 +382,20 @@ const activeCategory = project.data?.category || "all";
 			margin-top: 2rem !important;
 		}
 
-		/*
-			手機版圖片改成上下排列
-		*/
+
+		/* 手機版所有圖片上下排列 */
 
 		.prose :global(p:has(> img:only-child)) {
 			display: block;
+			width: 100%;
+			margin-right: 0;
+			margin-bottom: 1.5rem;
 		}
 
 		.prose :global(p:has(> img:only-child) > img) {
 			width: 100%;
-			flex: none;
-			margin-bottom: 1.5rem;
+			max-width: 100%;
+			height: auto;
 		}
 	}
 </style>
