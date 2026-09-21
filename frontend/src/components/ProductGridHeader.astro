@@ -8,7 +8,6 @@ type Props = {
 
 const { productsTotal = 3, activeCategory = "all" } = Astro.props;
 
-// 預設分類清單
 const categories = [
 	{ id: "all", label: "All" },
 	{ id: "Brand", label: "Brand" },
@@ -23,10 +22,13 @@ const categories = [
 	<header class="project-filter">
 		<div class="categories">
 			{categories.map((cat) => {
-				const isActive = cat.id.toLowerCase() === activeCategory.toLowerCase();
+				const isActive =
+					cat.id.toLowerCase() === activeCategory.toLowerCase();
+
 				return (
-					<button 
-						data-filter={cat.id} 
+					<button
+						type="button"
+						data-filter={cat.id}
 						class={isActive ? "active" : ""}
 					>
 						<TextSlider content={cat.label} />
@@ -42,45 +44,174 @@ const categories = [
 </div>
 
 <script>
+	function getCategoryFromUrl() {
+		const params = new URLSearchParams(window.location.search);
+		return params.get("category") || "all";
+	}
+
+	function updateUrl(category) {
+		const url = new URL(window.location.href);
+
+		if (category === "all") {
+			url.searchParams.delete("category");
+		} else {
+			url.searchParams.set("category", category);
+		}
+
+		/*
+		 * 不重新整理頁面，只更新網址。
+		 * 這樣分類、作品列表、瀏覽位置都可以維持。
+		 */
+		window.history.replaceState(
+			{ category },
+			"",
+			url.pathname + url.search + url.hash
+		);
+	}
+
+	function applyFilter(filterValue) {
+		const cards = document.querySelectorAll(
+			"[data-category]"
+		) as NodeListOf<HTMLElement>;
+
+		cards.forEach((card) => {
+			const cardCategory = card.getAttribute("data-category");
+
+			if (
+				filterValue === "all" ||
+				cardCategory === filterValue
+			) {
+				card.style.display = "";
+				card.style.opacity = "1";
+			} else {
+				card.style.display = "none";
+			}
+		});
+	}
+
+	function updateActiveButton(filterValue) {
+		const buttons = document.querySelectorAll(
+			".categories button"
+		);
+
+		buttons.forEach((button) => {
+			const value = button.getAttribute("data-filter");
+
+			if (
+				value?.toLowerCase() ===
+				filterValue.toLowerCase()
+			) {
+				button.classList.add("active");
+			} else {
+				button.classList.remove("active");
+			}
+		});
+	}
+
+	function saveCurrentListingState() {
+		const currentUrl =
+			window.location.pathname +
+			window.location.search +
+			window.location.hash;
+
+		const state = {
+			url: currentUrl,
+			scrollY: window.scrollY,
+			category: getCategoryFromUrl(),
+		};
+
+		sessionStorage.setItem(
+			"projectReturnState",
+			JSON.stringify(state)
+		);
+	}
+
 	function initFilter() {
-		const buttons = document.querySelectorAll('.categories button');
-		const cards = document.querySelectorAll('[data-category]') as NodeListOf<HTMLElement>;
+		const buttons = document.querySelectorAll(
+			".categories button"
+		);
 
 		if (!buttons.length) return;
 
-		buttons.forEach(button => {
-			button.addEventListener('click', () => {
-				const filterValue = button.getAttribute('data-filter');
+		/*
+		 * 先根據網址套用目前分類。
+		 *
+		 * 例如：
+		 * /?category=Brand
+		 *
+		 * 就會自動顯示 Brand。
+		 */
+		const currentCategory = getCategoryFromUrl();
 
-				buttons.forEach(btn => btn.classList.remove('active'));
-				button.classList.add('active');
+		updateActiveButton(currentCategory);
 
-				// 如果不在首頁，點擊分類按鈕時跳回首頁並帶上參數
+		/*
+		 * 只有首頁才真正篩選作品。
+		 */
+		if (window.location.pathname === "/") {
+			applyFilter(currentCategory);
+		}
+
+		buttons.forEach((button) => {
+			/*
+			 * 避免 Astro ClientRouter / astro:page-load
+			 * 重複綁定 click。
+			 */
+			button.onclick = () => {
+				const filterValue =
+					button.getAttribute("data-filter") || "all";
+
+				/*
+				 * 如果現在不在首頁：
+				 * 直接回首頁並帶上分類。
+				 */
 				if (window.location.pathname !== "/") {
-					window.location.href = filterValue === "all" ? "/" : `/?category=${filterValue}`;
+					const targetUrl =
+						filterValue === "all"
+							? "/"
+							: `/?category=${encodeURIComponent(filterValue)}`;
+
+					window.location.href = targetUrl;
 					return;
 				}
 
-				cards.forEach(card => {
-					const cardCategory = card.getAttribute('data-category');
+				/*
+				 * 首頁：
+				 * 先記錄目前分類到網址。
+				 */
+				updateUrl(filterValue);
 
-					if (filterValue === 'all' || cardCategory === filterValue) {
-						card.style.display = '';
-						card.style.opacity = '1';
-					} else {
-						card.style.display = 'none';
-					}
-				});
+				updateActiveButton(filterValue);
+
+				applyFilter(filterValue);
+			};
+		});
+
+		/*
+		 * 在作品卡片被點擊之前，
+		 * 保存「目前作品列表」的網址與捲動位置。
+		 */
+		const projectLinks =
+			document.querySelectorAll(
+				"a.project-link"
+			);
+
+		projectLinks.forEach((link) => {
+			link.addEventListener("click", () => {
+				saveCurrentListingState();
 			});
 		});
 	}
 
 	initFilter();
-	document.addEventListener('astro:page-load', initFilter);
+
+	document.addEventListener(
+		"astro:page-load",
+		initFilter
+	);
 </script>
 
 <style>
-	/* 🎯 主容器：跟網頁主內容寬度完全一致 */
 	.category-wrapper {
 		position: relative;
 		width: 100%;
@@ -88,7 +219,6 @@ const categories = [
 		margin-bottom: 0.5rem;
 	}
 
-	/* 🎯 滿版灰底：用 absolute 獨立延伸出去，不影響內文排版 */
 	.full-width-bg {
 		position: absolute;
 		top: 0;
@@ -100,7 +230,6 @@ const categories = [
 		z-index: 0;
 	}
 
-	/* 🎯 文字選單內容：貼齊左右邊緣，且層級比灰底高 */
 	.project-filter {
 		position: relative;
 		z-index: 1;
@@ -108,8 +237,8 @@ const categories = [
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding: 0.15rem 0; /* 上下留少許內邊距 */
-		font-size: 0.85rem; 
+		padding: 0.15rem 0;
+		font-size: 0.85rem;
 		box-sizing: border-box;
 		white-space: nowrap;
 	}
@@ -133,12 +262,15 @@ const categories = [
 
 		font-family: inherit;
 		font-size: inherit;
-		font-weight: normal; 
-		
+		font-weight: normal;
+
 		cursor: pointer;
 		color: #888888;
 
-		transition: color 0.2s ease, font-weight 0.2s ease;
+		transition:
+			color 0.2s ease,
+			font-weight 0.2s ease;
+
 		flex-shrink: 0;
 	}
 
@@ -152,7 +284,7 @@ const categories = [
 	}
 
 	.count {
-		font-weight: normal; 
+		font-weight: normal;
 		color: #888888;
 		white-space: nowrap;
 		flex-shrink: 0;

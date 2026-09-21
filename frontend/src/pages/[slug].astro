@@ -7,8 +7,12 @@ export async function getStaticPaths() {
 	const projects = await getCollection("projects");
 
 	return projects.map((project) => ({
-		params: { slug: project.data.slug },
-		props: { project },
+		params: {
+			slug: project.data.slug,
+		},
+		props: {
+			project,
+		},
 	}));
 }
 
@@ -20,39 +24,21 @@ if (!project) {
 
 const { Content } = await render(project);
 
-// 所有專案
 const allProjects = await getCollection("projects");
 const productsTotal = allProjects.length;
 
-// 目前分類
 const activeCategory = project.data?.category || "all";
 ---
 
 <BaseLayout title={project.data.title}>
-
-	<!-- ========================================
-	     作品分類
-	     保留原本的分類位置
-	======================================== -->
-
 	<ProductGridHeader
 		activeCategory={activeCategory}
 		productsTotal={productsTotal}
 	/>
 
-
 	<article class="project-detail">
-
-		<!-- ========================================
-		     專案標題 + 返回按鈕
-
-		     [ ← ] 專案名稱
-		======================================== -->
-
 		<header class="project-header">
-
 			<div class="project-title-row">
-
 				<button
 					id="back-btn"
 					class="back-btn"
@@ -65,15 +51,8 @@ const activeCategory = project.data?.category || "all";
 				<h1 class="main-title">
 					{project.data.title}
 				</h1>
-
 			</div>
-
 		</header>
-
-
-		<!-- ========================================
-		     封面圖片
-		======================================== -->
 
 		{project.data.cover && (
 			<figure class="featured-image">
@@ -85,832 +64,304 @@ const activeCategory = project.data?.category || "all";
 			</figure>
 		)}
 
-
-		<!-- ========================================
-		     Markdown / MDX 內容
-		======================================== -->
-
 		<div class="prose">
 			<Content />
 		</div>
-
 	</article>
-
 </BaseLayout>
 
-
 <script>
-	/**
-	 * =========================================================
-	 * 記住「進入作品之前」的位置
-	 * =========================================================
-	 *
-	 * 使用 sessionStorage 保存：
-	 *
-	 * 1. 原本的 URL
-	 * 2. 原本的 scrollY
-	 * 3. 原本的分類
-	 *
-	 * 這樣從作品頁按 ← 時，
-	 * 可以回到原本作品列表的位置。
-	 */
-
-	function saveCurrentPosition() {
-		const currentUrl =
-			window.location.pathname +
-			window.location.search +
-			window.location.hash;
-
-		const currentScrollY = window.scrollY;
-
-		sessionStorage.setItem(
-			"projectReturnUrl",
-			currentUrl
-		);
-
-		sessionStorage.setItem(
-			"projectReturnScrollY",
-			String(currentScrollY)
-		);
-
-		const activeCategory =
-			sessionStorage.getItem("activeCategory");
-
-		if (activeCategory) {
-			sessionStorage.setItem(
-				"projectReturnCategory",
-				activeCategory
-			);
-		}
-	}
-
-
-	/**
-	 * =========================================================
-	 * 返回作品列表
-	 * =========================================================
-	 */
-
-	function setupBackBtn() {
-		const btn =
+	function setupBackButton() {
+		const button =
 			document.getElementById("back-btn");
 
-		if (!btn) return;
+		if (!button) return;
 
-
-		btn.onclick = (event) => {
-			event.preventDefault();
-
-
-			/* -----------------------------------------
-			   取得原本的位置
-			----------------------------------------- */
-
-			const returnUrl =
+		button.onclick = () => {
+			const savedState =
 				sessionStorage.getItem(
-					"projectReturnUrl"
+					"projectReturnState"
 				);
 
-			const returnScrollY =
-				sessionStorage.getItem(
-					"projectReturnScrollY"
-				);
+			/*
+			 * 有保存作品列表狀態：
+			 * 回到原本的分類＋原本的位置。
+			 */
+			if (savedState) {
+				try {
+					const state = JSON.parse(savedState);
 
+					if (state.url) {
+						sessionStorage.setItem(
+							"restoreProjectScroll",
+							String(state.scrollY || 0)
+						);
 
-			/* -----------------------------------------
-			   如果有記錄，就回原本的位置
-			----------------------------------------- */
-
-			if (returnUrl) {
-
-				/*
-				 * 先記住 scroll，
-				 * 避免 Astro ClientRouter
-				 * 在切頁時把它清掉。
-				 */
-
-				const scrollY =
-					returnScrollY
-						? Number(returnScrollY)
-						: 0;
-
-
-				/*
-				 * 使用 history.back()
-				 *
-				 * 這會保留原本的頁面 history。
-				 */
-
-				if (window.history.length > 1) {
-
-					/*
-					 * 將 scroll 位置暫存在 sessionStorage
-					 * 給返回後的頁面使用。
-					 */
-
-					sessionStorage.setItem(
-						"restoreProjectScroll",
-						String(scrollY)
+						window.location.href = state.url;
+						return;
+					}
+				} catch (error) {
+					console.error(
+						"無法讀取作品列表返回狀態：",
+						error
 					);
-
-					window.history.back();
-
-					return;
 				}
-
-
-				/*
-				 * 如果沒有上一頁，
-				 * 直接前往之前記錄的 URL。
-				 */
-
-				window.location.href =
-					returnUrl;
-
-				return;
 			}
 
-
-			/* -----------------------------------------
-			   沒有任何記錄時
-			   回到分類首頁
-			----------------------------------------- */
-
-			const savedCategory =
-				sessionStorage.getItem(
-					"activeCategory"
-				) || "all";
-
-
-			const targetUrl =
-				savedCategory === "all"
-					? "/"
-					: `/?category=${encodeURIComponent(
-							savedCategory
-						)}`;
-
-
-			window.location.href =
-				targetUrl;
+			/*
+			 * 如果沒有保存狀態，
+			 * 最後才回首頁。
+			 */
+			window.location.href = "/";
 		};
 	}
 
-
-	/**
-	 * =========================================================
-	 * 恢復作品列表原本的 Scroll
-	 * =========================================================
-	 */
-
 	function restoreProjectScroll() {
-
-		const savedScroll =
+		const scrollValue =
 			sessionStorage.getItem(
 				"restoreProjectScroll"
 			);
 
-		if (!savedScroll) return;
+		if (!scrollValue) return;
 
+		sessionStorage.removeItem(
+			"restoreProjectScroll"
+		);
 
-		const scrollY =
-			Number(savedScroll);
-
+		const scrollY = Number(scrollValue);
 
 		/*
-		 * Astro ClientRouter 切頁完成後，
-		 * 再恢復 scroll。
+		 * 等作品列表完成渲染後再恢復位置。
 		 */
-
 		requestAnimationFrame(() => {
-
 			requestAnimationFrame(() => {
-
 				window.scrollTo({
 					top: scrollY,
-					behavior: "instant"
+					behavior: "instant",
 				});
-
-				sessionStorage.removeItem(
-					"restoreProjectScroll"
-				);
-
 			});
-
 		});
 	}
 
-
-	/**
-	 * =========================================================
-	 * 初始化
-	 * =========================================================
-	 */
-
-	setupBackBtn();
-
-
-	/**
-	 * Astro ClientRouter / View Transitions
-	 *
-	 * 每次頁面切換完成後重新設定。
-	 */
+	setupBackButton();
 
 	document.addEventListener(
 		"astro:page-load",
 		() => {
-
-			setupBackBtn();
+			setupBackButton();
 			restoreProjectScroll();
-
 		}
 	);
 </script>
 
-
 <style>
-	/* ========================================
-	   主容器
-	======================================== */
-
 	.project-detail {
 		width: 100%;
 		margin: 1.5rem 0 6rem;
-		box-sizing: border-box;
 	}
-
-
-	/* ========================================
-	   專案標題
-	======================================== */
 
 	.project-header {
 		width: 100%;
 		margin-bottom: 1.5rem;
 	}
 
-
-	/* 返回按鈕 + 專案標題 */
-
 	.project-title-row {
 		display: flex;
 		align-items: center;
-		width: 100%;
 		gap: 0.8rem;
+		width: 100%;
 	}
 
-
-	/* ========================================
-	   返回按鈕
-
-	   [ ← ]
-	======================================== */
-
 	.back-btn {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-
+		flex-shrink: 0;
 		width: 36px;
 		height: 36px;
 
-		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
-		margin: 0;
 		padding: 0;
+		margin: 0;
 
 		border: none;
 		border-radius: 0;
 
-		color: #222222;
-		background-color: #f2f2f2;
-
-		font-family: inherit;
-		font-size: 20px;
-		line-height: 1;
+		background: #f2f2f2;
+		color: #000000;
 
 		cursor: pointer;
 
 		transition:
-			color 0.2s ease,
 			background-color 0.2s ease,
+			color 0.2s ease,
 			transform 0.2s ease;
 	}
 
-
-	/* Hover → 黑色 */
-
 	.back-btn:hover {
+		background: #000000;
 		color: #ffffff;
-		background-color: #000000;
 		transform: translateX(-4px);
 	}
 
-
-	/* 箭頭 */
-
 	.back-arrow {
-		display: block;
-		transform: translateY(-1px);
+		font-size: 1.1rem;
+		line-height: 1;
 	}
-
-
-	/* ========================================
-	   專案標題
-	======================================== */
 
 	.main-title {
 		flex: 1;
-		width: auto;
+		margin: 0;
 
-		font-size: 2.3rem !important;
-		font-weight: 500 !important;
+		font-size: 2.3rem;
+		font-weight: 700;
+		line-height: 1.1;
 
-		color: #000000 !important;
-
-		margin: 0 !important;
-		padding: 0 !important;
-
-		line-height: 1.2 !important;
-		letter-spacing: -0.02em !important;
+		color: #000000;
 	}
-
-
-	/* ========================================
-	   封面圖片
-	======================================== */
 
 	.featured-image {
 		width: 100%;
-		aspect-ratio: 16 / 9;
-
-		margin: 0 0 2.5rem 0;
+		margin: 0 0 2.5rem;
 		padding: 0;
+	}
 
-		overflow: hidden;
-
-		background: #f9f9f9;
+	.featured-image img {
+		display: block;
+		width: 100%;
+		height: auto;
+		aspect-ratio: 16 / 9;
+		object-fit: cover;
 
 		border-radius: 0;
 
-		box-sizing: border-box;
-	}
-
-
-	.featured-image .protected-img {
-		width: 100%;
-		height: 100%;
-
-		object-fit: cover;
-
-		display: block;
-
-		margin: 0;
-		padding: 0;
-
+		filter: blur(0.6px);
 		user-select: none;
 		-webkit-user-drag: none;
-
-		filter: blur(0.6px);
-
-		transition: filter 0.3s ease;
 	}
-
-
-	.featured-image .protected-img:hover {
-		filter: blur(0);
-	}
-
-
-	/* ========================================
-	   Markdown 內容
-	======================================== */
 
 	.prose {
 		width: 100%;
-
-		color: #222222;
+		max-width: none;
 
 		font-size: 0.95rem;
 		line-height: 1.85;
-
-		box-sizing: border-box;
+		color: #000000;
 	}
-
-
-	/* ========================================
-	   一般段落
-	======================================== */
 
 	.prose :global(p) {
-		width: 100%;
-
 		margin: 0 0 1.5rem;
-		padding: 0;
-
-		text-align: justify;
-		word-break: break-word;
-
-		box-sizing: border-box;
 	}
-
-
-	/* ========================================
-	   文字段落
-	======================================== */
-
-	.prose :global(p:not(:has(> img))) {
-		width: 100%;
-		display: block;
-	}
-
-
-	/* ========================================
-	   圖片 Grid
-	======================================== */
-
-	.prose :global(.image-grid) {
-		width: 100%;
-
-		display: grid;
-
-		grid-template-columns:
-			repeat(2, minmax(0, 1fr));
-
-		gap: 0.3rem;
-
-		margin: 2rem 0 2.5rem;
-		padding: 0;
-
-		box-sizing: border-box;
-	}
-
-
-	/* ========================================
-	   Grid 裡面的圖片段落
-	======================================== */
-
-	.prose :global(.image-grid p) {
-		width: 100%;
-
-		margin: 0;
-		padding: 0;
-
-		text-align: left;
-
-		box-sizing: border-box;
-	}
-
-
-	/* ========================================
-	   Grid 裡面的圖片
-	======================================== */
-
-	.prose :global(.image-grid img) {
-		display: block;
-
-		width: 100%;
-		max-width: 100%;
-
-		height: auto;
-
-		margin: 0;
-		padding: 0;
-
-		border-radius: 0;
-
-		object-fit: cover;
-
-		box-sizing: border-box;
-
-		user-select: none;
-		-webkit-user-drag: none;
-
-		filter: blur(0.6px);
-
-		transition:
-			filter 0.3s ease,
-			transform 0.3s ease;
-	}
-
-
-	/* ========================================
-	   Grid 圖片 Hover
-	======================================== */
-
-	.prose :global(.image-grid img:hover) {
-		filter: blur(0);
-	}
-
-
-	/* ========================================
-	   Grid 外的一般圖片
-	======================================== */
-
-	.prose :global(
-		> p > img:only-child
-	) {
-		display: block;
-
-		width: 100%;
-		max-width: 100%;
-
-		height: auto;
-
-		margin: 0 0 1.5rem;
-
-		border-radius: 0;
-
-		box-sizing: border-box;
-
-		user-select: none;
-		-webkit-user-drag: none;
-
-		filter: blur(0.6px);
-
-		transition: filter 0.3s ease;
-	}
-
-
-	.prose :global(
-		> p > img:only-child:hover
-	) {
-		filter: blur(0);
-	}
-
-
-	/* ========================================
-	   一般圖片
-	======================================== */
-
-	.prose :global(img) {
-		max-width: 100%;
-		height: auto;
-
-		border-radius: 0;
-
-		user-select: none;
-		-webkit-user-drag: none;
-	}
-
-
-	/* ========================================
-	   標題
-	======================================== */
-
-	.prose :global(h1) {
-		width: 100%;
-
-		font-size: 2.3rem !important;
-		font-weight: 700 !important;
-
-		color: #000000 !important;
-
-		margin-top: 3.5rem !important;
-		margin-bottom: 1rem !important;
-
-		line-height: 1.25 !important;
-
-		clear: both;
-	}
-
 
 	.prose :global(h2) {
-		width: 100%;
+		margin-top: 3rem;
+		margin-bottom: 1rem;
 
-		font-size: 1.6rem !important;
-		font-weight: 700 !important;
-
-		color: #000000 !important;
-
-		margin-top: 3rem !important;
-		margin-bottom: 0.75rem !important;
-
-		line-height: 1.35 !important;
-
-		clear: both;
+		font-size: 1.5rem;
+		line-height: 1.3;
 	}
-
 
 	.prose :global(h3) {
+		margin-top: 2.5rem;
+		margin-bottom: 1rem;
+
+		font-size: 1.2rem;
+		line-height: 1.4;
+	}
+
+	.prose :global(img) {
+		display: block;
 		width: 100%;
+		height: auto;
+		margin: 1.5rem 0;
 
-		font-size: 1.2rem !important;
-		font-weight: 700 !important;
+		border-radius: 0;
 
-		color: #000000 !important;
-
-		margin-top: 2rem !important;
-		margin-bottom: 0.75rem !important;
-
-		line-height: 1.35 !important;
-
-		clear: both;
+		user-select: none;
+		-webkit-user-drag: none;
 	}
 
+	/*
+	 * MDX：
 
-	/* ========================================
-	   斜線
-	======================================== */
+	 * <div class="image-grid">
+	 *
+	 * ![圖片](...)
+	 *
+	 * ![圖片](...)
+	 *
+	 * </div>
+	 */
+	.prose :global(.image-grid) {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 0.3rem;
 
-	.prose :global(hr.slash) {
-		width: 40px;
-		height: 0.8px;
-
-		padding: 0;
-
-		border: none;
-		outline: none;
-
-		background-color: #000000;
-
-		margin: 1.5rem 0 2.2rem 0;
-
-		transform: rotate(-25deg);
-		transform-origin: left center;
-
-		clear: both;
-	}
-
-
-	/* ========================================
-	   圖說
-	======================================== */
-
-	.prose :global(p:has(> em)) {
 		width: 100%;
-
-		margin-top: -0.5rem;
-		margin-bottom: 2.2rem;
-
-		clear: both;
+		margin: 2rem 0;
 	}
 
+	.prose :global(.image-grid img) {
+		width: 100%;
+		height: auto;
+		margin: 0;
+		border-radius: 0;
+	}
 
-	.prose :global(p > em) {
-		font-style: normal;
+	.prose :global(.image-grid + em) {
+		display: block;
 
-		font-size: 0.8rem !important;
+		margin-top: -1.25rem;
+		margin-bottom: 2rem;
 
-		color: #888888 !important;
-
+		font-size: 0.8rem;
 		line-height: 1.5;
-
-		letter-spacing: 0.02em;
+		color: #888888;
 	}
 
-
-	/* ========================================
-	   Figure / Figcaption
-	======================================== */
-
-	.prose :global(figure) {
-		width: 100%;
-
-		margin: 0 0 2rem;
-		padding: 0;
-
-		clear: both;
+	.prose :global(a) {
+		color: inherit;
+		text-decoration: underline;
+		text-underline-offset: 3px;
 	}
-
-
-	.prose :global(figcaption) {
-		margin-top: 0.5rem;
-
-		font-style: normal;
-
-		font-size: 0.8rem !important;
-
-		color: #888888 !important;
-
-		line-height: 1.5;
-
-		letter-spacing: 0.02em;
-	}
-
-
-	/* ========================================
-	   清單
-	======================================== */
 
 	.prose :global(ul),
 	.prose :global(ol) {
-		width: 100%;
-
-		margin-left: 1.2rem;
-		margin-bottom: 1.5rem;
-
-		clear: both;
+		margin: 1.5rem 0;
+		padding-left: 1.5rem;
 	}
-
 
 	.prose :global(li) {
-		margin-bottom: 0.4rem;
+		margin-bottom: 0.5rem;
 	}
-
-
-	/* ========================================
-	   連結
-	======================================== */
-
-	.prose :global(a) {
-		word-break: break-word;
-	}
-
-
-	/* ========================================
-	   粗體
-	======================================== */
-
-	.prose :global(strong) {
-		font-weight: 700;
-	}
-
-
-	/* ========================================
-	   斜體
-	======================================== */
-
-	.prose :global(em) {
-		font-style: italic;
-	}
-
-
-	/* ========================================
-	   手機版
-	======================================== */
 
 	@media (max-width: 768px) {
+		.project-detail {
+			margin-top: 1rem;
+			margin-bottom: 4rem;
+		}
 
 		.project-title-row {
 			gap: 0.6rem;
 		}
 
-
-		.main-title {
-			font-size: 2rem !important;
-		}
-
-
 		.back-btn {
 			width: 32px;
 			height: 32px;
-
-			font-size: 18px;
 		}
 
-
-		.prose :global(h1) {
-			font-size: 1.8rem !important;
+		.main-title {
+			font-size: 1.7rem;
 		}
 
-
-		.prose :global(h2) {
-			font-size: 1.3rem !important;
-			margin-top: 2rem !important;
+		.prose {
+			font-size: 0.9rem;
+			line-height: 1.8;
 		}
-
-
-		.prose :global(h3) {
-			font-size: 1.1rem !important;
-			margin-top: 1.5rem !important;
-		}
-
-
-		/* ========================================
-		   手機版 Image Grid
-		======================================== */
 
 		.prose :global(.image-grid) {
 			grid-template-columns: 1fr;
-
 			gap: 0.5rem;
-
-			margin: 1.5rem 0 2rem;
-		}
-
-
-		.prose :global(.image-grid p) {
-			width: 100%;
-			margin: 0;
-		}
-
-
-		.prose :global(.image-grid img) {
-			width: 100%;
-			max-width: 100%;
-			height: auto;
-		}
-
-
-		/* ========================================
-		   手機版一般圖片
-		======================================== */
-
-		.prose :global(
-			> p > img:only-child
-		) {
-			width: 100%;
-			max-width: 100%;
 		}
 	}
 </style>

@@ -13,7 +13,11 @@ const year = product.data.year || "2026";
 ---
 
 {mode === "zoom" ? (
-	<div class="product-card is-zoom-mode" data-zoom={product.data.cover}>
+	<div
+		class="product-card is-zoom-mode"
+		data-zoom={product.data.cover}
+		data-category={product.data.category || "Visual"}
+	>
 		<div class="image-container">
 			<img
 				src={product.data.cover}
@@ -42,6 +46,7 @@ const year = product.data.year || "2026";
 		href={projectLink}
 		class="product-card is-page-mode project-link"
 		data-project-link={projectLink}
+		data-category={product.data.category || "Visual"}
 	>
 		<div class="image-container">
 			<img
@@ -68,95 +73,100 @@ const year = product.data.year || "2026";
 	</a>
 )}
 
-
 <script>
 	/**
 	 * =========================================================
-	 * 記錄進入作品之前的位置
+	 * 記錄「作品列表 → 作品詳細頁」之前的狀態
 	 * =========================================================
 	 *
-	 * 使用者：
+	 * 例如：
 	 *
 	 * 首頁
 	 * ↓
-	 * 選擇分類
+	 * Brand
 	 * ↓
-	 * 往下滑
+	 * /?category=Brand
+	 * ↓
+	 * 往下滑到 1800px
 	 * ↓
 	 * 點作品
 	 *
-	 * 在這一瞬間記錄：
+	 * 會記錄：
 	 *
-	 * 1. 原本 URL
-	 * 2. 原本 scrollY
-	 * 3. 原本分類
+	 * {
+	 *   url: "/?category=Brand",
+	 *   scrollY: 1800,
+	 *   category: "Brand"
+	 * }
+	 */
+
+	function saveProjectReturnState() {
+		const currentUrl =
+			window.location.pathname +
+			window.location.search +
+			window.location.hash;
+
+		const params = new URLSearchParams(
+			window.location.search
+		);
+
+		const category =
+			params.get("category") || "all";
+
+		const returnState = {
+			url: currentUrl,
+			scrollY: window.scrollY,
+			category: category,
+		};
+
+		sessionStorage.setItem(
+			"projectReturnState",
+			JSON.stringify(returnState)
+		);
+	}
+
+
+	/**
+	 * =========================================================
+	 * 綁定作品連結
+	 * =========================================================
+	 *
+	 * 使用 onclick：
+	 *
+	 * Astro ClientRouter / astro:page-load
+	 * 重跑時不會一直累積 click listener。
 	 */
 
 	function setupProjectLinks() {
 		const links =
 			document.querySelectorAll(
-				".project-link"
+				"a.project-link"
 			);
 
+		if (!links.length) return;
+
 		links.forEach((link) => {
-
-			/*
-			 * 使用 onclick 而不是 addEventListener，
-			 * 避免 Astro ClientRouter 重複綁定。
-			 */
 			(link as HTMLElement).onclick = () => {
-
-				/* -----------------------------------------
-				   記錄目前 URL
-				----------------------------------------- */
-
-				const currentUrl =
-					window.location.pathname +
-					window.location.search +
-					window.location.hash;
-
-
-				sessionStorage.setItem(
-					"projectReturnUrl",
-					currentUrl
-				);
-
-
-				/* -----------------------------------------
-				   記錄目前 Scroll
-				----------------------------------------- */
-
-				sessionStorage.setItem(
-					"projectReturnScrollY",
-					String(window.scrollY)
-				);
-
-
-				/* -----------------------------------------
-				   記錄目前分類
-				----------------------------------------- */
-
-				const activeCategory =
-					sessionStorage.getItem(
-						"activeCategory"
-					) || "all";
-
-
-				sessionStorage.setItem(
-					"projectReturnCategory",
-					activeCategory
-				);
+				saveProjectReturnState();
 			};
 		});
 	}
 
 
-	/* 第一次載入 */
+	/**
+	 * =========================================================
+	 * 第一次載入
+	 * =========================================================
+	 */
 
 	setupProjectLinks();
 
 
-	/* Astro ClientRouter / View Transitions */
+	/**
+	 * =========================================================
+	 * Astro ClientRouter / View Transitions
+	 * =========================================================
+	 */
 
 	document.addEventListener(
 		"astro:page-load",
