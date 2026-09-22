@@ -269,6 +269,9 @@ const activeCategory = project.data?.category || "all";
 		line-height: 1.4;
 	}
 
+	/*
+	 * 一般圖片
+	 */
 	.prose :global(img) {
 		display: block;
 		width: 100%;
@@ -282,37 +285,98 @@ const activeCategory = project.data?.category || "all";
 	}
 
 	/*
-	 * MDX：
+	 * =========================================================
+	 * 圖片並排區
+	 * =========================================================
 	 *
-	 * <div class="image-grid">
+	 * 桌機：
+	 * 兩張圖片並排
 	 *
-	 * ![圖片](...)
-	 *
-	 * ![圖片](...)
-	 *
-	 * </div>
-	 *
-	 * 桌機：兩張圖片並排
+	 * 手機：
+	 * 兩張圖片上下排列
 	 */
 	.prose :global(.image-grid) {
 		display: grid;
 		grid-template-columns: repeat(2, minmax(0, 1fr));
-		gap: 0.3rem;
 
 		width: 100%;
-		margin: 2rem 0;
+
+		/*
+		 * 圖片左右距離
+		 */
+		column-gap: 0.3rem;
+
+		/*
+		 * 圖片上下距離
+		 */
+		row-gap: 0.3rem;
+
+		/*
+		 * 不再額外製造上下空白
+		 */
+		margin: 0;
+		padding: 0;
 	}
 
+	/*
+	 * image-grid 裡面的圖片
+	 *
+	 * 取消一般 img 的 margin: 1.5rem 0
+	 * 避免造成圖片上下出現巨大空白。
+	 */
 	.prose :global(.image-grid img) {
+		display: block;
+
 		width: 100%;
 		height: auto;
+
 		margin: 0;
+		padding: 0;
+
 		border-radius: 0;
 	}
 
 	/*
-	 * 圖片下方的斜體說明
-	 * 往圖片方向拉近
+	 * =========================================================
+	 * 圖片共同圖說
+	 * =========================================================
+	 *
+	 * MDX 通常會把：
+	 *
+	 * *這是圖片說明*
+	 *
+	 * 轉成：
+	 *
+	 * <p>
+	 *   <em>這是圖片說明</em>
+	 * </p>
+	 *
+	 * 所以不能只抓 .image-grid + em。
+	 */
+
+	/*
+	 * 共同圖說外層 p：
+	 * 緊貼 image-grid
+	 */
+	.prose :global(.image-grid + p) {
+		margin-top: -1.5rem;
+		margin-bottom: 2rem;
+	}
+
+	/*
+	 * 共同圖說文字
+	 */
+	.prose :global(.image-grid + p em) {
+		display: block;
+
+		font-size: 0.8rem;
+		line-height: 1.5;
+		color: #888888;
+	}
+
+	/*
+	 * 如果 MDX 真的直接產生 image-grid + em，
+	 * 也一併支援。
 	 */
 	.prose :global(.image-grid + em) {
 		display: block;
@@ -325,12 +389,18 @@ const activeCategory = project.data?.category || "all";
 		color: #888888;
 	}
 
+	/*
+	 * 連結
+	 */
 	.prose :global(a) {
 		color: inherit;
 		text-decoration: underline;
 		text-underline-offset: 3px;
 	}
 
+	/*
+	 * 列表
+	 */
 	.prose :global(ul),
 	.prose :global(ol) {
 		margin: 1.5rem 0;
@@ -342,10 +412,9 @@ const activeCategory = project.data?.category || "all";
 	}
 
 	/*
+	 * =========================================================
 	 * 手機版
-	 *
-	 * 兩張圖片改成上下排列
-	 * 圖片之間距離縮小為 0.3rem
+	 * =========================================================
 	 */
 	@media (max-width: 768px) {
 		.project-detail {
@@ -371,9 +440,48 @@ const activeCategory = project.data?.category || "all";
 			line-height: 1.8;
 		}
 
+		/*
+		 * 手機：
+		 * 兩張圖片上下排列
+		 */
 		.prose :global(.image-grid) {
 			grid-template-columns: 1fr;
-			gap: 0.3rem;
+
+			column-gap: 0;
+			row-gap: 0.3rem;
+
+			margin: 0;
+			padding: 0;
+		}
+
+		/*
+		 * 手機圖片不要再有原本的 1.5rem margin
+		 */
+		.prose :global(.image-grid img) {
+			margin: 0;
+			padding: 0;
+		}
+
+		/*
+		 * 手機共同圖說再往上拉近
+		 */
+		.prose :global(.image-grid + p) {
+			margin-top: -1.5rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.prose :global(.image-grid + p em) {
+			font-size: 0.75rem;
+		}
+
+		/*
+		 * 直接 em 的情況
+		 */
+		.prose :global(.image-grid + em) {
+			margin-top: -1.5rem;
+			margin-bottom: 1.5rem;
+
+			font-size: 0.75rem;
 		}
 	}
 </style>
