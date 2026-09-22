@@ -72,21 +72,14 @@ const activeCategory = project.data?.category || "all";
 
 <script>
 	function setupBackButton() {
-		const button =
-			document.getElementById("back-btn");
+		const button = document.getElementById("back-btn");
 
 		if (!button) return;
 
 		button.onclick = () => {
 			const savedState =
-				sessionStorage.getItem(
-					"projectReturnState"
-				);
+				sessionStorage.getItem("projectReturnState");
 
-			/*
-			 * 有保存作品列表狀態：
-			 * 回到原本的分類＋原本的位置。
-			 */
 			if (savedState) {
 				try {
 					const state = JSON.parse(savedState);
@@ -108,31 +101,20 @@ const activeCategory = project.data?.category || "all";
 				}
 			}
 
-			/*
-			 * 如果沒有保存狀態，
-			 * 最後才回首頁。
-			 */
 			window.location.href = "/";
 		};
 	}
 
 	function restoreProjectScroll() {
 		const scrollValue =
-			sessionStorage.getItem(
-				"restoreProjectScroll"
-			);
+			sessionStorage.getItem("restoreProjectScroll");
 
 		if (!scrollValue) return;
 
-		sessionStorage.removeItem(
-			"restoreProjectScroll"
-		);
+		sessionStorage.removeItem("restoreProjectScroll");
 
 		const scrollY = Number(scrollValue);
 
-		/*
-		 * 等作品列表完成渲染後再恢復位置。
-		 */
 		requestAnimationFrame(() => {
 			requestAnimationFrame(() => {
 				window.scrollTo({
@@ -174,6 +156,7 @@ const activeCategory = project.data?.category || "all";
 
 	.back-btn {
 		flex-shrink: 0;
+
 		width: 36px;
 		height: 36px;
 
@@ -211,6 +194,7 @@ const activeCategory = project.data?.category || "all";
 
 	.main-title {
 		flex: 1;
+
 		margin: 0;
 
 		font-size: 2rem;
@@ -220,25 +204,41 @@ const activeCategory = project.data?.category || "all";
 		color: #000000;
 	}
 
+	/*
+	 * =========================================================
+	 * 首圖
+	 * =========================================================
+	 */
+
 	.featured-image {
 		width: 100%;
+
 		margin: 0 0 2.5rem;
 		padding: 0;
 	}
 
 	.featured-image img {
 		display: block;
+
 		width: 100%;
 		height: auto;
+
 		aspect-ratio: 16 / 9;
 		object-fit: cover;
 
 		border-radius: 0;
 
 		filter: blur(0.6px);
+
 		user-select: none;
 		-webkit-user-drag: none;
 	}
+
+	/*
+	 * =========================================================
+	 * 文章內容
+	 * =========================================================
+	 */
 
 	.prose {
 		width: 100%;
@@ -246,6 +246,7 @@ const activeCategory = project.data?.category || "all";
 
 		font-size: 0.95rem;
 		line-height: 1.85;
+
 		color: #000000;
 	}
 
@@ -270,12 +271,17 @@ const activeCategory = project.data?.category || "all";
 	}
 
 	/*
+	 * =========================================================
 	 * 一般圖片
+	 * =========================================================
 	 */
+
 	.prose :global(img) {
 		display: block;
+
 		width: 100%;
 		height: auto;
+
 		margin: 1.5rem 0;
 
 		border-radius: 0;
@@ -286,44 +292,66 @@ const activeCategory = project.data?.category || "all";
 
 	/*
 	 * =========================================================
-	 * 圖片並排區
+	 * 單張圖片＋圖說
 	 * =========================================================
 	 *
-	 * 桌機：
-	 * 兩張圖片並排
+	 * Markdown：
 	 *
-	 * 手機：
-	 * 兩張圖片上下排列
+	 * ![圖片](/images/example.jpg)
+	 *
+	 * *這是圖片說明*
+	 *
+	 * 不需要額外 class。
 	 */
+
+	.prose :global(p:has(> img:only-child) + p:has(> em:only-child)) {
+		margin-top: -1.2rem;
+		margin-bottom: 2rem;
+	}
+
+	.prose
+		:global(p:has(> img:only-child) + p:has(> em:only-child) em) {
+		display: block;
+
+		font-size: 0.8rem;
+		line-height: 1.5;
+
+		color: #888888;
+	}
+
+	/*
+	 * =========================================================
+	 * 兩張圖片自動並排
+	 * =========================================================
+	 *
+	 * Remark plugin 會自動產生：
+	 *
+	 * <div class="image-grid">
+	 *   <img>
+	 *   <img>
+	 * </div>
+	 */
+
 	.prose :global(.image-grid) {
 		display: grid;
+
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 
 		width: 100%;
 
-		/*
-		 * 圖片左右距離
-		 */
 		column-gap: 0.3rem;
-
-		/*
-		 * 圖片上下距離
-		 */
 		row-gap: 0.3rem;
 
-		/*
-		 * 不再額外製造上下空白
-		 */
-		margin: 0;
+		margin: 1.5rem 0 0;
 		padding: 0;
 	}
 
 	/*
 	 * image-grid 裡面的圖片
 	 *
-	 * 取消一般 img 的 margin: 1.5rem 0
-	 * 避免造成圖片上下出現巨大空白。
+	 * 覆蓋一般 img 的 margin。
 	 */
+
 	.prose :global(.image-grid img) {
 		display: block;
 
@@ -334,73 +362,81 @@ const activeCategory = project.data?.category || "all";
 		padding: 0;
 
 		border-radius: 0;
+
+		user-select: none;
+		-webkit-user-drag: none;
 	}
 
 	/*
 	 * =========================================================
-	 * 圖片共同圖說
+	 * 兩張圖片的共同圖說
 	 * =========================================================
 	 *
-	 * MDX 通常會把：
+	 * Markdown：
 	 *
-	 * *這是圖片說明*
+	 * ![圖片 2](...)
 	 *
-	 * 轉成：
+	 * ![圖片 3](...)
 	 *
-	 * <p>
-	 *   <em>這是圖片說明</em>
-	 * </p>
+	 * *共同圖說*
 	 *
-	 * 所以不能只抓 .image-grid + em。
+	 * 會自動變成：
+	 *
+	 * .image-grid
+	 * p
+	 *   em
 	 */
 
-	/*
-	 * 共同圖說外層 p：
-	 * 緊貼 image-grid
-	 */
 	.prose :global(.image-grid + p) {
 		margin-top: -1.2rem;
 		margin-bottom: 2rem;
 	}
 
-	/*
-	 * 共同圖說文字
-	 */
 	.prose :global(.image-grid + p em) {
 		display: block;
 
 		font-size: 0.8rem;
 		line-height: 1.5;
+
 		color: #888888;
 	}
 
 	/*
-	 * 如果 MDX 真的直接產生 image-grid + em，
-	 * 也一併支援。
+	 * 如果其他 Markdown 結構產生直接的 em，
+	 * 一併支援。
 	 */
+
 	.prose :global(.image-grid + em) {
 		display: block;
 
-		margin-top: -1.5rem;
+		margin-top: -1.2rem;
 		margin-bottom: 2rem;
 
 		font-size: 0.8rem;
 		line-height: 1.5;
+
 		color: #888888;
 	}
 
 	/*
+	 * =========================================================
 	 * 連結
+	 * =========================================================
 	 */
+
 	.prose :global(a) {
 		color: inherit;
+
 		text-decoration: underline;
 		text-underline-offset: 3px;
 	}
 
 	/*
+	 * =========================================================
 	 * 列表
+	 * =========================================================
 	 */
+
 	.prose :global(ul),
 	.prose :global(ol) {
 		margin: 1.5rem 0;
@@ -416,6 +452,7 @@ const activeCategory = project.data?.category || "all";
 	 * 手機版
 	 * =========================================================
 	 */
+
 	@media (max-width: 768px) {
 		.project-detail {
 			margin-top: 1rem;
@@ -441,30 +478,51 @@ const activeCategory = project.data?.category || "all";
 		}
 
 		/*
-		 * 手機：
-		 * 兩張圖片上下排列
+		 * 單張圖片圖說
 		 */
+
+		.prose
+			:global(p:has(> img:only-child) + p:has(> em:only-child)) {
+			margin-top: -1.2rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.prose
+			:global(p:has(> img:only-child) + p:has(> em:only-child) em) {
+			font-size: 0.75rem;
+		}
+
+		/*
+		 * =====================================================
+		 * 手機兩張圖片
+		 * =====================================================
+		 *
+		 * 注意：
+		 * 手機「不並排」。
+		 *
+		 * 一張在上
+		 * 一張在下
+		 */
+
 		.prose :global(.image-grid) {
 			grid-template-columns: 1fr;
 
 			column-gap: 0;
 			row-gap: 0.3rem;
 
-			margin: 0;
+			margin: 1.5rem 0 0;
 			padding: 0;
 		}
 
-		/*
-		 * 手機圖片不要再有原本的 1.5rem margin
-		 */
 		.prose :global(.image-grid img) {
 			margin: 0;
 			padding: 0;
 		}
 
 		/*
-		 * 手機共同圖說再往上拉近
+		 * 手機共同圖說
 		 */
+
 		.prose :global(.image-grid + p) {
 			margin-top: -1.2rem;
 			margin-bottom: 1.5rem;
@@ -474,11 +532,8 @@ const activeCategory = project.data?.category || "all";
 			font-size: 0.75rem;
 		}
 
-		/*
-		 * 直接 em 的情況
-		 */
 		.prose :global(.image-grid + em) {
-			margin-top: -1.5rem;
+			margin-top: -1.2rem;
 			margin-bottom: 1.5rem;
 
 			font-size: 0.75rem;

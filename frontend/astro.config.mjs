@@ -3,6 +3,7 @@ import { defineConfig, envField } from "astro/config";
 import { loadEnv } from "vite";
 
 import sitemap from "@astrojs/sitemap";
+import { remarkProjectImages } from "./src/plugins/remark-project-images.js";
 
 const { SITE_URL } = loadEnv(process.env.NODE_ENV, process.cwd(), "");
 
@@ -11,37 +12,53 @@ export default defineConfig({
 	devToolbar: {
 		enabled: false,
 	},
+
 	prefetch: true,
+
 	trailingSlash: "never",
+
 	site: SITE_URL,
+
 	integrations: [sitemap()],
+
 	image: {
 		domains: ["cdn.sanity.io"],
 		remotePatterns: [{ protocol: "https" }],
 	},
+
+	// Markdown 自動處理圖片
+	markdown: {
+		remarkPlugins: [remarkProjectImages],
+	},
+
 	vite: {
 		server: {
 			// // enable cloudflare tunnel for mobile testing
 			// allowedHosts: true,
 		},
+
 		css: {
 			devSourcemap: true,
 		},
 	},
+
 	env: {
 		schema: {
 			SITE_URL: envField.string({
 				context: "client",
 				access: "public",
 			}),
+
 			POLAR_ACCESS_TOKEN: envField.string({
 				context: "server",
 				access: "secret",
 			}),
+
 			SANITY_STUDIO_PROJECT_ID: envField.string({
 				context: "client",
 				access: "public",
 			}),
+
 			SANITY_STUDIO_DATASET: envField.string({
 				context: "client",
 				access: "public",
