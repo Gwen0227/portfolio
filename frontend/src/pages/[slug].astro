@@ -243,9 +243,8 @@ const activeCategory = project.data?.category || "all";
 	/*
 	 * 封面圖說
 	 *
-	 * 固定在圖片下面
+	 * 圖說固定在圖片正下方
 	 * 不使用 absolute
-	 * 因此不會壓在圖片上
 	 */
 
 	.featured-image figcaption {
@@ -299,7 +298,8 @@ const activeCategory = project.data?.category || "all";
 	/*
 	 * 中標題下方斜線
 	 *
-	 * 只保留約兩個中文字寬
+	 * 約兩個中文字寬
+	 * 斜度加大
 	 */
 
 	.prose :global(h2)::after {
@@ -315,7 +315,7 @@ const activeCategory = project.data?.category || "all";
 
 		background: #000000;
 
-		transform: skewY(-8deg);
+		transform: skewY(-20deg);
 		transform-origin: left center;
 	}
 
@@ -348,7 +348,9 @@ const activeCategory = project.data?.category || "all";
 	}
 
 	/*
-	 * 單張圖片下面的圖說
+	 * =========================
+	 * 單張圖片圖說
+	 * =========================
 	 */
 
 	.prose
@@ -396,7 +398,7 @@ const activeCategory = project.data?.category || "all";
 		width: 100%;
 		height: auto;
 
-		margin: 0;
+		margin: 0 !important;
 		padding: 0;
 
 		border-radius: 0;
@@ -406,11 +408,18 @@ const activeCategory = project.data?.category || "all";
 	}
 
 	/*
+	 * =========================
 	 * 兩張圖片共同圖說
+	 * =========================
+	 *
+	 * 圖片與圖說之間保留明確空間
+	 * 不使用負 margin
 	 */
 
 	.prose :global(.image-grid + p) {
-		margin-top: -1.2rem;
+		display: block;
+
+		margin-top: 0.5rem;
 		margin-bottom: 2rem;
 	}
 
@@ -430,7 +439,7 @@ const activeCategory = project.data?.category || "all";
 	.prose :global(.image-grid + em) {
 		display: block;
 
-		margin-top: -1.2rem;
+		margin-top: 0.5rem;
 		margin-bottom: 2rem;
 
 		font-size: 0.8rem;
@@ -510,7 +519,9 @@ const activeCategory = project.data?.category || "all";
 		}
 
 		/*
+		 * =========================
 		 * 手機版單張圖片圖說
+		 * =========================
 		 */
 
 		.prose
@@ -532,6 +543,9 @@ const activeCategory = project.data?.category || "all";
 		 * =========================
 		 * 手機版兩張圖片
 		 * =========================
+		 *
+		 * 上下排列
+		 * 圖片之間固定 0.3rem
 		 */
 
 		.prose :global(.image-grid) {
@@ -565,10 +579,15 @@ const activeCategory = project.data?.category || "all";
 
 		/*
 		 * 手機版共同圖說
+		 *
+		 * 不再使用負 margin
+		 * 避免壓到第二張圖片
 		 */
 
 		.prose :global(.image-grid + p) {
-			margin-top: -1.2rem;
+			display: block;
+
+			margin-top: 0.5rem;
 			margin-bottom: 1.5rem;
 		}
 
@@ -577,7 +596,7 @@ const activeCategory = project.data?.category || "all";
 		}
 
 		.prose :global(.image-grid + em) {
-			margin-top: -1.2rem;
+			margin-top: 0.5rem;
 			margin-bottom: 1.5rem;
 
 			font-size: 0.75rem;
@@ -601,7 +620,7 @@ const activeCategory = project.data?.category || "all";
 			width: 2em;
 			height: 1px;
 
-			transform: skewY(-8deg);
+			transform: skewY(-20deg);
 		}
 	}
 </style>
