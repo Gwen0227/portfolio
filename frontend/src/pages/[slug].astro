@@ -61,6 +61,12 @@ const activeCategory = project.data?.category || "all";
 					alt={project.data.title}
 					class="protected-img"
 				/>
+
+				{project.data.coverCaption && (
+					<figcaption>
+						{project.data.coverCaption}
+					</figcaption>
+				)}
 			</figure>
 		)}
 
@@ -204,6 +210,12 @@ const activeCategory = project.data?.category || "all";
 		color: #000000;
 	}
 
+	/*
+	 * =========================
+	 * 封面圖片
+	 * =========================
+	 */
+
 	.featured-image {
 		width: 100%;
 
@@ -227,6 +239,31 @@ const activeCategory = project.data?.category || "all";
 		user-select: none;
 		-webkit-user-drag: none;
 	}
+
+	/*
+	 * 封面圖說
+	 *
+	 * 固定在圖片下面
+	 * 不使用 absolute
+	 * 因此不會壓在圖片上
+	 */
+
+	.featured-image figcaption {
+		display: block;
+
+		margin-top: 0.5rem;
+
+		font-size: 0.8rem;
+		line-height: 1.5;
+
+		color: #888888;
+	}
+
+	/*
+	 * =========================
+	 * 文章內容
+	 * =========================
+	 */
 
 	.prose {
 		width: 100%;
@@ -260,8 +297,11 @@ const activeCategory = project.data?.category || "all";
 	}
 
 	/*
-	 * 中標題下方的斜線
+	 * 中標題下方斜線
+	 *
+	 * 只保留約兩個中文字寬
 	 */
+
 	.prose :global(h2)::after {
 		content: "";
 
@@ -270,12 +310,12 @@ const activeCategory = project.data?.category || "all";
 		left: 0;
 		bottom: 0;
 
-		width: 100%;
+		width: 2em;
 		height: 1px;
 
 		background: #000000;
 
-		transform: skewY(-2deg);
+		transform: skewY(-8deg);
 		transform-origin: left center;
 	}
 
@@ -310,6 +350,7 @@ const activeCategory = project.data?.category || "all";
 	/*
 	 * 單張圖片下面的圖說
 	 */
+
 	.prose
 		:global(p:has(> img:only-child) + p:has(> em:only-child)) {
 		margin-top: -1.2rem;
@@ -367,6 +408,7 @@ const activeCategory = project.data?.category || "all";
 	/*
 	 * 兩張圖片共同圖說
 	 */
+
 	.prose :global(.image-grid + p) {
 		margin-top: -1.2rem;
 		margin-bottom: 2rem;
@@ -384,6 +426,7 @@ const activeCategory = project.data?.category || "all";
 	/*
 	 * 如果圖說不是 p，而是直接的 em
 	 */
+
 	.prose :global(.image-grid + em) {
 		display: block;
 
@@ -456,8 +499,20 @@ const activeCategory = project.data?.category || "all";
 		}
 
 		/*
+		 * 手機版封面圖說
+		 */
+
+		.featured-image figcaption {
+			margin-top: 0.4rem;
+
+			font-size: 0.75rem;
+			line-height: 1.5;
+		}
+
+		/*
 		 * 手機版單張圖片圖說
 		 */
+
 		.prose
 			:global(
 				p:has(> img:only-child) + p:has(> em:only-child)
@@ -477,10 +532,6 @@ const activeCategory = project.data?.category || "all";
 		 * =========================
 		 * 手機版兩張圖片
 		 * =========================
-		 *
-		 * 改成上下排列
-		 * 但圖片之間維持和桌機並排時
-		 * 完全相同的 0.3rem 間距
 		 */
 
 		.prose :global(.image-grid) {
@@ -515,6 +566,7 @@ const activeCategory = project.data?.category || "all";
 		/*
 		 * 手機版共同圖說
 		 */
+
 		.prose :global(.image-grid + p) {
 			margin-top: -1.2rem;
 			margin-bottom: 1.5rem;
@@ -532,8 +584,11 @@ const activeCategory = project.data?.category || "all";
 		}
 
 		/*
+		 * =========================
 		 * 手機版中標題
+		 * =========================
 		 */
+
 		.prose :global(h2) {
 			margin-top: 2.5rem;
 			margin-bottom: 1.3rem;
@@ -543,9 +598,10 @@ const activeCategory = project.data?.category || "all";
 		}
 
 		.prose :global(h2)::after {
+			width: 2em;
 			height: 1px;
 
-			transform: skewY(-2deg);
+			transform: skewY(-8deg);
 		}
 	}
 </style>

@@ -3,6 +3,7 @@ title: "my-project"
 slug: "my-project"
 year: 2026
 cover: /images/brand/0000.png
+coverCaption: "這是封面的圖說文字"
 category: "Brand"
 tech:
   - Astro
