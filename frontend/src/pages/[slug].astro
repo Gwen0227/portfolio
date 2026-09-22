@@ -283,7 +283,7 @@ const activeCategory = project.data?.category || "all";
 
 	/*
 	 * MDX：
-
+	 *
 	 * <div class="image-grid">
 	 *
 	 * ![圖片](...)
@@ -291,6 +291,8 @@ const activeCategory = project.data?.category || "all";
 	 * ![圖片](...)
 	 *
 	 * </div>
+	 *
+	 * 桌機：兩張圖片並排
 	 */
 	.prose :global(.image-grid) {
 		display: grid;
@@ -308,10 +310,14 @@ const activeCategory = project.data?.category || "all";
 		border-radius: 0;
 	}
 
+	/*
+	 * 圖片下方的斜體說明
+	 * 往圖片方向拉近
+	 */
 	.prose :global(.image-grid + em) {
 		display: block;
 
-		margin-top: -1.25rem;
+		margin-top: -1.5rem;
 		margin-bottom: 2rem;
 
 		font-size: 0.8rem;
@@ -335,6 +341,12 @@ const activeCategory = project.data?.category || "all";
 		margin-bottom: 0.5rem;
 	}
 
+	/*
+	 * 手機版
+	 *
+	 * 兩張圖片改成上下排列
+	 * 圖片之間距離縮小為 0.3rem
+	 */
 	@media (max-width: 768px) {
 		.project-detail {
 			margin-top: 1rem;
@@ -361,7 +373,7 @@ const activeCategory = project.data?.category || "all";
 
 		.prose :global(.image-grid) {
 			grid-template-columns: 1fr;
-			gap: 0.5rem;
+			gap: 0.3rem;
 		}
 	}
 </style>
