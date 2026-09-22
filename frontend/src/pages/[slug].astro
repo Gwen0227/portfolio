@@ -282,25 +282,33 @@ const activeCategory = project.data?.category || "all";
 	 *
 	 * 所有 Markdown 的 ## 中標題
 	 * 都會自動產生下方斜線
+	 *
+	 * 結構：
+	 *
+	 * 中標題
+	 *
+	 * ／
+	 *
+	 * 內文
 	 */
 
 	.prose :global(h2) {
 		position: relative;
 
 		margin-top: 3rem;
-		margin-bottom: 2.2rem;
+		margin-bottom: 2.6rem;
 
 		padding-bottom: 0;
 
-		font-size: 1.5rem;
+		font-size: 1.25rem;
 		line-height: 1.3;
 	}
 
 	/*
 	 * 中標題下方斜線
 	 *
-	 * 約兩個中文字寬
 	 * 放在標題與內文之間
+	 * 約兩個中文字寬
 	 */
 
 	.prose :global(h2)::after {
@@ -309,7 +317,7 @@ const activeCategory = project.data?.category || "all";
 		position: absolute;
 
 		left: 0;
-		bottom: -1.1rem;
+		bottom: -1.5rem;
 
 		width: 2em;
 		height: 1px;
@@ -527,6 +535,7 @@ const activeCategory = project.data?.category || "all";
 		 * =========================
 		 *
 		 * 手機改成上下排列
+		 * 圖片之間固定 0.3rem
 		 */
 
 		.prose :global(.image-grid) {
@@ -581,18 +590,18 @@ const activeCategory = project.data?.category || "all";
 
 		.prose :global(h2) {
 			margin-top: 2.5rem;
-			margin-bottom: 2rem;
+			margin-bottom: 2.3rem;
 
 			padding-bottom: 0;
 
-			font-size: 1.25rem;
+			font-size: 1.1rem;
 		}
 
 		.prose :global(h2)::after {
 			width: 2em;
 			height: 1px;
 
-			bottom: -1rem;
+			bottom: -1.3rem;
 
 			transform: rotate(-25deg);
 		}
