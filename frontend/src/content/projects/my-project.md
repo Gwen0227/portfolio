@@ -10,7 +10,7 @@ tech:
   - CSS
 ---
 
-慣看秋月春風。一壺濁酒喜相逢，浪花淘盡英雄。
+_這是第二張與第三張圖片的共同圖說文字（選填）_
 
 ## 中標題標題標題
 <hr class="slash" />
@@ -23,7 +23,6 @@ tech:
 <div class="image-grid">
 
 ![第二張作品圖片](/images/brand/0000.png)
-
 ![第三張作品圖片](/images/brand/0000.png)
 
 </div>
