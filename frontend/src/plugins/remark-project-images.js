@@ -18,16 +18,19 @@ export function remarkProjectImages() {
 			);
 		};
 
-		const createDiv = (className, children) => {
+		const createImageGrid = (imageNodes) => {
 			return {
-				type: "paragraph",
-				data: {
-					hName: "div",
-					hProperties: {
-						className: className.split(" "),
-					},
-				},
-				children,
+				type: "html",
+				value: `<div class="image-grid">${imageNodes
+					.map((node) => {
+						const image = node.children[0];
+
+						const src = image.url || "";
+						const alt = image.alt || "";
+
+						return `<img src="${src}" alt="${alt}" />`;
+					})
+					.join("")}</div>`,
 			};
 		};
 
@@ -35,28 +38,37 @@ export function remarkProjectImages() {
 
 		for (let i = 0; i < children.length; i++) {
 			const current = children[i];
+			const next = children[i + 1];
+			const caption = children[i + 2];
 
-			// --------------------------------------------------
-			// 兩張連續圖片
-			// --------------------------------------------------
+			/*
+			 * =====================================================
+			 * 兩張連續圖片
+			 * =====================================================
+			 *
+			 * Markdown 正常寫：
+			 *
+			 * ![圖片 1](...)
+			 *
+			 * ![圖片 2](...)
+			 *
+			 * *共同圖說*
+			 *
+			 * 中間保留一個空白行沒有問題。
+			 */
+
 			if (
 				isImageParagraph(current) &&
-				isImageParagraph(children[i + 1])
+				isImageParagraph(next)
 			) {
-				const image1 = current;
-				const image2 = children[i + 1];
+				newChildren.push(
+					createImageGrid([current, next])
+				);
 
-				// 找兩張圖片後面是否緊接著共同圖說
-				const caption = children[i + 2];
-
-				const imageGrid = createDiv("image-grid", [
-					image1,
-					image2,
-				]);
-
-				newChildren.push(imageGrid);
-
-				// 如果後面是 *斜體圖說*，一起保留
+				/*
+				 * 如果下一個是共同圖說，
+				 * 一起保留下來。
+				 */
 				if (isCaptionParagraph(caption)) {
 					newChildren.push(caption);
 					i += 2;
@@ -67,26 +79,13 @@ export function remarkProjectImages() {
 				continue;
 			}
 
-			// --------------------------------------------------
-			// 單張圖片
-			// --------------------------------------------------
+			/*
+			 * =====================================================
+			 * 單張圖片
+			 * =====================================================
+			 */
+
 			if (isImageParagraph(current)) {
-				const caption = children[i + 1];
-
-				// 單張圖片＋斜體圖說
-				if (isCaptionParagraph(caption)) {
-					const imageWithCaption = createDiv("image-with-caption", [
-						current,
-						caption,
-					]);
-
-					newChildren.push(imageWithCaption);
-					i += 1;
-
-					continue;
-				}
-
-				// 單純單張圖片
 				newChildren.push(current);
 				continue;
 			}
