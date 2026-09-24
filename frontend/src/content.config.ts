@@ -5,29 +5,48 @@ const projects = defineCollection({
 	loader: glob({
 		pattern: "**/*.md",
 		base: "./src/content/projects",
-		retainBody: true,
 	}),
 
 	schema: z.object({
 		title: z.string(),
+
 		slug: z.string(),
+
 		year: z.number(),
 
 		cover: z.string(),
 
-		// 封面圖下方的圖說文字（選填）
-		coverCaption: z.string().optional(),
+		/*
+		 * Lightbox 圖片
+		 *
+		 * 第一張通常使用 cover，
+		 * 其他圖片放在這裡。
+		 */
+		gallery: z.array(z.string()).optional(),
 
-		category: z.string().optional(),
+		/*
+		 * 封面圖下方的圖說
+		 */
+		coverCaption:
+			z.string().optional(),
 
-		github: z.string().optional(),
-		demo: z.string().optional(),
+		category:
+			z.string().optional(),
 
-		tech: z.array(z.string()),
+		github:
+			z.string().optional(),
 
-		// zoom = 留在首頁使用 Lightbox
-		// page = 進入獨立作品頁
-		mode: z.enum(["zoom", "page"]).optional(),
+		demo:
+			z.string().optional(),
+
+		tech:
+			z.array(z.string()),
+
+		mode:
+			z.enum([
+				"zoom",
+				"page",
+			]).optional(),
 	}),
 });
 
