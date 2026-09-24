@@ -1,0 +1,403 @@
+<div id="project-lightbox" class="project-lightbox" aria-hidden="true">
+	<div class="project-lightbox-backdrop"></div>
+
+	<button
+		type="button"
+		class="project-lightbox-close"
+		aria-label="關閉"
+	>
+		×
+	</button>
+
+	<button
+		type="button"
+		class="project-lightbox-prev"
+		aria-label="上一張"
+	>
+		←
+	</button>
+
+	<div class="project-lightbox-inner">
+		<img
+			id="project-lightbox-image"
+			src=""
+			alt=""
+		/>
+
+		<div
+			id="project-lightbox-counter"
+			class="project-lightbox-counter"
+		>
+			1 / 1
+		</div>
+	</div>
+
+	<button
+		type="button"
+		class="project-lightbox-next"
+		aria-label="下一張"
+	>
+		→
+	</button>
+</div>
+
+<script>
+	const initProjectLightbox = () => {
+		const lightbox = document.querySelector(
+			"#project-lightbox"
+		);
+
+		if (!lightbox) return;
+
+		const image = lightbox.querySelector(
+			"#project-lightbox-image"
+		);
+
+		const counter = lightbox.querySelector(
+			"#project-lightbox-counter"
+		);
+
+		const close = lightbox.querySelector(
+			".project-lightbox-close"
+		);
+
+		const prev = lightbox.querySelector(
+			".project-lightbox-prev"
+		);
+
+		const next = lightbox.querySelector(
+			".project-lightbox-next"
+		);
+
+		const backdrop = lightbox.querySelector(
+			".project-lightbox-backdrop"
+		);
+
+		if (
+			!image ||
+			!counter ||
+			!close ||
+			!prev ||
+			!next ||
+			!backdrop
+		) {
+			return;
+		}
+
+		let current = 0;
+		let images = [];
+
+		const collectImages = () => {
+			const elements = document.querySelectorAll(
+				".featured-image img, .prose img"
+			);
+
+			images = Array.from(elements)
+				.map((img) => ({
+					src: img.currentSrc || img.src,
+					alt: img.alt || "",
+				}))
+				.filter((item) => item.src);
+		};
+
+		const showImage = (index) => {
+			if (!images.length) return;
+
+			current =
+				(index + images.length) %
+				images.length;
+
+			image.src = images[current].src;
+			image.alt = images[current].alt;
+
+			counter.textContent =
+				`${current + 1} / ${images.length}`;
+		};
+
+		const open = (index) => {
+			collectImages();
+
+			if (!images.length) return;
+
+			showImage(index);
+
+			lightbox.classList.add("is-open");
+			lightbox.setAttribute(
+				"aria-hidden",
+				"false"
+			);
+
+			document.body.style.overflow = "hidden";
+		};
+
+		const closeLightbox = () => {
+			lightbox.classList.remove("is-open");
+			lightbox.setAttribute(
+				"aria-hidden",
+				"true"
+			);
+
+			document.body.style.overflow = "";
+		};
+
+		/*
+		 * 使用事件委派。
+		 * 即使圖片是 set:html 後才產生，
+		 * 也可以正常點擊。
+		 */
+		document.addEventListener("click", (event) => {
+			const target = event.target;
+
+			if (!(target instanceof Element)) {
+				return;
+			}
+
+			const clickedImage = target.closest(
+				".featured-image img, .prose img"
+			);
+
+			if (!clickedImage) {
+				return;
+			}
+
+			collectImages();
+
+			const allImages = Array.from(
+				document.querySelectorAll(
+					".featured-image img, .prose img"
+				)
+			);
+
+			const index =
+				allImages.indexOf(clickedImage);
+
+			open(index);
+		});
+
+		close.addEventListener(
+			"click",
+			closeLightbox
+		);
+
+		backdrop.addEventListener(
+			"click",
+			closeLightbox
+		);
+
+		prev.addEventListener("click", () => {
+			showImage(current - 1);
+		});
+
+		next.addEventListener("click", () => {
+			showImage(current + 1);
+		});
+
+		document.addEventListener(
+			"keydown",
+			(event) => {
+				if (
+					!lightbox.classList.contains(
+						"is-open"
+					)
+				) {
+					return;
+				}
+
+				if (event.key === "Escape") {
+					closeLightbox();
+				}
+
+				if (event.key === "ArrowLeft") {
+					showImage(current - 1);
+				}
+
+				if (event.key === "ArrowRight") {
+					showImage(current + 1);
+				}
+			}
+		);
+
+		let touchStartX = 0;
+
+		lightbox.addEventListener(
+			"touchstart",
+			(event) => {
+				touchStartX =
+					event.changedTouches[0].screenX;
+			},
+			{ passive: true }
+		);
+
+		lightbox.addEventListener(
+			"touchend",
+			(event) => {
+				const touchEndX =
+					event.changedTouches[0].screenX;
+
+				const distance =
+					touchEndX - touchStartX;
+
+				if (Math.abs(distance) < 50) {
+					return;
+				}
+
+				if (distance < 0) {
+					showImage(current + 1);
+				} else {
+					showImage(current - 1);
+				}
+			},
+			{ passive: true }
+		);
+	};
+
+	document.addEventListener(
+		"astro:page-load",
+		initProjectLightbox
+	);
+
+	initProjectLightbox();
+</script>
+
+<style>
+	.project-lightbox {
+		position: fixed;
+		inset: 0;
+		z-index: 999999;
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		visibility: hidden;
+		opacity: 0;
+		pointer-events: none;
+
+		transition:
+			opacity 0.25s ease,
+			visibility 0.25s ease;
+	}
+
+	.project-lightbox.is-open {
+		visibility: visible;
+		opacity: 1;
+		pointer-events: auto;
+	}
+
+	.project-lightbox-backdrop {
+		position: absolute;
+		inset: 0;
+		background: rgba(0, 0, 0, 0.9);
+	}
+
+	.project-lightbox-inner {
+		position: relative;
+		z-index: 2;
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		width: 90vw;
+		height: 90vh;
+	}
+
+	#project-lightbox-image {
+		max-width: 100%;
+		max-height: 85vh;
+
+		width: auto;
+		height: auto;
+
+		object-fit: contain;
+
+		user-select: none;
+		-webkit-user-drag: none;
+	}
+
+	.project-lightbox-close,
+	.project-lightbox-prev,
+	.project-lightbox-next {
+		position: absolute;
+		z-index: 10;
+
+		border: 0;
+		background: transparent;
+
+		color: white;
+
+		cursor: pointer;
+
+		font-family: inherit;
+	}
+
+	.project-lightbox-close {
+		top: 20px;
+		right: 25px;
+
+		font-size: 44px;
+		line-height: 1;
+	}
+
+	.project-lightbox-prev,
+	.project-lightbox-next {
+		top: 50%;
+
+		transform: translateY(-50%);
+
+		font-size: 44px;
+	}
+
+	.project-lightbox-prev {
+		left: 25px;
+	}
+
+	.project-lightbox-next {
+		right: 25px;
+	}
+
+	.project-lightbox-counter {
+		position: absolute;
+
+		left: 50%;
+		bottom: 15px;
+
+		transform: translateX(-50%);
+
+		color: white;
+
+		font-size: 14px;
+
+		opacity: 0.8;
+	}
+
+	.featured-image img,
+	.prose img {
+		cursor: zoom-in;
+	}
+
+	@media (max-width: 700px) {
+		.project-lightbox-inner {
+			width: 92vw;
+			height: 88vh;
+		}
+
+		#project-lightbox-image {
+			max-width: 92vw;
+			max-height: 82vh;
+		}
+
+		.project-lightbox-prev {
+			left: 5px;
+		}
+
+		.project-lightbox-next {
+			right: 5px;
+		}
+
+		.project-lightbox-close {
+			top: 10px;
+			right: 12px;
+		}
+	}
+</style>

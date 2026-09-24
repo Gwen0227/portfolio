@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProductGridHeader from "../components/ProductGridHeader.astro";
+import ProjectLightbox from "../components/ProjectLightbox.astro";
 
 export async function getStaticPaths() {
 	const projects = await getCollection("projects");
@@ -39,13 +40,13 @@ const renderedHtml = project.rendered?.html || "";
 				<img
 					src={project.data.cover}
 					alt={project.data.title}
-					class="protected-img lightbox-trigger"
-					data-lightbox-image={project.data.cover}
-					data-lightbox-alt={project.data.title}
+					class="protected-img"
 				/>
 
 				{project.data.coverCaption && (
-					<figcaption>{project.data.coverCaption}</figcaption>
+					<figcaption>
+						{project.data.coverCaption}
+					</figcaption>
 				)}
 			</figure>
 		)}
@@ -55,59 +56,7 @@ const renderedHtml = project.rendered?.html || "";
 		</div>
 	</main>
 
-	<!-- =========================
-	     LIGHTBOX
-	========================= -->
-
-	<div
-		id="lightbox"
-		class="lightbox"
-		aria-hidden="true"
-	>
-		<div
-			class="lightbox-backdrop"
-			data-lightbox-close
-		></div>
-
-		<button
-			type="button"
-			class="lightbox-close"
-			aria-label="Close"
-			data-lightbox-close
-		>
-			×
-		</button>
-
-		<button
-			type="button"
-			class="lightbox-prev"
-			aria-label="Previous image"
-		>
-			←
-		</button>
-
-		<div class="lightbox-content">
-			<img
-				id="lightbox-image"
-				src=""
-				alt=""
-			/>
-
-			<div id="lightbox-caption"></div>
-
-			<div id="lightbox-counter">
-				1 / 1
-			</div>
-		</div>
-
-		<button
-			type="button"
-			class="lightbox-next"
-			aria-label="Next image"
-		>
-			→
-		</button>
-	</div>
+	<ProjectLightbox />
 </BaseLayout>
 
 <style>
@@ -123,9 +72,14 @@ const renderedHtml = project.rendered?.html || "";
 
 	.main-title {
 		margin: 0 0 40px;
+
 		font-size: clamp(42px, 7vw, 100px);
 		line-height: 0.95;
 	}
+
+	/* =========================
+	   COVER
+	========================= */
 
 	.featured-image {
 		margin: 0 0 60px;
@@ -133,14 +87,22 @@ const renderedHtml = project.rendered?.html || "";
 
 	.featured-image img {
 		display: block;
+
 		width: 100%;
 		height: auto;
+
 		cursor: zoom-in;
+
+		-webkit-user-select: none;
+		user-select: none;
+		-webkit-user-drag: none;
 	}
 
 	.featured-image figcaption {
 		margin-top: 12px;
+
 		font-size: 14px;
+
 		opacity: 0.6;
 	}
 
@@ -154,11 +116,18 @@ const renderedHtml = project.rendered?.html || "";
 
 	.prose img {
 		display: block;
+
 		width: 100%;
 		max-width: 100%;
 		height: auto;
+
 		margin: 40px 0;
+
 		cursor: zoom-in;
+
+		-webkit-user-select: none;
+		user-select: none;
+		-webkit-user-drag: none;
 	}
 
 	.prose p {
@@ -172,169 +141,12 @@ const renderedHtml = project.rendered?.html || "";
 	}
 
 	/* =========================
-	   LIGHTBOX
-	========================= */
-
-	.lightbox {
-		position: fixed;
-		inset: 0;
-		z-index: 99999;
-
-		display: flex;
-		align-items: center;
-		justify-content: center;
-
-		visibility: hidden;
-		opacity: 0;
-
-		pointer-events: none;
-
-		transition:
-			opacity 0.25s ease,
-			visibility 0.25s ease;
-	}
-
-	.lightbox.is-open {
-		visibility: visible;
-		opacity: 1;
-		pointer-events: auto;
-	}
-
-	.lightbox-backdrop {
-		position: absolute;
-		inset: 0;
-		background: rgba(0, 0, 0, 0.88);
-	}
-
-	.lightbox-content {
-		position: relative;
-		z-index: 2;
-
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-
-		width: min(90vw, 1400px);
-		height: 90vh;
-
-		pointer-events: none;
-	}
-
-	#lightbox-image {
-		display: block;
-
-		max-width: 100%;
-		max-height: calc(90vh - 70px);
-
-		width: auto;
-		height: auto;
-
-		object-fit: contain;
-
-		user-select: none;
-		-webkit-user-drag: none;
-
-		pointer-events: auto;
-	}
-
-	#lightbox-caption {
-		margin-top: 12px;
-
-		color: white;
-		font-size: 14px;
-		text-align: center;
-
-		opacity: 0.8;
-	}
-
-	#lightbox-counter {
-		margin-top: 8px;
-
-		color: white;
-		font-size: 13px;
-
-		opacity: 0.65;
-	}
-
-	/* =========================
-	   BUTTONS
-	========================= */
-
-	.lightbox-close,
-	.lightbox-prev,
-	.lightbox-next {
-		position: absolute;
-		z-index: 5;
-
-		border: 0;
-		background: transparent;
-
-		color: white;
-
-		cursor: pointer;
-
-		display: flex;
-		align-items: center;
-		justify-content: center;
-
-		font-family: inherit;
-
-		transition:
-			opacity 0.2s ease,
-			transform 0.2s ease;
-	}
-
-	.lightbox-close:hover,
-	.lightbox-prev:hover,
-	.lightbox-next:hover {
-		opacity: 0.65;
-	}
-
-	.lightbox-close {
-		top: 20px;
-		right: 25px;
-
-		width: 50px;
-		height: 50px;
-
-		font-size: 42px;
-		font-weight: 300;
-		line-height: 1;
-	}
-
-	.lightbox-prev,
-	.lightbox-next {
-		top: 50%;
-		transform: translateY(-50%);
-
-		width: 70px;
-		height: 90px;
-
-		font-size: 42px;
-		font-weight: 300;
-	}
-
-	.lightbox-prev {
-		left: 20px;
-	}
-
-	.lightbox-next {
-		right: 20px;
-	}
-
-	.lightbox-prev:hover,
-	.lightbox-next:hover {
-		transform: translateY(-50%) scale(1.08);
-	}
-
-	/* =========================
 	   MOBILE
 	========================= */
 
 	@media (max-width: 700px) {
 		.project-detail {
-			width: min(100% - 24px, 1200px);
+			width: calc(100% - 24px);
 			padding-top: 40px;
 		}
 
@@ -349,439 +161,5 @@ const renderedHtml = project.rendered?.html || "";
 		.prose img {
 			margin: 30px 0;
 		}
-
-		.lightbox-content {
-			width: 92vw;
-			height: 88vh;
-		}
-
-		#lightbox-image {
-			max-width: 92vw;
-			max-height: calc(88vh - 70px);
-		}
-
-		.lightbox-close {
-			top: 10px;
-			right: 10px;
-
-			width: 45px;
-			height: 45px;
-
-			font-size: 36px;
-		}
-
-		.lightbox-prev,
-		.lightbox-next {
-			width: 48px;
-			height: 70px;
-
-			font-size: 30px;
-		}
-
-		.lightbox-prev {
-			left: 0;
-		}
-
-		.lightbox-next {
-			right: 0;
-		}
-	}
-
-	/* =========================
-	   PROTECTED IMAGE
-	========================= */
-
-	.protected-img,
-	.prose img {
-		-webkit-user-select: none;
-		user-select: none;
-		-webkit-user-drag: none;
 	}
 </style>
-
-<script is:inline>
-	(function () {
-		function setupLightbox() {
-			const lightbox = document.getElementById("lightbox");
-
-			if (!lightbox) {
-				return;
-			}
-
-			const lightboxImage =
-				document.getElementById("lightbox-image");
-
-			const lightboxCaption =
-				document.getElementById("lightbox-caption");
-
-			const lightboxCounter =
-				document.getElementById("lightbox-counter");
-
-			const closeButton =
-				lightbox.querySelector(".lightbox-close");
-
-			const prevButton =
-				lightbox.querySelector(".lightbox-prev");
-
-			const nextButton =
-				lightbox.querySelector(".lightbox-next");
-
-			if (
-				!lightboxImage ||
-				!lightboxCaption ||
-				!lightboxCounter ||
-				!closeButton ||
-				!prevButton ||
-				!nextButton
-			) {
-				return;
-			}
-
-			/* 避免重複初始化 */
-			if (lightbox.dataset.initialized === "true") {
-				return;
-			}
-
-			lightbox.dataset.initialized = "true";
-
-			let images = [];
-			let currentIndex = 0;
-
-			let touchStartX = 0;
-			let touchEndX = 0;
-
-			/* =========================
-			   收集所有圖片
-			========================= */
-
-			function collectImages() {
-				const result = [];
-
-				/* Cover */
-				const cover =
-					document.querySelector(
-						".featured-image img"
-					);
-
-				if (cover) {
-					result.push({
-						src:
-							cover.getAttribute(
-								"data-lightbox-image"
-							) ||
-							cover.getAttribute("src"),
-
-						alt:
-							cover.getAttribute(
-								"data-lightbox-alt"
-							) ||
-							cover.getAttribute("alt") ||
-							"",
-					});
-				}
-
-				/* 內容圖片 */
-				const contentImages =
-					document.querySelectorAll(
-						".prose img"
-					);
-
-				contentImages.forEach(function (img) {
-					const src =
-						img.getAttribute("src");
-
-					if (!src) {
-						return;
-					}
-
-					result.push({
-						src: src,
-						alt:
-							img.getAttribute("alt") ||
-							"",
-					});
-				});
-
-				images = result;
-			}
-
-			/* =========================
-			   顯示圖片
-			========================= */
-
-			function showImage(index) {
-				if (!images.length) {
-					return;
-				}
-
-				if (index < 0) {
-					index = images.length - 1;
-				}
-
-				if (index >= images.length) {
-					index = 0;
-				}
-
-				currentIndex = index;
-
-				const item = images[currentIndex];
-
-				lightboxImage.src = item.src;
-				lightboxImage.alt = item.alt;
-
-				lightboxCaption.textContent =
-					item.alt || "";
-
-				lightboxCounter.textContent =
-					(currentIndex + 1) +
-					" / " +
-					images.length;
-			}
-
-			/* =========================
-			   開啟
-			========================= */
-
-			function openLightbox(index) {
-				collectImages();
-
-				if (!images.length) {
-					return;
-				}
-
-				showImage(index);
-
-				lightbox.classList.add("is-open");
-				lightbox.setAttribute(
-					"aria-hidden",
-					"false"
-				);
-
-				document.body.style.overflow = "hidden";
-			}
-
-			/* =========================
-			   關閉
-			========================= */
-
-			function closeLightbox() {
-				lightbox.classList.remove(
-					"is-open"
-				);
-
-				lightbox.setAttribute(
-					"aria-hidden",
-					"true"
-				);
-
-				document.body.style.overflow = "";
-
-				lightboxImage.src = "";
-			}
-
-			/* =========================
-			   上一張
-			========================= */
-
-			function previousImage() {
-				showImage(currentIndex - 1);
-			}
-
-			/* =========================
-			   下一張
-			========================= */
-
-			function nextImage() {
-				showImage(currentIndex + 1);
-			}
-
-			/* =========================
-			   點擊圖片
-			========================= */
-
-			document.addEventListener(
-				"click",
-				function (event) {
-					const target =
-						event.target;
-
-					if (!(target instanceof Element)) {
-						return;
-					}
-
-					const image =
-						target.closest(
-							".featured-image img, .prose img"
-						);
-
-					if (!image) {
-						return;
-					}
-
-					event.preventDefault();
-
-					collectImages();
-
-					const allImages =
-						Array.from(
-							document.querySelectorAll(
-								".featured-image img, .prose img"
-							)
-						);
-
-					const index =
-						allImages.indexOf(image);
-
-					openLightbox(
-						index >= 0 ? index : 0
-					);
-				}
-			);
-
-			/* =========================
-			   關閉按鈕
-			========================= */
-
-			closeButton.addEventListener(
-				"click",
-				function () {
-					closeLightbox();
-				}
-			);
-
-			/* =========================
-			   背景關閉
-			========================= */
-
-			const backdrop =
-				lightbox.querySelector(
-					".lightbox-backdrop"
-				);
-
-			if (backdrop) {
-				backdrop.addEventListener(
-					"click",
-					function () {
-						closeLightbox();
-					}
-				);
-			}
-
-			/* =========================
-			   上一張
-			========================= */
-
-			prevButton.addEventListener(
-				"click",
-				function () {
-					previousImage();
-				}
-			);
-
-			/* =========================
-			   下一張
-			========================= */
-
-			nextButton.addEventListener(
-				"click",
-				function () {
-					nextImage();
-				}
-			);
-
-			/* =========================
-			   鍵盤
-			========================= */
-
-			document.addEventListener(
-				"keydown",
-				function (event) {
-					if (
-						!lightbox.classList.contains(
-							"is-open"
-						)
-					) {
-						return;
-					}
-
-					if (event.key === "Escape") {
-						closeLightbox();
-					}
-
-					if (event.key === "ArrowLeft") {
-						event.preventDefault();
-						previousImage();
-					}
-
-					if (event.key === "ArrowRight") {
-						event.preventDefault();
-						nextImage();
-					}
-				}
-			);
-
-			/* =========================
-			   手機滑動
-			========================= */
-
-			lightbox.addEventListener(
-				"touchstart",
-				function (event) {
-					if (!event.changedTouches.length) {
-						return;
-					}
-
-					touchStartX =
-						event.changedTouches[0].screenX;
-				},
-				{ passive: true }
-			);
-
-			lightbox.addEventListener(
-				"touchend",
-				function (event) {
-					if (!event.changedTouches.length) {
-						return;
-					}
-
-					touchEndX =
-						event.changedTouches[0].screenX;
-
-					const distance =
-						touchEndX - touchStartX;
-
-					if (Math.abs(distance) < 50) {
-						return;
-					}
-
-					if (distance < 0) {
-						nextImage();
-					} else {
-						previousImage();
-					}
-				},
-				{ passive: true }
-			);
-		}
-
-		/* 初次載入 */
-		document.addEventListener(
-			"astro:page-load",
-			setupLightbox
-		);
-
-		/* 如果沒有 View Transitions，
-		   第一次載入也直接執行 */
-		if (
-			document.readyState === "loading"
-		) {
-			document.addEventListener(
-				"DOMContentLoaded",
-				setupLightbox,
-				{ once: true }
-			);
-		} else {
-			setupLightbox();
-		}
-	})();
-</script>
