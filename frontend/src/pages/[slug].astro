@@ -2,7 +2,6 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProductGridHeader from "../components/ProductGridHeader.astro";
-import ProjectLightbox from "../components/ProjectLightbox.astro";
 
 export async function getStaticPaths() {
 	const projects = await getCollection("projects");
@@ -19,28 +18,47 @@ export async function getStaticPaths() {
 
 const { project } = Astro.props;
 
-const allProjects = await getCollection("projects");
-const productsTotal = allProjects.length;
-const activeCategory = project.data?.category || "all";
+const allProjects =
+	await getCollection("projects");
 
-const renderedHtml = project.rendered?.html || "";
+const productsTotal =
+	allProjects.length;
+
+const activeCategory =
+	project.data?.category || "all";
+
+const renderedHtml =
+	project.rendered?.html || "";
 ---
 
 <BaseLayout title={project.data.title}>
+
 	<ProductGridHeader
 		activeCategory={activeCategory}
 		productsTotal={productsTotal}
 	/>
 
 	<main class="project-detail">
-		<h1 class="main-title">{project.data.title}</h1>
+
+		<h1 class="main-title">
+			{project.data.title}
+		</h1>
+
+
+		<!-- ========================================
+		     文章首圖
+		     一般文章頁只顯示
+		     不使用 Lightbox
+		======================================== -->
 
 		{project.data.cover && (
 			<figure class="featured-image">
+
 				<img
 					src={project.data.cover}
 					alt={project.data.title}
 					class="protected-img"
+					draggable="false"
 				/>
 
 				{project.data.coverCaption && (
@@ -48,118 +66,267 @@ const renderedHtml = project.rendered?.html || "";
 						{project.data.coverCaption}
 					</figcaption>
 				)}
+
 			</figure>
 		)}
 
+
+		<!-- ========================================
+		     文章內容
+		======================================== -->
+
 		<div class="prose">
-			<Fragment set:html={renderedHtml} />
+			<Fragment
+				set:html={renderedHtml}
+			/>
 		</div>
+
 	</main>
 
-	<ProjectLightbox />
 </BaseLayout>
 
+
 <style>
-	/* =========================
+	/* ========================================
 	   PROJECT PAGE
-	========================= */
+	   一般文章頁
+	======================================== */
 
 	.project-detail {
-		width: min(1200px, calc(100% - 40px));
-		margin: 0 auto;
-		padding: 60px 0 120px;
+		width:
+			min(
+				1200px,
+				calc(100% - 40px)
+			);
+
+		margin:
+			0 auto;
+
+		padding:
+			60px 0 120px;
 	}
+
+
+	/* ========================================
+	   TITLE
+	======================================== */
 
 	.main-title {
-		margin: 0 0 40px;
+		margin:
+			0 0 40px;
 
-		font-size: clamp(42px, 7vw, 100px);
-		line-height: 0.95;
+		font-size:
+			clamp(
+				42px,
+				7vw,
+				100px
+			);
+
+		line-height:
+			0.95;
 	}
 
-	/* =========================
+
+	/* ========================================
 	   COVER
-	========================= */
+	   
+	   一般文章首圖
+	   不可點擊
+	   不使用 Lightbox
+	======================================== */
 
 	.featured-image {
-		margin: 0 0 60px;
+		margin:
+			0 0 60px;
 	}
+
 
 	.featured-image img {
-		display: block;
+		display:
+			block;
 
-		width: 100%;
-		height: auto;
+		width:
+			100%;
 
-		cursor: zoom-in;
+		max-width:
+			100%;
 
-		-webkit-user-select: none;
-		user-select: none;
-		-webkit-user-drag: none;
+		height:
+			auto;
+
+		cursor:
+			default;
+
+		-webkit-user-select:
+			none;
+
+		user-select:
+			none;
+
+		-webkit-user-drag:
+			none;
 	}
+
+
+	/* ========================================
+	   COVER CAPTION
+	======================================== */
 
 	.featured-image figcaption {
-		margin-top: 12px;
+		margin-top:
+			12px;
 
-		font-size: 14px;
+		font-size:
+			14px;
 
-		opacity: 0.6;
+		opacity:
+			0.6;
 	}
 
-	/* =========================
+
+	/* ========================================
 	   CONTENT
-	========================= */
+	======================================== */
 
 	.prose {
-		width: 100%;
+		width:
+			100%;
 	}
+
+
+	/* ========================================
+	   CONTENT IMAGES
+	   
+	   一般文章圖片：
+	   只顯示
+	   不開 Lightbox
+	======================================== */
 
 	.prose img {
-		display: block;
+		display:
+			block;
 
-		width: 100%;
-		max-width: 100%;
-		height: auto;
+		width:
+			100%;
 
-		margin: 40px 0;
+		max-width:
+			100%;
 
-		cursor: zoom-in;
+		height:
+			auto;
 
-		-webkit-user-select: none;
-		user-select: none;
-		-webkit-user-drag: none;
+		margin:
+			40px 0;
+
+		cursor:
+			default;
+
+		-webkit-user-select:
+			none;
+
+		user-select:
+			none;
+
+		-webkit-user-drag:
+			none;
 	}
+
+
+	/* ========================================
+	   PARAGRAPH
+	======================================== */
 
 	.prose p {
-		margin: 0 0 24px;
+		margin:
+			0 0 24px;
 	}
+
+
+	/* ========================================
+	   HEADINGS
+	======================================== */
 
 	.prose h2,
 	.prose h3 {
-		margin-top: 60px;
-		margin-bottom: 24px;
+		margin-top:
+			60px;
+
+		margin-bottom:
+			24px;
 	}
 
-	/* =========================
+
+	/* ========================================
+	   LINKS
+	======================================== */
+
+	.prose a {
+		text-decoration:
+			underline;
+	}
+
+
+	/* ========================================
+	   LIST
+	======================================== */
+
+	.prose ul,
+	.prose ol {
+		margin:
+			0 0 24px;
+
+		padding-left:
+			1.5rem;
+	}
+
+
+	.prose li {
+		margin-bottom:
+			8px;
+	}
+
+
+	/* ========================================
 	   MOBILE
-	========================= */
+	======================================== */
 
 	@media (max-width: 700px) {
+
 		.project-detail {
-			width: calc(100% - 24px);
-			padding-top: 40px;
+			width:
+				calc(100% - 24px);
+
+			padding:
+				40px 0 80px;
 		}
+
 
 		.main-title {
-			margin-bottom: 30px;
+			margin-bottom:
+				30px;
 		}
+
 
 		.featured-image {
-			margin-bottom: 40px;
+			margin-bottom:
+				40px;
 		}
 
+
 		.prose img {
-			margin: 30px 0;
+			margin:
+				30px 0;
 		}
+
+
+		.prose h2,
+		.prose h3 {
+			margin-top:
+				40px;
+
+			margin-bottom:
+				20px;
+		}
+
 	}
 </style>
