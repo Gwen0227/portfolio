@@ -1,5 +1,5 @@
 ---
-import { getCollection } from "astro:content";
+import { getCollection, render } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProductGridHeader from "../components/ProductGridHeader.astro";
 
@@ -18,47 +18,48 @@ export async function getStaticPaths() {
 
 const { project } = Astro.props;
 
-const allProjects =
-	await getCollection("projects");
+if (!project) {
+	throw new Error("Project not found");
+}
 
-const productsTotal =
-	allProjects.length;
+const { Content } = await render(project);
 
-const activeCategory =
-	project.data?.category || "all";
+const allProjects = await getCollection("projects");
+const productsTotal = allProjects.length;
 
-const renderedHtml =
-	project.rendered?.html || "";
+const activeCategory = project.data?.category || "all";
 ---
 
 <BaseLayout title={project.data.title}>
-
 	<ProductGridHeader
 		activeCategory={activeCategory}
 		productsTotal={productsTotal}
 	/>
 
-	<main class="project-detail">
+	<article class="project-detail">
+		<header class="project-header">
+			<div class="project-title-row">
+				<button
+					id="back-btn"
+					class="back-btn"
+					type="button"
+					aria-label="返回作品列表"
+				>
+					<span class="back-arrow">←</span>
+				</button>
 
-		<h1 class="main-title">
-			{project.data.title}
-		</h1>
-
-
-		<!-- ========================================
-		     文章首圖
-		     一般文章頁只顯示
-		     不使用 Lightbox
-		======================================== -->
+				<h1 class="main-title">
+					{project.data.title}
+				</h1>
+			</div>
+		</header>
 
 		{project.data.cover && (
 			<figure class="featured-image">
-
 				<img
 					src={project.data.cover}
 					alt={project.data.title}
 					class="protected-img"
-					draggable="false"
 				/>
 
 				{project.data.coverCaption && (
@@ -66,267 +67,543 @@ const renderedHtml =
 						{project.data.coverCaption}
 					</figcaption>
 				)}
-
 			</figure>
 		)}
 
-
-		<!-- ========================================
-		     文章內容
-		======================================== -->
-
 		<div class="prose">
-			<Fragment
-				set:html={renderedHtml}
-			/>
+			<Content />
 		</div>
-
-	</main>
-
+	</article>
 </BaseLayout>
 
+<script>
+	function setupBackButton() {
+		const button = document.getElementById("back-btn");
+
+		if (!button) return;
+
+		button.onclick = () => {
+			const savedState =
+				sessionStorage.getItem("projectReturnState");
+
+			if (savedState) {
+				try {
+					const state = JSON.parse(savedState);
+
+					if (state.url) {
+						sessionStorage.setItem(
+							"restoreProjectScroll",
+							String(state.scrollY || 0)
+						);
+
+						window.location.href = state.url;
+						return;
+					}
+				} catch (error) {
+					console.error(
+						"無法讀取作品列表返回狀態：",
+						error
+					);
+				}
+			}
+
+			window.location.href = "/";
+		};
+	}
+
+	function restoreProjectScroll() {
+		const scrollValue =
+			sessionStorage.getItem("restoreProjectScroll");
+
+		if (!scrollValue) return;
+
+		sessionStorage.removeItem("restoreProjectScroll");
+
+		const scrollY = Number(scrollValue);
+
+		requestAnimationFrame(() => {
+			requestAnimationFrame(() => {
+				window.scrollTo({
+					top: scrollY,
+					behavior: "instant",
+				});
+			});
+		});
+	}
+
+	setupBackButton();
+
+	document.addEventListener(
+		"astro:page-load",
+		() => {
+			setupBackButton();
+			restoreProjectScroll();
+		}
+	);
+</script>
 
 <style>
-	/* ========================================
-	   PROJECT PAGE
-	   一般文章頁
-	======================================== */
-
 	.project-detail {
-		width:
-			min(
-				1200px,
-				calc(100% - 40px)
-			);
-
-		margin:
-			0 auto;
-
-		padding:
-			60px 0 120px;
+		width: 100%;
+		margin: 1.5rem 0 6rem;
 	}
 
+	.project-header {
+		width: 100%;
+		margin-bottom: 1.5rem;
+	}
 
-	/* ========================================
-	   TITLE
-	======================================== */
+	.project-title-row {
+		display: flex;
+		align-items: center;
+		gap: 0.8rem;
+		width: 100%;
+	}
+
+	.back-btn {
+		flex-shrink: 0;
+
+		width: 36px;
+		height: 36px;
+
+		display: flex;
+		align-items: center;
+		justify-content: center;
+
+		padding: 0;
+		margin: 0;
+
+		border: none;
+		border-radius: 0;
+
+		background: #f2f2f2;
+		color: #000000;
+
+		cursor: pointer;
+
+		transition:
+			background-color 0.2s ease,
+			color 0.2s ease,
+			transform 0.2s ease;
+	}
+
+	.back-btn:hover {
+		background: #000000;
+		color: #ffffff;
+		transform: translateX(-4px);
+	}
+
+	.back-arrow {
+		font-size: 1.1rem;
+		line-height: 1;
+	}
 
 	.main-title {
-		margin:
-			0 0 40px;
+		flex: 1;
 
-		font-size:
-			clamp(
-				42px,
-				7vw,
-				100px
-			);
+		margin: 0;
 
-		line-height:
-			0.95;
+		font-size: 2rem;
+		font-weight: 600;
+		line-height: 1.3;
+
+		color: #000000;
 	}
 
-
-	/* ========================================
-	   COVER
-	   
-	   一般文章首圖
-	   不可點擊
-	   不使用 Lightbox
-	======================================== */
+	/*
+	 * =========================
+	 * 封面圖片
+	 * =========================
+	 */
 
 	.featured-image {
-		margin:
-			0 0 60px;
-	}
+		width: 100%;
 
+		margin: 0 0 2.5rem;
+		padding: 0;
+	}
 
 	.featured-image img {
-		display:
-			block;
+		display: block;
 
-		width:
-			100%;
+		width: 100%;
+		height: auto;
 
-		max-width:
-			100%;
+		aspect-ratio: 16 / 9;
+		object-fit: cover;
 
-		height:
-			auto;
+		border-radius: 0;
 
-		cursor:
-			default;
+		filter: blur(0.6px);
 
-		-webkit-user-select:
-			none;
-
-		user-select:
-			none;
-
-		-webkit-user-drag:
-			none;
+		user-select: none;
+		-webkit-user-drag: none;
 	}
 
-
-	/* ========================================
-	   COVER CAPTION
-	======================================== */
+	/*
+	 * 封面圖說
+	 */
 
 	.featured-image figcaption {
-		margin-top:
-			12px;
+		display: block;
 
-		font-size:
-			14px;
+		margin-top: 0.5rem;
 
-		opacity:
-			0.6;
+		font-size: 0.8rem;
+		line-height: 1.5;
+
+		color: #888888;
 	}
 
-
-	/* ========================================
-	   CONTENT
-	======================================== */
+	/*
+	 * =========================
+	 * 文章內容
+	 * =========================
+	 */
 
 	.prose {
-		width:
-			100%;
+		width: 100%;
+		max-width: none;
+
+		font-size: 0.95rem;
+		line-height: 1.85;
+
+		color: #000000;
 	}
 
-
-	/* ========================================
-	   CONTENT IMAGES
-	   
-	   一般文章圖片：
-	   只顯示
-	   不開 Lightbox
-	======================================== */
-
-	.prose img {
-		display:
-			block;
-
-		width:
-			100%;
-
-		max-width:
-			100%;
-
-		height:
-			auto;
-
-		margin:
-			40px 0;
-
-		cursor:
-			default;
-
-		-webkit-user-select:
-			none;
-
-		user-select:
-			none;
-
-		-webkit-user-drag:
-			none;
+	.prose :global(p) {
+		margin: 0 0 1.5rem;
 	}
 
+	/*
+	 * =========================
+	 * 中標題
+	 * =========================
+	 *
+	 * 所有 Markdown 的 ## 中標題
+	 * 都會自動產生下方斜線
+	 *
+	 * 結構：
+	 *
+	 * 中標題
+	 *
+	 * ／
+	 *
+	 * 內文
+	 */
 
-	/* ========================================
-	   PARAGRAPH
-	======================================== */
+	.prose :global(h2) {
+		position: relative;
 
-	.prose p {
-		margin:
-			0 0 24px;
+		margin-top: 3rem;
+		margin-bottom: 2.6rem;
+
+		padding-bottom: 0;
+
+		font-size: 1.25rem;
+		line-height: 1.3;
 	}
 
+	/*
+	 * 中標題下方斜線
+	 *
+	 * 放在標題與內文之間
+	 * 約兩個中文字寬
+	 */
 
-	/* ========================================
-	   HEADINGS
-	======================================== */
+	.prose :global(h2)::after {
+		content: "";
 
-	.prose h2,
-	.prose h3 {
-		margin-top:
-			60px;
+		position: absolute;
 
-		margin-bottom:
-			24px;
+		left: 0;
+		bottom: -1.5rem;
+
+		width: 2em;
+		height: 1px;
+
+		background: #000000;
+
+		transform: rotate(-25deg);
+		transform-origin: left center;
 	}
 
+	.prose :global(h3) {
+		margin-top: 2.5rem;
+		margin-bottom: 1rem;
 
-	/* ========================================
-	   LINKS
-	======================================== */
-
-	.prose a {
-		text-decoration:
-			underline;
+		font-size: 1.2rem;
+		line-height: 1.4;
 	}
 
+	/*
+	 * =========================
+	 * 一般圖片
+	 * =========================
+	 */
 
-	/* ========================================
-	   LIST
-	======================================== */
+	.prose :global(img) {
+		display: block;
 
-	.prose ul,
-	.prose ol {
-		margin:
-			0 0 24px;
+		width: 100%;
+		height: auto;
 
-		padding-left:
-			1.5rem;
+		margin: 1.5rem 0;
+
+		border-radius: 0;
+
+		user-select: none;
+		-webkit-user-drag: none;
 	}
 
+	/*
+	 * =========================
+	 * 單張圖片圖說
+	 * =========================
+	 */
 
-	.prose li {
-		margin-bottom:
-			8px;
+	.prose
+		:global(p:has(> img:only-child) + p:has(> em:only-child)) {
+		margin-top: -1.2rem;
+		margin-bottom: 2rem;
 	}
 
+	.prose
+		:global(p:has(> img:only-child) + p:has(> em:only-child) em) {
+		display: block;
 
-	/* ========================================
-	   MOBILE
-	======================================== */
+		font-size: 0.8rem;
+		line-height: 1.5;
 
-	@media (max-width: 700px) {
+		color: #888888;
+	}
 
+	/*
+	 * =========================
+	 * 兩張圖片並排
+	 * =========================
+	 */
+
+	.prose :global(.image-grid) {
+		display: grid;
+
+		grid-template-columns: repeat(
+			2,
+			minmax(0, 1fr)
+		);
+
+		width: 100%;
+
+		column-gap: 0.3rem;
+		row-gap: 0.3rem;
+
+		margin: 1.5rem 0 0;
+		padding: 0;
+	}
+
+	.prose :global(.image-grid img) {
+		display: block;
+
+		width: 100%;
+		height: auto;
+
+		margin: 0 !important;
+		padding: 0;
+
+		border-radius: 0;
+
+		user-select: none;
+		-webkit-user-drag: none;
+	}
+
+	/*
+	 * =========================
+	 * 兩張圖片共同圖說
+	 * =========================
+	 */
+
+	.prose :global(.image-grid + p) {
+		display: block;
+
+		margin-top: 0.5rem;
+		margin-bottom: 2rem;
+	}
+
+	.prose :global(.image-grid + p em) {
+		display: block;
+
+		font-size: 0.8rem;
+		line-height: 1.5;
+
+		color: #888888;
+	}
+
+	/*
+	 * =========================
+	 * 連結
+	 * =========================
+	 */
+
+	.prose :global(a) {
+		color: inherit;
+
+		text-decoration: underline;
+		text-underline-offset: 3px;
+	}
+
+	/*
+	 * =========================
+	 * 清單
+	 * =========================
+	 */
+
+	.prose :global(ul),
+	.prose :global(ol) {
+		margin: 1.5rem 0;
+		padding-left: 1.5rem;
+	}
+
+	.prose :global(li) {
+		margin-bottom: 0.5rem;
+	}
+
+	/*
+	 * =========================
+	 * 手機版
+	 * =========================
+	 */
+
+	@media (max-width: 768px) {
 		.project-detail {
-			width:
-				calc(100% - 24px);
-
-			padding:
-				40px 0 80px;
+			margin-top: 1rem;
+			margin-bottom: 4rem;
 		}
 
+		.project-title-row {
+			gap: 0.6rem;
+		}
+
+		.back-btn {
+			width: 32px;
+			height: 32px;
+		}
 
 		.main-title {
-			margin-bottom:
-				30px;
+			font-size: 1.3rem;
 		}
 
-
-		.featured-image {
-			margin-bottom:
-				40px;
+		.prose {
+			font-size: 0.8rem;
+			line-height: 1.8;
 		}
 
+		/*
+		 * 手機版封面圖說
+		 */
 
-		.prose img {
-			margin:
-				30px 0;
+		.featured-image figcaption {
+			margin-top: 0.4rem;
+
+			font-size: 0.75rem;
+			line-height: 1.5;
 		}
 
+		/*
+		 * =========================
+		 * 手機版單張圖片圖說
+		 * =========================
+		 */
 
-		.prose h2,
-		.prose h3 {
-			margin-top:
-				40px;
-
-			margin-bottom:
-				20px;
+		.prose
+			:global(
+				p:has(> img:only-child) + p:has(> em:only-child)
+			) {
+			margin-top: -1.2rem;
+			margin-bottom: 1.5rem;
 		}
 
+		.prose
+			:global(
+				p:has(> img:only-child) + p:has(> em:only-child) em
+			) {
+			font-size: 0.75rem;
+		}
+
+		/*
+		 * =========================
+		 * 手機版兩張圖片
+		 * =========================
+		 *
+		 * 手機改成上下排列
+		 * 圖片之間固定 0.3rem
+		 */
+
+		.prose :global(.image-grid) {
+			display: flex;
+
+			flex-direction: column;
+
+			width: 100%;
+
+			gap: 0.3rem;
+
+			margin: 1.5rem 0 0;
+			padding: 0;
+		}
+
+		.prose :global(.image-grid img) {
+			display: block;
+
+			width: 100%;
+			height: auto;
+
+			margin: 0 !important;
+			padding: 0 !important;
+
+			border: 0;
+			border-radius: 0;
+
+			user-select: none;
+			-webkit-user-drag: none;
+		}
+
+		/*
+		 * 手機版共同圖說
+		 */
+
+		.prose :global(.image-grid + p) {
+			display: block;
+
+			margin-top: 0.5rem;
+			margin-bottom: 1.5rem;
+		}
+
+		.prose :global(.image-grid + p em) {
+			font-size: 0.75rem;
+		}
+
+		/*
+		 * =========================
+		 * 手機版中標題
+		 * =========================
+		 */
+
+		.prose :global(h2) {
+			margin-top: 2.5rem;
+			margin-bottom: 2.3rem;
+
+			padding-bottom: 0;
+
+			font-size: 1.1rem;
+		}
+
+		.prose :global(h2)::after {
+			width: 2em;
+			height: 1px;
+
+			bottom: -1.3rem;
+
+			transform: rotate(-25deg);
+		}
 	}
 </style>
