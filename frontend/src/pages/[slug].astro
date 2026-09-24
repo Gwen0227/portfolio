@@ -1,5 +1,5 @@
 ---
-import { getCollection, render } from "astro:content";
+import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProductGridHeader from "../components/ProductGridHeader.astro";
 
@@ -17,8 +17,6 @@ export async function getStaticPaths() {
 }
 
 const { project } = Astro.props;
-
-const { Content } = await render(project);
 
 const allProjects = await getCollection("projects");
 const productsTotal = allProjects.length;
@@ -75,9 +73,10 @@ const activeCategory = project.data?.category || "all";
 		     Project Content
 		========================= -->
 
-		<div class="prose">
-			<Content />
-		</div>
+		<div
+			class="prose"
+			set:html={project.rendered?.html || ""}
+		></div>
 	</main>
 
 	<!-- =========================
@@ -277,7 +276,9 @@ const activeCategory = project.data?.category || "all";
 		filter: blur(0);
 	}
 
-	/* 連續圖片在寬螢幕時並排 */
+	/* =========================================================
+	   連續圖片
+	========================================================= */
 
 	.prose :global(p:has(> img:only-child)) {
 		margin: 0;
@@ -561,9 +562,12 @@ const activeCategory = project.data?.category || "all";
 			}
 
 			const lightbox = document.querySelector("#lightbox");
-			const lightboxImage = document.querySelector("#lightbox-image");
-			const lightboxCaption = document.querySelector("#lightbox-caption");
-			const lightboxCounter = document.querySelector("#lightbox-counter");
+			const lightboxImage =
+				document.querySelector("#lightbox-image");
+			const lightboxCaption =
+				document.querySelector("#lightbox-caption");
+			const lightboxCounter =
+				document.querySelector("#lightbox-counter");
 
 			if (
 				!lightbox ||
@@ -583,21 +587,28 @@ const activeCategory = project.data?.category || "all";
 
 			const images = [];
 
+			/* Cover */
 			if (coverImage) {
 				images.push({
 					element: coverImage,
-					src: coverImage.currentSrc || coverImage.src,
+					src:
+						coverImage.currentSrc ||
+						coverImage.src,
 					alt: coverImage.alt || "",
 					caption:
-						document.querySelector(".featured-image figcaption")
-							?.textContent || "",
+						document.querySelector(
+							".featured-image figcaption"
+						)?.textContent || "",
 				});
 			}
 
+			/* Markdown images */
 			contentImages.forEach(function (img) {
 				images.push({
 					element: img,
-					src: img.currentSrc || img.src,
+					src:
+						img.currentSrc ||
+						img.src,
 					alt: img.alt || "",
 					caption: "",
 				});
@@ -620,23 +631,44 @@ const activeCategory = project.data?.category || "all";
 
 				lightboxImage.src = current.src;
 				lightboxImage.alt = current.alt;
-				lightboxCaption.textContent = current.caption;
+				lightboxCaption.textContent =
+					current.caption;
 
 				lightboxCounter.textContent =
-					currentIndex + 1 + " / " + images.length;
+					currentIndex + 1 +
+					" / " +
+					images.length;
+
+				const previousButton =
+					lightbox.querySelector(
+						".lightbox-prev"
+					);
+
+				const nextButton =
+					lightbox.querySelector(
+						".lightbox-next"
+					);
 
 				if (images.length <= 1) {
-					lightbox.querySelector(".lightbox-prev").style.display =
-						"none";
+					if (previousButton) {
+						previousButton.style.display =
+							"none";
+					}
 
-					lightbox.querySelector(".lightbox-next").style.display =
-						"none";
+					if (nextButton) {
+						nextButton.style.display =
+							"none";
+					}
 				} else {
-					lightbox.querySelector(".lightbox-prev").style.display =
-						"flex";
+					if (previousButton) {
+						previousButton.style.display =
+							"flex";
+					}
 
-					lightbox.querySelector(".lightbox-next").style.display =
-						"flex";
+					if (nextButton) {
+						nextButton.style.display =
+							"flex";
+					}
 				}
 			}
 
@@ -646,26 +678,45 @@ const activeCategory = project.data?.category || "all";
 				}
 
 				currentIndex =
-					((index % images.length) + images.length) %
+					((index % images.length) +
+						images.length) %
 					images.length;
 
 				updateLightbox();
 
-				lightbox.classList.add("is-open");
-				lightbox.setAttribute("aria-hidden", "false");
+				lightbox.classList.add(
+					"is-open"
+				);
 
-				document.documentElement.style.overflow = "hidden";
-				document.body.style.overflow = "hidden";
+				lightbox.setAttribute(
+					"aria-hidden",
+					"false"
+				);
+
+				document.documentElement.style.overflow =
+					"hidden";
+
+				document.body.style.overflow =
+					"hidden";
 			}
 
 			function closeLightbox() {
-				lightbox.classList.remove("is-open");
-				lightbox.setAttribute("aria-hidden", "true");
+				lightbox.classList.remove(
+					"is-open"
+				);
+
+				lightbox.setAttribute(
+					"aria-hidden",
+					"true"
+				);
 
 				lightboxImage.src = "";
 
-				document.documentElement.style.overflow = "";
-				document.body.style.overflow = "";
+				document.documentElement.style.overflow =
+					"";
+
+				document.body.style.overflow =
+					"";
 			}
 
 			function showPrevious() {
@@ -674,7 +725,9 @@ const activeCategory = project.data?.category || "all";
 				}
 
 				currentIndex =
-					(currentIndex - 1 + images.length) %
+					(currentIndex -
+						1 +
+						images.length) %
 					images.length;
 
 				updateLightbox();
@@ -686,7 +739,8 @@ const activeCategory = project.data?.category || "all";
 				}
 
 				currentIndex =
-					(currentIndex + 1) % images.length;
+					(currentIndex + 1) %
+					images.length;
 
 				updateLightbox();
 			}
@@ -703,9 +757,15 @@ const activeCategory = project.data?.category || "all";
 				);
 
 				if (image) {
-					const index = images.findIndex(function (item) {
-						return item.element === image;
-					});
+					const index =
+						images.findIndex(
+							function (item) {
+								return (
+									item.element ===
+									image
+								);
+							}
+						);
 
 					if (index !== -1) {
 						event.preventDefault();
@@ -715,45 +775,65 @@ const activeCategory = project.data?.category || "all";
 					return;
 				}
 
-				if (target.closest("[data-lightbox-close]")) {
+				if (
+					target.closest(
+						"[data-lightbox-close]"
+					)
+				) {
 					closeLightbox();
 					return;
 				}
 
-				if (target.closest("[data-lightbox-prev]")) {
+				if (
+					target.closest(
+						"[data-lightbox-prev]"
+					)
+				) {
 					showPrevious();
 					return;
 				}
 
-				if (target.closest("[data-lightbox-next]")) {
+				if (
+					target.closest(
+						"[data-lightbox-next]"
+					)
+				) {
 					showNext();
 					return;
 				}
 			}
 
 			function handleKeydown(event) {
-				if (!lightbox.classList.contains("is-open")) {
+				if (
+					!lightbox.classList.contains(
+						"is-open"
+					)
+				) {
 					return;
 				}
 
 				if (event.key === "Escape") {
 					event.preventDefault();
 					closeLightbox();
+					return;
 				}
 
 				if (event.key === "ArrowLeft") {
 					event.preventDefault();
 					showPrevious();
+					return;
 				}
 
 				if (event.key === "ArrowRight") {
 					event.preventDefault();
 					showNext();
+					return;
 				}
 			}
 
 			function handleTouchStart(event) {
-				const touch = event.changedTouches[0];
+				const touch =
+					event.changedTouches[0];
 
 				if (!touch) {
 					return;
@@ -764,26 +844,33 @@ const activeCategory = project.data?.category || "all";
 			}
 
 			function handleTouchEnd(event) {
-				if (!lightbox.classList.contains("is-open")) {
+				if (
+					!lightbox.classList.contains(
+						"is-open"
+					)
+				) {
 					return;
 				}
 
-				const touch = event.changedTouches[0];
+				const touch =
+					event.changedTouches[0];
 
 				if (!touch) {
 					return;
 				}
 
-				const deltaX = touch.clientX - touchStartX;
-				const deltaY = touch.clientY - touchStartY;
+				const deltaX =
+					touch.clientX -
+					touchStartX;
 
-				/*
-				 * 只有水平滑動距離夠大，而且不是主要的上下滑動
-				 * 才切換圖片。
-				 */
+				const deltaY =
+					touch.clientY -
+					touchStartY;
+
 				if (
 					Math.abs(deltaX) > 50 &&
-					Math.abs(deltaX) > Math.abs(deltaY)
+					Math.abs(deltaX) >
+						Math.abs(deltaY)
 				) {
 					if (deltaX > 0) {
 						showPrevious();
@@ -793,8 +880,15 @@ const activeCategory = project.data?.category || "all";
 				}
 			}
 
-			document.addEventListener("click", handleClick);
-			document.addEventListener("keydown", handleKeydown);
+			document.addEventListener(
+				"click",
+				handleClick
+			);
+
+			document.addEventListener(
+				"keydown",
+				handleKeydown
+			);
 
 			lightbox.addEventListener(
 				"touchstart",
@@ -809,8 +903,15 @@ const activeCategory = project.data?.category || "all";
 			);
 
 			cleanup = function () {
-				document.removeEventListener("click", handleClick);
-				document.removeEventListener("keydown", handleKeydown);
+				document.removeEventListener(
+					"click",
+					handleClick
+				);
+
+				document.removeEventListener(
+					"keydown",
+					handleKeydown
+				);
 
 				lightbox.removeEventListener(
 					"touchstart",
@@ -822,8 +923,11 @@ const activeCategory = project.data?.category || "all";
 					handleTouchEnd
 				);
 
-				document.documentElement.style.overflow = "";
-				document.body.style.overflow = "";
+				document.documentElement.style.overflow =
+					"";
+
+				document.body.style.overflow =
+					"";
 			};
 		}
 
