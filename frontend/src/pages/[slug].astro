@@ -50,6 +50,7 @@ const activeCategory = project.data?.category || "all";
 
 			<div class="project-meta">
 				{project.data.year && <span>{project.data.year}</span>}
+
 				{project.data.category && (
 					<span>{project.data.category}</span>
 				)}
@@ -58,7 +59,7 @@ const activeCategory = project.data?.category || "all";
 
 		{
 			project.data.cover && (
-				<figure class="featured-image lightbox-trigger">
+				<figure class="featured-image">
 					<img
 						src={project.data.cover}
 						alt={project.data.title}
@@ -68,7 +69,9 @@ const activeCategory = project.data?.category || "all";
 
 					{
 						project.data.coverCaption && (
-							<figcaption>{project.data.coverCaption}</figcaption>
+							<figcaption>
+								{project.data.coverCaption}
+							</figcaption>
 						)
 					}
 				</figure>
@@ -85,6 +88,7 @@ const activeCategory = project.data?.category || "all";
 	<!-- =========================================================
 	     LIGHTBOX
 	     ========================================================= -->
+
 	<div
 		id="lightbox"
 		class="lightbox"
@@ -100,7 +104,7 @@ const activeCategory = project.data?.category || "all";
 			class="lightbox-close"
 			aria-label="Close image viewer"
 		>
-			<span>×</span>
+			×
 		</button>
 
 		<button
@@ -108,7 +112,7 @@ const activeCategory = project.data?.category || "all";
 			class="lightbox-arrow lightbox-prev"
 			aria-label="Previous image"
 		>
-			<span>←</span>
+			←
 		</button>
 
 		<div class="lightbox-content">
@@ -119,9 +123,15 @@ const activeCategory = project.data?.category || "all";
 				draggable="false"
 			/>
 
-			<div class="lightbox-caption" id="lightbox-caption"></div>
+			<div
+				class="lightbox-caption"
+				id="lightbox-caption"
+			></div>
 
-			<div class="lightbox-counter" id="lightbox-counter">
+			<div
+				class="lightbox-counter"
+				id="lightbox-counter"
+			>
 				1 / 1
 			</div>
 		</div>
@@ -131,99 +141,27 @@ const activeCategory = project.data?.category || "all";
 			class="lightbox-arrow lightbox-next"
 			aria-label="Next image"
 		>
-			<span>→</span>
+			→
 		</button>
 	</div>
 
 	<script>
 		/* =========================================================
-		   PROJECT PAGE
-		   ========================================================= */
-
-		function setupBackButton() {
-			const backButton = document.querySelector(".back-button");
-
-			if (!backButton) return;
-
-			backButton.onclick = (event) => {
-				/*
-				 * 如果有上一頁，就回上一頁。
-				 * 如果沒有，就回首頁。
-				 */
-				if (window.history.length > 1) {
-					event.preventDefault();
-					window.history.back();
-				}
-			};
-		}
-
-		/* =========================================================
 		   LIGHTBOX
+		   使用事件委派，支援 Astro Client Navigation
 		   ========================================================= */
 
-		function setupLightbox() {
-			const lightbox = document.querySelector("#lightbox");
+		const getLightboxImages = () => {
+			const images = [];
 
-			if (!lightbox) {
-				console.warn("Lightbox 元素不存在");
-				return;
-			}
-
-			const lightboxImage =
-				lightbox.querySelector("#lightbox-image");
-
-			const lightboxCaption =
-				lightbox.querySelector("#lightbox-caption");
-
-			const lightboxCounter =
-				lightbox.querySelector("#lightbox-counter");
-
-			const closeButton =
-				lightbox.querySelector(".lightbox-close");
-
-			const prevButton =
-				lightbox.querySelector(".lightbox-prev");
-
-			const nextButton =
-				lightbox.querySelector(".lightbox-next");
-
-			const backdrop =
-				lightbox.querySelector(".lightbox-backdrop");
-
-			if (
-				!lightboxImage ||
-				!closeButton ||
-				!prevButton ||
-				!nextButton ||
-				!backdrop
-			) {
-				console.warn("Lightbox 元件不完整");
-				return;
-			}
-
-			/*
-			 * 防止 Astro 頁面切換時重複綁定事件。
-			 */
-			if (lightbox.dataset.initialized === "true") {
-				return;
-			}
-
-			lightbox.dataset.initialized = "true";
-
-			/* -------------------------------------------------------
-			   收集所有圖片
-			   ------------------------------------------------------- */
-
-			const imageItems = [];
-
-			/*
-			 * 1. Cover
-			 */
-			const cover =
-				document.querySelector(".featured-image img");
+			/* Cover */
+			const cover = document.querySelector(
+				".featured-image img"
+			);
 
 			if (cover) {
-				imageItems.push({
+				images.push({
+					element: cover,
 					src: cover.currentSrc || cover.src,
 					alt: cover.alt || "",
 					caption:
@@ -234,24 +172,15 @@ const activeCategory = project.data?.category || "all";
 				});
 			}
 
-			/*
-			 * 2. 文章內圖片
-			 */
+			/* 內文圖片 */
 			const contentImages =
 				document.querySelectorAll(".prose img");
 
 			contentImages.forEach((img) => {
-				/*
-				 * 如果文章內圖片跟 Cover 是同一個 DOM，
-				 * 避免重複加入。
-				 */
 				if (img === cover) return;
 
 				let caption = "";
 
-				/*
-				 * 嘗試找 figure / figcaption
-				 */
 				const figure = img.closest("figure");
 
 				if (figure) {
@@ -261,351 +190,517 @@ const activeCategory = project.data?.category || "all";
 							?.textContent?.trim() || "";
 				}
 
-				/*
-				 * 如果沒有 figcaption，
-				 * 嘗試找圖片後面緊接著的斜體文字。
-				 */
 				if (!caption) {
 					const parent = img.parentElement;
 
 					if (parent) {
-						const nextElement =
+						const next =
 							parent.nextElementSibling;
 
 						if (
-							nextElement?.tagName === "P" &&
-							nextElement.querySelector("em")
+							next?.tagName === "P" &&
+							next.querySelector("em")
 						) {
 							caption =
-								nextElement
+								next
 									.querySelector("em")
 									.textContent?.trim() || "";
 						}
 					}
 				}
 
-				imageItems.push({
+				images.push({
+					element: img,
 					src: img.currentSrc || img.src,
 					alt: img.alt || "",
 					caption,
 				});
 			});
 
-			console.log(
-				"Lightbox 圖片數量：",
-				imageItems.length
-			);
+			return images;
+		};
 
-			if (imageItems.length === 0) {
-				console.warn("Lightbox 沒有找到任何圖片");
+		let lightboxIndex = 0;
+
+		let touchStartX = 0;
+		let touchStartY = 0;
+
+		function getLightboxElements() {
+			const lightbox =
+				document.querySelector("#lightbox");
+
+			if (!lightbox) return null;
+
+			return {
+				lightbox,
+				image: lightbox.querySelector(
+					"#lightbox-image"
+				),
+				caption: lightbox.querySelector(
+					"#lightbox-caption"
+				),
+				counter: lightbox.querySelector(
+					"#lightbox-counter"
+				),
+				close: lightbox.querySelector(
+					".lightbox-close"
+				),
+				prev: lightbox.querySelector(
+					".lightbox-prev"
+				),
+				next: lightbox.querySelector(
+					".lightbox-next"
+				),
+				backdrop: lightbox.querySelector(
+					".lightbox-backdrop"
+				),
+			};
+		}
+
+		function showLightboxImage(index) {
+			const elements = getLightboxElements();
+
+			if (!elements) return;
+
+			const {
+				image,
+				caption,
+				counter,
+				prev,
+				next,
+			} = elements;
+
+			const items = getLightboxImages();
+
+			if (!items.length) return;
+
+			if (index < 0) {
+				index = items.length - 1;
+			}
+
+			if (index >= items.length) {
+				index = 0;
+			}
+
+			lightboxIndex = index;
+
+			const item = items[index];
+
+			image.src = item.src;
+			image.alt = item.alt;
+
+			if (caption) {
+				caption.textContent =
+					item.caption || "";
+			}
+
+			if (counter) {
+				counter.textContent =
+					`${index + 1} / ${items.length}`;
+			}
+
+			if (items.length <= 1) {
+				prev?.classList.add("is-hidden");
+				next?.classList.add("is-hidden");
+			} else {
+				prev?.classList.remove("is-hidden");
+				next?.classList.remove("is-hidden");
+			}
+		}
+
+		function openLightbox(index) {
+			const elements = getLightboxElements();
+
+			if (!elements) {
+				console.warn(
+					"Lightbox 元素不存在"
+				);
 				return;
 			}
 
-			/* -------------------------------------------------------
-			   目前圖片
-			   ------------------------------------------------------- */
+			const items = getLightboxImages();
 
-			let currentIndex = 0;
-
-			/* -------------------------------------------------------
-			   更新圖片
-			   ------------------------------------------------------- */
-
-			function showImage(index) {
-				if (imageItems.length === 0) return;
-
-				/*
-				 * 循環切換
-				 */
-				if (index < 0) {
-					index = imageItems.length - 1;
-				}
-
-				if (index >= imageItems.length) {
-					index = 0;
-				}
-
-				currentIndex = index;
-
-				const item = imageItems[currentIndex];
-
-				lightboxImage.src = item.src;
-				lightboxImage.alt = item.alt;
-
-				if (lightboxCaption) {
-					lightboxCaption.textContent =
-						item.caption || "";
-				}
-
-				if (lightboxCounter) {
-					lightboxCounter.textContent =
-						`${currentIndex + 1} / ${imageItems.length}`;
-				}
-
-				/*
-				 * 只有一張圖片時，不需要左右按鈕。
-				 */
-				if (imageItems.length <= 1) {
-					prevButton.classList.add("is-hidden");
-					nextButton.classList.add("is-hidden");
-				} else {
-					prevButton.classList.remove("is-hidden");
-					nextButton.classList.remove("is-hidden");
-				}
+			if (!items.length) {
+				console.warn(
+					"Lightbox 找不到圖片"
+				);
+				return;
 			}
 
-			/* -------------------------------------------------------
-			   開啟
-			   ------------------------------------------------------- */
+			showLightboxImage(index);
 
-			function openLightbox(index) {
-				showImage(index);
-
-				lightbox.classList.add("is-open");
-				lightbox.setAttribute("aria-hidden", "false");
-
-				document.documentElement.classList.add(
-					"lightbox-open"
-				);
-
-				document.body.classList.add(
-					"lightbox-open"
-				);
-			}
-
-			/* -------------------------------------------------------
-			   關閉
-			   ------------------------------------------------------- */
-
-			function closeLightbox() {
-				lightbox.classList.remove("is-open");
-				lightbox.setAttribute("aria-hidden", "true");
-
-				document.documentElement.classList.remove(
-					"lightbox-open"
-				);
-
-				document.body.classList.remove(
-					"lightbox-open"
-				);
-
-				/*
-				 * 清空圖片，避免關閉後仍然載入。
-				 */
-				window.setTimeout(() => {
-					if (
-						!lightbox.classList.contains(
-							"is-open"
-						)
-					) {
-						lightboxImage.src = "";
-					}
-				}, 250);
-			}
-
-			/* -------------------------------------------------------
-			   Cover 點擊
-			   ------------------------------------------------------- */
-
-			if (cover) {
-				cover.style.cursor = "zoom-in";
-
-				cover.onclick = (event) => {
-					event.preventDefault();
-					event.stopPropagation();
-
-					openLightbox(0);
-				};
-			}
-
-			/* -------------------------------------------------------
-			   文章內圖片點擊
-			   ------------------------------------------------------- */
-
-			contentImages.forEach((img, index) => {
-				if (img === cover) return;
-
-				img.style.cursor = "zoom-in";
-
-				img.onclick = (event) => {
-					event.preventDefault();
-					event.stopPropagation();
-
-					/*
-					 * Cover 佔第 0 張，
-					 * 所以文章圖片從第 1 張開始。
-					 */
-					openLightbox(index + 1);
-				};
-			});
-
-			/* -------------------------------------------------------
-			   上一張
-			   ------------------------------------------------------- */
-
-			prevButton.onclick = (event) => {
-				event.preventDefault();
-				event.stopPropagation();
-
-				showImage(currentIndex - 1);
-			};
-
-			/* -------------------------------------------------------
-			   下一張
-			   ------------------------------------------------------- */
-
-			nextButton.onclick = (event) => {
-				event.preventDefault();
-				event.stopPropagation();
-
-				showImage(currentIndex + 1);
-			};
-
-			/* -------------------------------------------------------
-			   關閉按鈕
-			   ------------------------------------------------------- */
-
-			closeButton.onclick = (event) => {
-				event.preventDefault();
-				event.stopPropagation();
-
-				closeLightbox();
-			};
-
-			/* -------------------------------------------------------
-			   點背景關閉
-			   ------------------------------------------------------- */
-
-			backdrop.onclick = () => {
-				closeLightbox();
-			};
-
-			/* -------------------------------------------------------
-			   點圖片本身不要關閉
-			   ------------------------------------------------------- */
-
-			lightboxImage.onclick = (event) => {
-				event.stopPropagation();
-			};
-
-			/* -------------------------------------------------------
-			   鍵盤
-			   ------------------------------------------------------- */
-
-			const handleKeydown = (event) => {
-				if (!lightbox.classList.contains("is-open")) {
-					return;
-				}
-
-				if (event.key === "Escape") {
-					event.preventDefault();
-					closeLightbox();
-					return;
-				}
-
-				if (event.key === "ArrowLeft") {
-					event.preventDefault();
-					showImage(currentIndex - 1);
-					return;
-				}
-
-				if (event.key === "ArrowRight") {
-					event.preventDefault();
-					showImage(currentIndex + 1);
-				}
-			};
-
-			document.addEventListener(
-				"keydown",
-				handleKeydown
+			elements.lightbox.classList.add(
+				"is-open"
 			);
 
-			/* -------------------------------------------------------
-			   手機左右滑動
-			   ------------------------------------------------------- */
-
-			let touchStartX = 0;
-			let touchStartY = 0;
-
-			lightbox.addEventListener(
-				"touchstart",
-				(event) => {
-					if (!lightbox.classList.contains("is-open")) {
-						return;
-					}
-
-					const touch = event.changedTouches[0];
-
-					touchStartX = touch.clientX;
-					touchStartY = touch.clientY;
-				},
-				{ passive: true }
+			elements.lightbox.setAttribute(
+				"aria-hidden",
+				"false"
 			);
 
-			lightbox.addEventListener(
-				"touchend",
-				(event) => {
-					if (!lightbox.classList.contains("is-open")) {
-						return;
-					}
-
-					const touch = event.changedTouches[0];
-
-					const diffX =
-						touch.clientX - touchStartX;
-
-					const diffY =
-						touch.clientY - touchStartY;
-
-					/*
-					 * 必須是明顯的水平滑動。
-					 */
-					if (
-						Math.abs(diffX) > 50 &&
-						Math.abs(diffX) > Math.abs(diffY)
-					) {
-						if (diffX > 0) {
-							showImage(currentIndex - 1);
-						} else {
-							showImage(currentIndex + 1);
-						}
-					}
-				},
-				{ passive: true }
+			document.documentElement.classList.add(
+				"lightbox-open"
 			);
+
+			document.body.classList.add(
+				"lightbox-open"
+			);
+		}
+
+		function closeLightbox() {
+			const elements = getLightboxElements();
+
+			if (!elements) return;
+
+			elements.lightbox.classList.remove(
+				"is-open"
+			);
+
+			elements.lightbox.setAttribute(
+				"aria-hidden",
+				"true"
+			);
+
+			document.documentElement.classList.remove(
+				"lightbox-open"
+			);
+
+			document.body.classList.remove(
+				"lightbox-open"
+			);
+
+			window.setTimeout(() => {
+				if (
+					!elements.lightbox.classList.contains(
+						"is-open"
+					)
+				) {
+					elements.image.src = "";
+				}
+			}, 250);
 		}
 
 		/* =========================================================
-		   INITIALIZE
+		   點擊
 		   ========================================================= */
 
-		function initializeProjectPage() {
-			setupBackButton();
-			setupLightbox();
+		function handleLightboxClick(event) {
+			const target = event.target;
+
+			if (!(target instanceof Element)) {
+				return;
+			}
+
+			const elements = getLightboxElements();
+
+			if (!elements) return;
+
+			/* Cover */
+			const cover = target.closest(
+				".featured-image img"
+			);
+
+			if (cover) {
+				event.preventDefault();
+				event.stopPropagation();
+
+				const items = getLightboxImages();
+
+				const index = items.findIndex(
+					(item) => item.element === cover
+				);
+
+				openLightbox(
+					index >= 0 ? index : 0
+				);
+
+				return;
+			}
+
+			/* 內文圖片 */
+			const contentImage = target.closest(
+				".prose img"
+			);
+
+			if (
+				contentImage &&
+				contentImage !==
+					document.querySelector(
+						".featured-image img"
+					)
+			) {
+				event.preventDefault();
+				event.stopPropagation();
+
+				const items = getLightboxImages();
+
+				const index = items.findIndex(
+					(item) =>
+						item.element === contentImage
+				);
+
+				if (index >= 0) {
+					openLightbox(index);
+				}
+
+				return;
+			}
+
+			/* 關閉 */
+			if (
+				target.closest(".lightbox-close")
+			) {
+				event.preventDefault();
+				event.stopPropagation();
+
+				closeLightbox();
+				return;
+			}
+
+			/* 上一張 */
+			if (
+				target.closest(".lightbox-prev")
+			) {
+				event.preventDefault();
+				event.stopPropagation();
+
+				showLightboxImage(
+					lightboxIndex - 1
+				);
+
+				return;
+			}
+
+			/* 下一張 */
+			if (
+				target.closest(".lightbox-next")
+			) {
+				event.preventDefault();
+				event.stopPropagation();
+
+				showLightboxImage(
+					lightboxIndex + 1
+				);
+
+				return;
+			}
+
+			/* 背景 */
+			if (
+				target.closest(".lightbox-backdrop")
+			) {
+				closeLightbox();
+			}
 		}
+
+		/* =========================================================
+		   鍵盤
+		   ========================================================= */
+
+		function handleLightboxKeydown(event) {
+			const elements = getLightboxElements();
+
+			if (!elements) return;
+
+			if (
+				!elements.lightbox.classList.contains(
+					"is-open"
+				)
+			) {
+				return;
+			}
+
+			if (event.key === "Escape") {
+				event.preventDefault();
+				closeLightbox();
+				return;
+			}
+
+			if (event.key === "ArrowLeft") {
+				event.preventDefault();
+
+				showLightboxImage(
+					lightboxIndex - 1
+				);
+
+				return;
+			}
+
+			if (event.key === "ArrowRight") {
+				event.preventDefault();
+
+				showLightboxImage(
+					lightboxIndex + 1
+				);
+			}
+		}
+
+		/* =========================================================
+		   手機滑動
+		   ========================================================= */
+
+		function handleTouchStart(event) {
+			const elements = getLightboxElements();
+
+			if (!elements) return;
+
+			if (
+				!elements.lightbox.classList.contains(
+					"is-open"
+				)
+			) {
+				return;
+			}
+
+			const touch = event.changedTouches[0];
+
+			touchStartX = touch.clientX;
+			touchStartY = touch.clientY;
+		}
+
+		function handleTouchEnd(event) {
+			const elements = getLightboxElements();
+
+			if (!elements) return;
+
+			if (
+				!elements.lightbox.classList.contains(
+					"is-open"
+				)
+			) {
+				return;
+			}
+
+			const touch = event.changedTouches[0];
+
+			const diffX =
+				touch.clientX - touchStartX;
+
+			const diffY =
+				touch.clientY - touchStartY;
+
+			if (
+				Math.abs(diffX) > 50 &&
+				Math.abs(diffX) >
+					Math.abs(diffY)
+			) {
+				if (diffX > 0) {
+					showLightboxImage(
+						lightboxIndex - 1
+					);
+				} else {
+					showLightboxImage(
+						lightboxIndex + 1
+					);
+				}
+			}
+		}
+
+		/* =========================================================
+		   Back
+		   ========================================================= */
+
+		function handleBackButton(event) {
+			const target = event.target;
+
+			if (!(target instanceof Element)) {
+				return;
+			}
+
+			const button = target.closest(
+				".back-button"
+			);
+
+			if (!button) return;
+
+			if (window.history.length > 1) {
+				event.preventDefault();
+				window.history.back();
+			}
+		}
+
+		/* =========================================================
+		   全域事件
+		   ========================================================= */
+
+		document.addEventListener(
+			"click",
+			handleLightboxClick
+		);
+
+		document.addEventListener(
+			"keydown",
+			handleLightboxKeydown
+		);
+
+		document.addEventListener(
+			"touchstart",
+			handleTouchStart,
+			{ passive: true }
+		);
+
+		document.addEventListener(
+			"touchend",
+			handleTouchEnd,
+			{ passive: true }
+		);
+
+		document.addEventListener(
+			"click",
+			handleBackButton
+		);
+
+		/* =========================================================
+		   Astro Client Navigation
+		   ========================================================= */
+
+		document.addEventListener(
+			"astro:page-load",
+			() => {
+				/*
+				 * 每次 Astro 頁面切換後，
+				 * 不需要重新綁定圖片。
+				 * 因為上面的事件是綁在 document。
+				 */
+
+				const images =
+					getLightboxImages();
+
+				images.forEach((item) => {
+					item.element.style.cursor =
+						"zoom-in";
+				});
+			}
+		);
 
 		/*
 		 * 初次載入
 		 */
-		if (document.readyState === "loading") {
+		if (
+			document.readyState === "loading"
+		) {
 			document.addEventListener(
 				"DOMContentLoaded",
-				initializeProjectPage,
+				() => {
+					const images =
+						getLightboxImages();
+
+					images.forEach((item) => {
+						item.element.style.cursor =
+							"zoom-in";
+					});
+				},
 				{ once: true }
 			);
 		} else {
-			initializeProjectPage();
-		}
+			const images =
+				getLightboxImages();
 
-		/*
-		 * Astro Client Navigation
-		 */
-		document.addEventListener(
-			"astro:page-load",
-			() => {
-				initializeProjectPage();
-			}
-		);
+			images.forEach((item) => {
+				item.element.style.cursor =
+					"zoom-in";
+			});
+		}
 	</script>
 
 	<style>
@@ -697,6 +792,7 @@ const activeCategory = project.data?.category || "all";
 			object-fit: contain;
 			user-select: none;
 			-webkit-user-drag: none;
+			cursor: zoom-in;
 		}
 
 		.featured-image figcaption {
@@ -777,7 +873,10 @@ const activeCategory = project.data?.category || "all";
 
 		.prose .image-grid {
 			display: grid;
-			grid-template-columns: repeat(2, minmax(0, 1fr));
+			grid-template-columns: repeat(
+				2,
+				minmax(0, 1fr)
+			);
 			gap: 1rem;
 			margin: 2rem 0;
 		}
@@ -813,7 +912,6 @@ const activeCategory = project.data?.category || "all";
 
 			visibility: hidden;
 			opacity: 0;
-
 			pointer-events: none;
 
 			transition:
@@ -828,7 +926,7 @@ const activeCategory = project.data?.category || "all";
 		}
 
 		/* =========================================================
-		   BLACK BACKGROUND
+		   BACKGROUND
 		   ========================================================= */
 
 		.lightbox-backdrop {
@@ -847,7 +945,7 @@ const activeCategory = project.data?.category || "all";
 		}
 
 		/* =========================================================
-		   LIGHTBOX CONTENT
+		   CONTENT
 		   ========================================================= */
 
 		.lightbox-content {
@@ -882,7 +980,8 @@ const activeCategory = project.data?.category || "all";
 			pointer-events: auto;
 
 			box-shadow:
-				0 20px 80px rgba(0, 0, 0, 0.45);
+				0 20px 80px
+				rgba(0, 0, 0, 0.45);
 		}
 
 		/* =========================================================
@@ -967,11 +1066,6 @@ const activeCategory = project.data?.category || "all";
 			transform: rotate(90deg);
 		}
 
-		.lightbox-close span {
-			display: block;
-			transform: translateY(-1px);
-		}
-
 		/* =========================================================
 		   ARROWS
 		   ========================================================= */
@@ -1018,16 +1112,20 @@ const activeCategory = project.data?.category || "all";
 			left: 1.5rem;
 		}
 
-		.lightbox-prev:hover {
-			transform: translateY(-50%) translateX(-3px);
-		}
-
 		.lightbox-next {
 			right: 1.5rem;
 		}
 
+		.lightbox-prev:hover {
+			transform:
+				translateY(-50%)
+				translateX(-3px);
+		}
+
 		.lightbox-next:hover {
-			transform: translateY(-50%) translateX(3px);
+			transform:
+				translateY(-50%)
+				translateX(3px);
 		}
 
 		.lightbox-arrow.is-hidden {
@@ -1049,7 +1147,8 @@ const activeCategory = project.data?.category || "all";
 			}
 
 			.project-header h1 {
-				font-size: clamp(2.5rem, 13vw, 5rem);
+				font-size:
+					clamp(2.5rem, 13vw, 5rem);
 			}
 
 			.project-meta {
@@ -1094,6 +1193,7 @@ const activeCategory = project.data?.category || "all";
 			.lightbox-arrow {
 				top: auto;
 				bottom: 1rem;
+
 				transform: none;
 
 				width: 3rem;
