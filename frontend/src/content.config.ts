@@ -5,6 +5,7 @@ const projects = defineCollection({
 	loader: glob({
 		pattern: "**/*.md",
 		base: "./src/content/projects",
+		retainBody: true,
 	}),
 
 	schema: z.object({
@@ -24,6 +25,8 @@ const projects = defineCollection({
 
 		tech: z.array(z.string()),
 
+		// zoom = 留在首頁使用 Lightbox
+		// page = 進入獨立作品頁
 		mode: z.enum(["zoom", "page"]).optional(),
 	}),
 });
