@@ -14,18 +14,18 @@ tech:
 
 ## About Me
 
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
+<img src="/images/visual/bn-Tw Mansion-meat.jpg" alt="About Me" />
 
 這是第一張測試圖片。
 
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
+<img src="/images/visual/bn-Tw Mansion-meat.jpg" alt="About Me" />
 
 這是第二張測試圖片。
 
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
+<img src="/images/visual/bn-Tw Mansion-meat.jpg" alt="About Me" />
 
 這是第三張測試圖片。
 
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
+<img src="/images/visual/bn-Tw Mansion-meat.jpg" alt="About Me" />
 
 這是第四張測試圖片。
