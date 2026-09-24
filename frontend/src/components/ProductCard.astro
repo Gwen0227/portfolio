@@ -7,7 +7,15 @@ type Props = {
 
 const { product } = Astro.props;
 
-const mode = product.data.mode || "page";
+
+/*
+ * ========================================
+ * 基本資料
+ * ========================================
+ */
+
+const mode =
+	product.data.mode || "page";
 
 const projectLink =
 	`/${product.data.slug || product.id}`;
@@ -23,102 +31,39 @@ const category =
  * ========================================
  * Lightbox 圖片
  *
- * 第一張：
- * cover
+ * zoom 模式：
  *
- * 後面：
- * Markdown 文章裡的圖片
+ * gallery 有設定
+ * → 使用 gallery 裡的全部圖片
  *
- * Astro glob() 的 Markdown entry
- * 會提供 rendered.metadata.imagePaths
- * ========================================
- */
-
-const cover =
-	product.data.cover;
-
-
-/*
- * 取得 Markdown 內文圖片
+ * gallery 沒設定
+ * → 使用 cover
  *
- * imagePaths 是 Astro 已經解析好的圖片清單
- */
-
-const contentImages =
-	product.rendered?.metadata?.imagePaths || [];
-
-
-/*
- * 有些情況下 imagePaths
- * 可能是相對於 Markdown 檔案的路徑。
- *
- * 你的圖片目前都是 /images/...
- * 因此只保留可以直接使用的圖片路徑。
- */
-
-const normalizedContentImages =
-	contentImages
-		.map((image) => {
-			if (!image) {
-				return null;
-			}
-
-			/*
-			 * 已經是網站絕對路徑
-			 */
-
-			if (
-				image.startsWith("/")
-			) {
-				return image;
-			}
-
-			/*
-			 * 如果 Astro 回傳的是相對路徑
-			 * 就嘗試轉成 / 開頭
-			 */
-
-			return `/${image}`;
-		})
-		.filter(
-			(image): image is string =>
-				Boolean(image)
-		);
-
-
-/*
- * ========================================
- * 建立這個作品自己的圖片組
- *
- * cover
- * +
- * 文章內文圖片
- *
- * 去除重複圖片
+ * 注意：
+ * 不使用 Set
+ * 不刪除重複圖片
  * ========================================
  */
 
 const galleryImages =
-	Array.from(
-		new Set([
-			cover,
-			...normalizedContentImages,
-		])
-	).filter(
-		(image): image is string =>
-			Boolean(image)
-	);
+	product.data.gallery?.length
+		? product.data.gallery
+		: [product.data.cover];
 
 
 /*
- * 傳給前端 JavaScript
+ * 傳給 ProductGrid.astro
  */
 
 const galleryJson =
 	JSON.stringify(
-		galleryImages
+		galleryImages.filter(
+			(image): image is string =>
+				Boolean(image)
+		)
 	);
 ---
+
 
 {mode === "zoom" ? (
 
@@ -252,6 +197,7 @@ const galleryJson =
 
 
 <script>
+
 	/*
 	 * ========================================
 	 * 保存文章返回位置
@@ -278,6 +224,7 @@ const galleryJson =
 
 
 		const returnState = {
+
 			url:
 				currentUrl,
 
@@ -286,17 +233,28 @@ const galleryJson =
 
 			category:
 				category,
+
 		};
 
 
 		sessionStorage.setItem(
+
 			"projectReturnState",
+
 			JSON.stringify(
 				returnState
 			)
+
 		);
+
 	}
 
+
+	/*
+	 * ========================================
+	 * PAGE MODE 連結
+	 * ========================================
+	 */
 
 	function setupProjectLinks() {
 
@@ -318,6 +276,7 @@ const galleryJson =
 
 			}
 		);
+
 	}
 
 
@@ -325,9 +284,13 @@ const galleryJson =
 
 
 	document.addEventListener(
+
 		"astro:page-load",
+
 		setupProjectLinks
+
 	);
+
 </script>
 
 
@@ -355,6 +318,7 @@ const galleryJson =
 
 		border:
 			none !important;
+
 	}
 
 
@@ -380,6 +344,7 @@ const galleryJson =
 
 		filter:
 			none !important;
+
 	}
 
 
@@ -407,7 +372,7 @@ const galleryJson =
 
 	/*
 	 * ========================================
-	 * IMAGE
+	 * IMAGE CONTAINER
 	 * ========================================
 	 */
 
@@ -436,6 +401,7 @@ const galleryJson =
 
 		filter:
 			none !important;
+
 	}
 
 
@@ -485,6 +451,7 @@ const galleryJson =
 
 		pointer-events:
 			none;
+
 	}
 
 
@@ -528,6 +495,7 @@ const galleryJson =
 
 		z-index:
 			0;
+
 	}
 
 
@@ -542,6 +510,7 @@ const galleryJson =
 
 		opacity:
 			0;
+
 	}
 
 
@@ -555,6 +524,7 @@ const galleryJson =
 
 		opacity:
 			1 !important;
+
 	}
 
 
@@ -574,6 +544,7 @@ const galleryJson =
 
 		width:
 			100% !important;
+
 	}
 
 
@@ -593,6 +564,7 @@ const galleryJson =
 
 		color:
 			#000000 !important;
+
 	}
 
 
@@ -621,6 +593,7 @@ const galleryJson =
 
 		width:
 			100% !important;
+
 	}
 
 
@@ -637,6 +610,7 @@ const galleryJson =
 
 		line-height:
 			1 !important;
+
 	}
 
 
@@ -650,6 +624,7 @@ const galleryJson =
 
 		color:
 			#aaaaaa !important;
+
 	}
 
 
