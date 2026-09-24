@@ -20,8 +20,9 @@ const { project } = Astro.props;
 
 const allProjects = await getCollection("projects");
 const productsTotal = allProjects.length;
-
 const activeCategory = project.data?.category || "all";
+
+const renderedHtml = project.rendered?.html || "";
 ---
 
 <BaseLayout title={project.data.title}>
@@ -31,56 +32,31 @@ const activeCategory = project.data?.category || "all";
 	/>
 
 	<main class="project-detail">
-		<a href="/" class="back-link">← Back</a>
+		<h1 class="main-title">{project.data.title}</h1>
 
-		<header class="project-header">
-			<h1 class="main-title">{project.data.title}</h1>
+		{project.data.cover && (
+			<figure class="featured-image">
+				<img
+					src={project.data.cover}
+					alt={project.data.title}
+					class="protected-img lightbox-trigger"
+					data-lightbox-image={project.data.cover}
+					data-lightbox-alt={project.data.title}
+				/>
 
-			<div class="project-meta">
-				<span>{project.data.year}</span>
-
-				{project.data.category && (
-					<span>{project.data.category}</span>
+				{project.data.coverCaption && (
+					<figcaption>{project.data.coverCaption}</figcaption>
 				)}
+			</figure>
+		)}
 
-				{project.data.tech && project.data.tech.length > 0 && (
-					<span>{project.data.tech.join(" · ")}</span>
-				)}
-			</div>
-		</header>
-
-		<!-- =========================
-		     Cover
-		========================= -->
-
-		<figure
-			class="featured-image lightbox-trigger"
-			data-lightbox-index="0"
-		>
-			<img
-				src={project.data.cover}
-				alt={project.data.coverCaption || project.data.title}
-				class="protected-img"
-				draggable="false"
-			/>
-
-			{project.data.coverCaption && (
-				<figcaption>{project.data.coverCaption}</figcaption>
-			)}
-		</figure>
-
-		<!-- =========================
-		     Project Content
-		========================= -->
-
-		<div
-			class="prose"
-			set:html={project.rendered?.html || ""}
-		></div>
+		<div class="prose">
+			<Fragment set:html={renderedHtml} />
+		</div>
 	</main>
 
 	<!-- =========================
-	     Lightbox
+	     LIGHTBOX
 	========================= -->
 
 	<div
@@ -96,7 +72,7 @@ const activeCategory = project.data?.category || "all";
 		<button
 			type="button"
 			class="lightbox-close"
-			aria-label="Close image"
+			aria-label="Close"
 			data-lightbox-close
 		>
 			×
@@ -106,7 +82,6 @@ const activeCategory = project.data?.category || "all";
 			type="button"
 			class="lightbox-prev"
 			aria-label="Previous image"
-			data-lightbox-prev
 		>
 			←
 		</button>
@@ -116,18 +91,11 @@ const activeCategory = project.data?.category || "all";
 				id="lightbox-image"
 				src=""
 				alt=""
-				draggable="false"
 			/>
 
-			<div
-				id="lightbox-caption"
-				class="lightbox-caption"
-			></div>
+			<div id="lightbox-caption"></div>
 
-			<div
-				id="lightbox-counter"
-				class="lightbox-counter"
-			>
+			<div id="lightbox-counter">
 				1 / 1
 			</div>
 		</div>
@@ -136,7 +104,6 @@ const activeCategory = project.data?.category || "all";
 			type="button"
 			class="lightbox-next"
 			aria-label="Next image"
-			data-lightbox-next
 		>
 			→
 		</button>
@@ -144,176 +111,69 @@ const activeCategory = project.data?.category || "all";
 </BaseLayout>
 
 <style>
-	/* =========================================================
-	   Project page
-	========================================================= */
+	/* =========================
+	   PROJECT PAGE
+	========================= */
 
 	.project-detail {
 		width: min(1200px, calc(100% - 40px));
 		margin: 0 auto;
-		padding: 40px 0 120px;
-	}
-
-	.back-link {
-		display: inline-block;
-		margin-bottom: 40px;
-		color: inherit;
-		text-decoration: none;
-		font-size: 14px;
-		opacity: 0.7;
-		transition: opacity 0.2s ease;
-	}
-
-	.back-link:hover {
-		opacity: 1;
-	}
-
-	.project-header {
-		margin-bottom: 40px;
+		padding: 60px 0 120px;
 	}
 
 	.main-title {
-		margin: 0 0 16px;
-		font-size: clamp(40px, 7vw, 96px);
+		margin: 0 0 40px;
+		font-size: clamp(42px, 7vw, 100px);
 		line-height: 0.95;
-		font-weight: 500;
-		letter-spacing: -0.04em;
 	}
-
-	.project-meta {
-		display: flex;
-		flex-wrap: wrap;
-		gap: 10px 20px;
-		font-size: 14px;
-		opacity: 0.65;
-	}
-
-	/* =========================================================
-	   Cover
-	========================================================= */
 
 	.featured-image {
-		margin: 0 0 70px;
-		cursor: zoom-in;
+		margin: 0 0 60px;
 	}
 
 	.featured-image img {
 		display: block;
 		width: 100%;
 		height: auto;
-		max-height: 80vh;
-		object-fit: contain;
-		user-select: none;
-		-webkit-user-drag: none;
-		transition: opacity 0.25s ease;
-	}
-
-	.featured-image:hover img {
-		opacity: 0.92;
+		cursor: zoom-in;
 	}
 
 	.featured-image figcaption {
 		margin-top: 12px;
-		font-size: 13px;
-		opacity: 0.55;
+		font-size: 14px;
+		opacity: 0.6;
 	}
 
-	/* =========================================================
-	   Markdown content
-	========================================================= */
+	/* =========================
+	   CONTENT
+	========================= */
 
 	.prose {
-		width: min(900px, 100%);
-		margin: 0 auto;
-		font-size: 18px;
-		line-height: 1.8;
+		width: 100%;
 	}
 
-	.prose :global(h2) {
-		margin-top: 80px;
-		margin-bottom: 24px;
-		font-size: clamp(28px, 4vw, 48px);
-		line-height: 1.1;
-	}
-
-	.prose :global(h3) {
-		margin-top: 60px;
-		margin-bottom: 20px;
-		font-size: 28px;
-	}
-
-	.prose :global(p) {
-		margin: 0 0 24px;
-	}
-
-	.prose :global(ul),
-	.prose :global(ol) {
-		margin: 0 0 30px;
-		padding-left: 28px;
-	}
-
-	.prose :global(a) {
-		text-decoration: underline;
-	}
-
-	.prose :global(img) {
+	.prose img {
 		display: block;
 		width: 100%;
 		max-width: 100%;
 		height: auto;
-		margin: 50px 0;
+		margin: 40px 0;
 		cursor: zoom-in;
-		user-select: none;
-		-webkit-user-drag: none;
-		transition:
-			opacity 0.25s ease,
-			filter 0.25s ease;
-		filter: blur(0.6px);
 	}
 
-	.prose :global(img:hover) {
-		opacity: 0.95;
-		filter: blur(0);
+	.prose p {
+		margin: 0 0 24px;
 	}
 
-	/* =========================================================
-	   連續圖片
-	========================================================= */
-
-	.prose :global(p:has(> img:only-child)) {
-		margin: 0;
+	.prose h2,
+	.prose h3 {
+		margin-top: 60px;
+		margin-bottom: 24px;
 	}
 
-	.prose :global(p:has(> img:only-child) + p:has(> img:only-child)) {
-		margin-top: 20px;
-	}
-
-	@media (min-width: 768px) {
-		.prose {
-			max-width: 1100px;
-		}
-
-		.prose :global(p:has(> img:only-child)) {
-			display: inline-block;
-			vertical-align: top;
-			width: calc(50% - 10px);
-			margin-right: 16px;
-			margin-bottom: 20px;
-		}
-
-		.prose :global(p:has(> img:only-child):nth-of-type(even)) {
-			margin-right: 0;
-		}
-
-		.prose :global(p:has(> img:only-child) img) {
-			width: 100%;
-			margin: 0;
-		}
-	}
-
-	/* =========================================================
-	   Lightbox
-	========================================================= */
+	/* =========================
+	   LIGHTBOX
+	========================= */
 
 	.lightbox {
 		position: fixed;
@@ -344,7 +204,6 @@ const activeCategory = project.data?.category || "all";
 		position: absolute;
 		inset: 0;
 		background: rgba(0, 0, 0, 0.88);
-		cursor: zoom-out;
 	}
 
 	.lightbox-content {
@@ -357,16 +216,16 @@ const activeCategory = project.data?.category || "all";
 		justify-content: center;
 
 		width: min(90vw, 1400px);
-		height: min(90vh, 900px);
+		height: 90vh;
 
-		touch-action: pan-y;
+		pointer-events: none;
 	}
 
-	.lightbox-content img {
+	#lightbox-image {
 		display: block;
 
 		max-width: 100%;
-		max-height: calc(100% - 50px);
+		max-height: calc(90vh - 70px);
 
 		width: auto;
 		height: auto;
@@ -375,62 +234,51 @@ const activeCategory = project.data?.category || "all";
 
 		user-select: none;
 		-webkit-user-drag: none;
+
+		pointer-events: auto;
 	}
 
-	.lightbox-caption {
-		position: absolute;
-		left: 0;
-		right: 0;
-		bottom: 5px;
-
-		text-align: center;
+	#lightbox-caption {
+		margin-top: 12px;
 
 		color: white;
 		font-size: 14px;
-		line-height: 1.5;
+		text-align: center;
 
-		pointer-events: none;
+		opacity: 0.8;
 	}
 
-	.lightbox-counter {
-		position: fixed;
-		left: 50%;
-		bottom: 24px;
-
-		transform: translateX(-50%);
-
-		z-index: 10;
+	#lightbox-counter {
+		margin-top: 8px;
 
 		color: white;
 		font-size: 13px;
-		letter-spacing: 0.05em;
 
-		opacity: 0.75;
-
-		pointer-events: none;
+		opacity: 0.65;
 	}
+
+	/* =========================
+	   BUTTONS
+	========================= */
 
 	.lightbox-close,
 	.lightbox-prev,
 	.lightbox-next {
-		position: fixed;
-		z-index: 10;
+		position: absolute;
+		z-index: 5;
+
+		border: 0;
+		background: transparent;
+
+		color: white;
+
+		cursor: pointer;
 
 		display: flex;
 		align-items: center;
 		justify-content: center;
 
-		border: 0;
-		background: transparent;
-		color: white;
-
-		cursor: pointer;
-
 		font-family: inherit;
-		font-size: 32px;
-		line-height: 1;
-
-		opacity: 0.75;
 
 		transition:
 			opacity 0.2s ease,
@@ -440,18 +288,19 @@ const activeCategory = project.data?.category || "all";
 	.lightbox-close:hover,
 	.lightbox-prev:hover,
 	.lightbox-next:hover {
-		opacity: 1;
+		opacity: 0.65;
 	}
 
 	.lightbox-close {
-		top: 22px;
-		right: 28px;
+		top: 20px;
+		right: 25px;
 
-		width: 48px;
-		height: 48px;
+		width: 50px;
+		height: 50px;
 
 		font-size: 42px;
 		font-weight: 300;
+		line-height: 1;
 	}
 
 	.lightbox-prev,
@@ -459,18 +308,19 @@ const activeCategory = project.data?.category || "all";
 		top: 50%;
 		transform: translateY(-50%);
 
-		width: 64px;
-		height: 80px;
+		width: 70px;
+		height: 90px;
 
 		font-size: 42px;
+		font-weight: 300;
 	}
 
 	.lightbox-prev {
-		left: 15px;
+		left: 20px;
 	}
 
 	.lightbox-next {
-		right: 15px;
+		right: 20px;
 	}
 
 	.lightbox-prev:hover,
@@ -478,63 +328,54 @@ const activeCategory = project.data?.category || "all";
 		transform: translateY(-50%) scale(1.08);
 	}
 
-	/* =========================================================
-	   Mobile
-	========================================================= */
+	/* =========================
+	   MOBILE
+	========================= */
 
-	@media (max-width: 767px) {
+	@media (max-width: 700px) {
 		.project-detail {
 			width: min(100% - 24px, 1200px);
-			padding-top: 24px;
+			padding-top: 40px;
 		}
 
-		.back-link {
-			margin-bottom: 30px;
-		}
-
-		.project-header {
+		.main-title {
 			margin-bottom: 30px;
 		}
 
 		.featured-image {
-			margin-bottom: 45px;
+			margin-bottom: 40px;
 		}
 
-		.prose {
-			font-size: 16px;
-			line-height: 1.75;
-		}
-
-		.prose :global(h2) {
-			margin-top: 55px;
-		}
-
-		.prose :global(img) {
-			margin: 35px 0;
-			filter: none;
+		.prose img {
+			margin: 30px 0;
 		}
 
 		.lightbox-content {
-			width: 100vw;
-			height: 100vh;
+			width: 92vw;
+			height: 88vh;
 		}
 
-		.lightbox-content img {
+		#lightbox-image {
 			max-width: 92vw;
-			max-height: 78vh;
+			max-height: calc(88vh - 70px);
 		}
 
 		.lightbox-close {
-			top: 12px;
-			right: 12px;
+			top: 10px;
+			right: 10px;
+
+			width: 45px;
+			height: 45px;
+
+			font-size: 36px;
 		}
 
 		.lightbox-prev,
 		.lightbox-next {
-			width: 50px;
-			height: 60px;
+			width: 48px;
+			height: 70px;
 
-			font-size: 32px;
+			font-size: 30px;
 		}
 
 		.lightbox-prev {
@@ -544,161 +385,184 @@ const activeCategory = project.data?.category || "all";
 		.lightbox-next {
 			right: 0;
 		}
+	}
 
-		.lightbox-counter {
-			bottom: 16px;
-		}
+	/* =========================
+	   PROTECTED IMAGE
+	========================= */
+
+	.protected-img,
+	.prose img {
+		-webkit-user-select: none;
+		user-select: none;
+		-webkit-user-drag: none;
 	}
 </style>
 
 <script is:inline>
 	(function () {
-		let cleanup = null;
+		function setupLightbox() {
+			const lightbox = document.getElementById("lightbox");
 
-		function initLightbox() {
-			if (cleanup) {
-				cleanup();
-				cleanup = null;
+			if (!lightbox) {
+				return;
 			}
 
-			const lightbox = document.querySelector("#lightbox");
 			const lightboxImage =
-				document.querySelector("#lightbox-image");
+				document.getElementById("lightbox-image");
+
 			const lightboxCaption =
-				document.querySelector("#lightbox-caption");
+				document.getElementById("lightbox-caption");
+
 			const lightboxCounter =
-				document.querySelector("#lightbox-counter");
+				document.getElementById("lightbox-counter");
+
+			const closeButton =
+				lightbox.querySelector(".lightbox-close");
+
+			const prevButton =
+				lightbox.querySelector(".lightbox-prev");
+
+			const nextButton =
+				lightbox.querySelector(".lightbox-next");
 
 			if (
-				!lightbox ||
 				!lightboxImage ||
 				!lightboxCaption ||
-				!lightboxCounter
+				!lightboxCounter ||
+				!closeButton ||
+				!prevButton ||
+				!nextButton
 			) {
 				return;
 			}
 
-			const coverImage =
-				document.querySelector(".featured-image img");
-
-			const contentImages = Array.from(
-				document.querySelectorAll(".prose img")
-			);
-
-			const images = [];
-
-			/* Cover */
-			if (coverImage) {
-				images.push({
-					element: coverImage,
-					src:
-						coverImage.currentSrc ||
-						coverImage.src,
-					alt: coverImage.alt || "",
-					caption:
-						document.querySelector(
-							".featured-image figcaption"
-						)?.textContent || "",
-				});
-			}
-
-			/* Markdown images */
-			contentImages.forEach(function (img) {
-				images.push({
-					element: img,
-					src:
-						img.currentSrc ||
-						img.src,
-					alt: img.alt || "",
-					caption: "",
-				});
-			});
-
-			if (!images.length) {
+			/* 避免重複初始化 */
+			if (lightbox.dataset.initialized === "true") {
 				return;
 			}
 
+			lightbox.dataset.initialized = "true";
+
+			let images = [];
 			let currentIndex = 0;
+
 			let touchStartX = 0;
-			let touchStartY = 0;
+			let touchEndX = 0;
 
-			function updateLightbox() {
-				const current = images[currentIndex];
+			/* =========================
+			   收集所有圖片
+			========================= */
 
-				if (!current) {
-					return;
-				}
+			function collectImages() {
+				const result = [];
 
-				lightboxImage.src = current.src;
-				lightboxImage.alt = current.alt;
-				lightboxCaption.textContent =
-					current.caption;
-
-				lightboxCounter.textContent =
-					currentIndex + 1 +
-					" / " +
-					images.length;
-
-				const previousButton =
-					lightbox.querySelector(
-						".lightbox-prev"
+				/* Cover */
+				const cover =
+					document.querySelector(
+						".featured-image img"
 					);
 
-				const nextButton =
-					lightbox.querySelector(
-						".lightbox-next"
+				if (cover) {
+					result.push({
+						src:
+							cover.getAttribute(
+								"data-lightbox-image"
+							) ||
+							cover.getAttribute("src"),
+
+						alt:
+							cover.getAttribute(
+								"data-lightbox-alt"
+							) ||
+							cover.getAttribute("alt") ||
+							"",
+					});
+				}
+
+				/* 內容圖片 */
+				const contentImages =
+					document.querySelectorAll(
+						".prose img"
 					);
 
-				if (images.length <= 1) {
-					if (previousButton) {
-						previousButton.style.display =
-							"none";
+				contentImages.forEach(function (img) {
+					const src =
+						img.getAttribute("src");
+
+					if (!src) {
+						return;
 					}
 
-					if (nextButton) {
-						nextButton.style.display =
-							"none";
-					}
-				} else {
-					if (previousButton) {
-						previousButton.style.display =
-							"flex";
-					}
+					result.push({
+						src: src,
+						alt:
+							img.getAttribute("alt") ||
+							"",
+					});
+				});
 
-					if (nextButton) {
-						nextButton.style.display =
-							"flex";
-					}
-				}
+				images = result;
 			}
 
-			function openLightbox(index) {
+			/* =========================
+			   顯示圖片
+			========================= */
+
+			function showImage(index) {
 				if (!images.length) {
 					return;
 				}
 
-				currentIndex =
-					((index % images.length) +
-						images.length) %
+				if (index < 0) {
+					index = images.length - 1;
+				}
+
+				if (index >= images.length) {
+					index = 0;
+				}
+
+				currentIndex = index;
+
+				const item = images[currentIndex];
+
+				lightboxImage.src = item.src;
+				lightboxImage.alt = item.alt;
+
+				lightboxCaption.textContent =
+					item.alt || "";
+
+				lightboxCounter.textContent =
+					(currentIndex + 1) +
+					" / " +
 					images.length;
+			}
 
-				updateLightbox();
+			/* =========================
+			   開啟
+			========================= */
 
-				lightbox.classList.add(
-					"is-open"
-				);
+			function openLightbox(index) {
+				collectImages();
 
+				if (!images.length) {
+					return;
+				}
+
+				showImage(index);
+
+				lightbox.classList.add("is-open");
 				lightbox.setAttribute(
 					"aria-hidden",
 					"false"
 				);
 
-				document.documentElement.style.overflow =
-					"hidden";
-
-				document.body.style.overflow =
-					"hidden";
+				document.body.style.overflow = "hidden";
 			}
+
+			/* =========================
+			   關閉
+			========================= */
 
 			function closeLightbox() {
 				lightbox.classList.remove(
@@ -710,240 +574,214 @@ const activeCategory = project.data?.category || "all";
 					"true"
 				);
 
+				document.body.style.overflow = "";
+
 				lightboxImage.src = "";
-
-				document.documentElement.style.overflow =
-					"";
-
-				document.body.style.overflow =
-					"";
 			}
 
-			function showPrevious() {
-				if (images.length <= 1) {
-					return;
-				}
+			/* =========================
+			   上一張
+			========================= */
 
-				currentIndex =
-					(currentIndex -
-						1 +
-						images.length) %
-					images.length;
-
-				updateLightbox();
+			function previousImage() {
+				showImage(currentIndex - 1);
 			}
 
-			function showNext() {
-				if (images.length <= 1) {
-					return;
-				}
+			/* =========================
+			   下一張
+			========================= */
 
-				currentIndex =
-					(currentIndex + 1) %
-					images.length;
-
-				updateLightbox();
+			function nextImage() {
+				showImage(currentIndex + 1);
 			}
 
-			function handleClick(event) {
-				const target = event.target;
-
-				if (!(target instanceof Element)) {
-					return;
-				}
-
-				const image = target.closest(
-					".featured-image img, .prose img"
-				);
-
-				if (image) {
-					const index =
-						images.findIndex(
-							function (item) {
-								return (
-									item.element ===
-									image
-								);
-							}
-						);
-
-					if (index !== -1) {
-						event.preventDefault();
-						openLightbox(index);
-					}
-
-					return;
-				}
-
-				if (
-					target.closest(
-						"[data-lightbox-close]"
-					)
-				) {
-					closeLightbox();
-					return;
-				}
-
-				if (
-					target.closest(
-						"[data-lightbox-prev]"
-					)
-				) {
-					showPrevious();
-					return;
-				}
-
-				if (
-					target.closest(
-						"[data-lightbox-next]"
-					)
-				) {
-					showNext();
-					return;
-				}
-			}
-
-			function handleKeydown(event) {
-				if (
-					!lightbox.classList.contains(
-						"is-open"
-					)
-				) {
-					return;
-				}
-
-				if (event.key === "Escape") {
-					event.preventDefault();
-					closeLightbox();
-					return;
-				}
-
-				if (event.key === "ArrowLeft") {
-					event.preventDefault();
-					showPrevious();
-					return;
-				}
-
-				if (event.key === "ArrowRight") {
-					event.preventDefault();
-					showNext();
-					return;
-				}
-			}
-
-			function handleTouchStart(event) {
-				const touch =
-					event.changedTouches[0];
-
-				if (!touch) {
-					return;
-				}
-
-				touchStartX = touch.clientX;
-				touchStartY = touch.clientY;
-			}
-
-			function handleTouchEnd(event) {
-				if (
-					!lightbox.classList.contains(
-						"is-open"
-					)
-				) {
-					return;
-				}
-
-				const touch =
-					event.changedTouches[0];
-
-				if (!touch) {
-					return;
-				}
-
-				const deltaX =
-					touch.clientX -
-					touchStartX;
-
-				const deltaY =
-					touch.clientY -
-					touchStartY;
-
-				if (
-					Math.abs(deltaX) > 50 &&
-					Math.abs(deltaX) >
-						Math.abs(deltaY)
-				) {
-					if (deltaX > 0) {
-						showPrevious();
-					} else {
-						showNext();
-					}
-				}
-			}
+			/* =========================
+			   點擊圖片
+			========================= */
 
 			document.addEventListener(
 				"click",
-				handleClick
+				function (event) {
+					const target =
+						event.target;
+
+					if (!(target instanceof Element)) {
+						return;
+					}
+
+					const image =
+						target.closest(
+							".featured-image img, .prose img"
+						);
+
+					if (!image) {
+						return;
+					}
+
+					event.preventDefault();
+
+					collectImages();
+
+					const allImages =
+						Array.from(
+							document.querySelectorAll(
+								".featured-image img, .prose img"
+							)
+						);
+
+					const index =
+						allImages.indexOf(image);
+
+					openLightbox(
+						index >= 0 ? index : 0
+					);
+				}
 			);
+
+			/* =========================
+			   關閉按鈕
+			========================= */
+
+			closeButton.addEventListener(
+				"click",
+				function () {
+					closeLightbox();
+				}
+			);
+
+			/* =========================
+			   背景關閉
+			========================= */
+
+			const backdrop =
+				lightbox.querySelector(
+					".lightbox-backdrop"
+				);
+
+			if (backdrop) {
+				backdrop.addEventListener(
+					"click",
+					function () {
+						closeLightbox();
+					}
+				);
+			}
+
+			/* =========================
+			   上一張
+			========================= */
+
+			prevButton.addEventListener(
+				"click",
+				function () {
+					previousImage();
+				}
+			);
+
+			/* =========================
+			   下一張
+			========================= */
+
+			nextButton.addEventListener(
+				"click",
+				function () {
+					nextImage();
+				}
+			);
+
+			/* =========================
+			   鍵盤
+			========================= */
 
 			document.addEventListener(
 				"keydown",
-				handleKeydown
+				function (event) {
+					if (
+						!lightbox.classList.contains(
+							"is-open"
+						)
+					) {
+						return;
+					}
+
+					if (event.key === "Escape") {
+						closeLightbox();
+					}
+
+					if (event.key === "ArrowLeft") {
+						event.preventDefault();
+						previousImage();
+					}
+
+					if (event.key === "ArrowRight") {
+						event.preventDefault();
+						nextImage();
+					}
+				}
 			);
+
+			/* =========================
+			   手機滑動
+			========================= */
 
 			lightbox.addEventListener(
 				"touchstart",
-				handleTouchStart,
+				function (event) {
+					if (!event.changedTouches.length) {
+						return;
+					}
+
+					touchStartX =
+						event.changedTouches[0].screenX;
+				},
 				{ passive: true }
 			);
 
 			lightbox.addEventListener(
 				"touchend",
-				handleTouchEnd,
+				function (event) {
+					if (!event.changedTouches.length) {
+						return;
+					}
+
+					touchEndX =
+						event.changedTouches[0].screenX;
+
+					const distance =
+						touchEndX - touchStartX;
+
+					if (Math.abs(distance) < 50) {
+						return;
+					}
+
+					if (distance < 0) {
+						nextImage();
+					} else {
+						previousImage();
+					}
+				},
 				{ passive: true }
 			);
-
-			cleanup = function () {
-				document.removeEventListener(
-					"click",
-					handleClick
-				);
-
-				document.removeEventListener(
-					"keydown",
-					handleKeydown
-				);
-
-				lightbox.removeEventListener(
-					"touchstart",
-					handleTouchStart
-				);
-
-				lightbox.removeEventListener(
-					"touchend",
-					handleTouchEnd
-				);
-
-				document.documentElement.style.overflow =
-					"";
-
-				document.body.style.overflow =
-					"";
-			};
 		}
 
-		if (document.readyState === "loading") {
+		/* 初次載入 */
+		document.addEventListener(
+			"astro:page-load",
+			setupLightbox
+		);
+
+		/* 如果沒有 View Transitions，
+		   第一次載入也直接執行 */
+		if (
+			document.readyState === "loading"
+		) {
 			document.addEventListener(
 				"DOMContentLoaded",
-				initLightbox,
+				setupLightbox,
 				{ once: true }
 			);
 		} else {
-			initLightbox();
+			setupLightbox();
 		}
-
-		document.addEventListener(
-			"astro:page-load",
-			initLightbox
-		);
 	})();
 </script>
