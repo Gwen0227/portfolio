@@ -4,7 +4,7 @@ slug: aboutme
 year: 2026
 cover: /images/visual/bn-Tw Mansion-meat.jpg
 category: "Visual"
-mode: "zoom"
+mode: "page"
 tech:
   - Astro
   - TypeScript
