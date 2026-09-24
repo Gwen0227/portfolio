@@ -17,1714 +17,1108 @@ export async function getStaticPaths() {
 }
 
 const { project } = Astro.props;
-
-if (!project) {
-	throw new Error("Project not found");
-}
-
 const { Content } = await render(project);
 
 const allProjects = await getCollection("projects");
 const productsTotal = allProjects.length;
-
 const activeCategory = project.data?.category || "all";
 ---
 
-<BaseLayout title={project.data.title}>
+<BaseLayout
+	title={`${project.data.title} — Portfolio`}
+	description={`${project.data.title} project`}
+>
 	<ProductGridHeader
 		activeCategory={activeCategory}
 		productsTotal={productsTotal}
 	/>
 
-	<article class="project-detail">
-		<header class="project-header">
-			<div class="project-title-row">
-				<button
-					id="back-btn"
-					class="back-btn"
-					type="button"
-					aria-label="返回作品列表"
-				>
-					<span class="back-arrow">←</span>
-				</button>
+	<main class="project-page">
+		<div class="project-top">
+			<a
+				href="/"
+				class="back-button"
+				aria-label="Back to projects"
+			>
+				<span class="back-arrow">←</span>
+				<span>Back</span>
+			</a>
+		</div>
 
-				<h1 class="main-title">
-					{project.data.title}
-				</h1>
+		<header class="project-header">
+			<h1>{project.data.title}</h1>
+
+			<div class="project-meta">
+				{project.data.year && <span>{project.data.year}</span>}
+				{project.data.category && (
+					<span>{project.data.category}</span>
+				)}
 			</div>
 		</header>
 
-		{project.data.cover && (
-			<figure
-				class="featured-image lightbox-trigger"
-				data-lightbox-image={project.data.cover}
-				data-lightbox-alt={project.data.title}
-				data-lightbox-caption={project.data.coverCaption || ""}
-				tabindex="0"
-				role="button"
-				aria-label="查看作品圖片"
-			>
-				<img
-					src={project.data.cover}
-					alt={project.data.title}
-					class="protected-img"
-				/>
+		{
+			project.data.cover && (
+				<figure class="featured-image lightbox-trigger">
+					<img
+						src={project.data.cover}
+						alt={project.data.title}
+						class="protected-img"
+						draggable="false"
+					/>
 
-				{project.data.coverCaption && (
-					<figcaption>
-						{project.data.coverCaption}
-					</figcaption>
-				)}
-			</figure>
-		)}
+					{
+						project.data.coverCaption && (
+							<figcaption>{project.data.coverCaption}</figcaption>
+						)
+					}
+				</figure>
+			)
+		}
 
-		<div class="prose">
-			<Content />
-		</div>
-	</article>
+		<section class="project-content">
+			<div class="prose">
+				<Content />
+			</div>
+		</section>
+	</main>
 
-
-	<!-- ========================================
-	     Lightbox
-	======================================== -->
-
+	<!-- =========================================================
+	     LIGHTBOX
+	     ========================================================= -->
 	<div
 		id="lightbox"
 		class="lightbox"
 		aria-hidden="true"
+		role="dialog"
+		aria-modal="true"
+		aria-label="Image viewer"
 	>
+		<div class="lightbox-backdrop"></div>
+
 		<button
-			id="lightbox-close"
-			class="lightbox-close"
 			type="button"
-			aria-label="關閉圖片"
+			class="lightbox-close"
+			aria-label="Close image viewer"
 		>
-			×
+			<span>×</span>
 		</button>
 
 		<button
-			id="lightbox-prev"
-			class="lightbox-arrow lightbox-prev"
 			type="button"
-			aria-label="上一張"
+			class="lightbox-arrow lightbox-prev"
+			aria-label="Previous image"
 		>
-			←
+			<span>←</span>
 		</button>
 
 		<div class="lightbox-content">
 			<img
 				id="lightbox-image"
-				class="lightbox-image"
 				src=""
 				alt=""
+				draggable="false"
 			/>
 
-			<div
-				id="lightbox-caption"
-				class="lightbox-caption"
-			></div>
+			<div class="lightbox-caption" id="lightbox-caption"></div>
 
-			<div
-				id="lightbox-counter"
-				class="lightbox-counter"
-			></div>
+			<div class="lightbox-counter" id="lightbox-counter">
+				1 / 1
+			</div>
 		</div>
 
 		<button
-			id="lightbox-next"
-			class="lightbox-arrow lightbox-next"
 			type="button"
-			aria-label="下一張"
+			class="lightbox-arrow lightbox-next"
+			aria-label="Next image"
 		>
-			→
+			<span>→</span>
 		</button>
 	</div>
-</BaseLayout>
 
+	<script>
+		/* =========================================================
+		   PROJECT PAGE
+		   ========================================================= */
 
-<script>
-	/* ========================================
-	   返回作品列表
-	======================================== */
+		function setupBackButton() {
+			const backButton = document.querySelector(".back-button");
 
-	function setupBackButton() {
-		const button =
-			document.getElementById("back-btn");
+			if (!backButton) return;
 
-		if (!button) return;
-
-		/*
-		 * 使用 onclick，
-		 * 避免 Astro 頁面切換後重複綁定。
-		 */
-
-		button.onclick = () => {
-			const savedState =
-				sessionStorage.getItem(
-					"projectReturnState"
-				);
-
-			if (savedState) {
-				try {
-					const state =
-						JSON.parse(savedState);
-
-					if (state.url) {
-						sessionStorage.setItem(
-							"restoreProjectScroll",
-							String(
-								state.scrollY || 0
-							)
-						);
-
-						window.location.href =
-							state.url;
-
-						return;
-					}
-				} catch (error) {
-					console.error(
-						"無法讀取作品列表返回狀態：",
-						error
-					);
+			backButton.onclick = (event) => {
+				/*
+				 * 如果有上一頁，就回上一頁。
+				 * 如果沒有，就回首頁。
+				 */
+				if (window.history.length > 1) {
+					event.preventDefault();
+					window.history.back();
 				}
-			}
-
-			window.location.href = "/";
-		};
-	}
-
-
-	/* ========================================
-	   回到作品列表後恢復捲動位置
-	======================================== */
-
-	function restoreProjectScroll() {
-		const scrollValue =
-			sessionStorage.getItem(
-				"restoreProjectScroll"
-			);
-
-		if (!scrollValue) return;
-
-		sessionStorage.removeItem(
-			"restoreProjectScroll"
-		);
-
-		const scrollY =
-			Number(scrollValue);
-
-		requestAnimationFrame(() => {
-			requestAnimationFrame(() => {
-				window.scrollTo({
-					top: scrollY,
-					behavior: "auto",
-				});
-			});
-		});
-	}
-
-
-	/* ========================================
-	   Lightbox
-	======================================== */
-
-	function setupLightbox() {
-		const lightbox =
-			document.getElementById("lightbox");
-
-		const lightboxImage =
-			document.getElementById(
-				"lightbox-image"
-			);
-
-		const lightboxCaption =
-			document.getElementById(
-				"lightbox-caption"
-			);
-
-		const lightboxCounter =
-			document.getElementById(
-				"lightbox-counter"
-			);
-
-		const closeButton =
-			document.getElementById(
-				"lightbox-close"
-			);
-
-		const prevButton =
-			document.getElementById(
-				"lightbox-prev"
-			);
-
-		const nextButton =
-			document.getElementById(
-				"lightbox-next"
-			);
-
-		const featuredImage =
-			document.querySelector(
-				".featured-image.lightbox-trigger"
-			);
-
-		const contentImages =
-			document.querySelectorAll(
-				".prose img"
-			);
-
-
-		/* ====================================
-		   確認 Lightbox 元件存在
-		==================================== */
-
-		if (
-			!lightbox ||
-			!lightboxImage ||
-			!lightboxCaption ||
-			!lightboxCounter ||
-			!closeButton ||
-			!prevButton ||
-			!nextButton
-		) {
-			console.warn(
-				"Lightbox 元件不存在"
-			);
-
-			return;
+			};
 		}
 
+		/* =========================================================
+		   LIGHTBOX
+		   ========================================================= */
 
-		/* ====================================
-		   防止重複初始化
-		==================================== */
+		function setupLightbox() {
+			const lightbox = document.querySelector("#lightbox");
 
-		if (
-			lightbox.dataset.initialized ===
-			"true"
-		) {
-			return;
-		}
-
-		lightbox.dataset.initialized =
-			"true";
-
-
-		/* ====================================
-		   收集所有圖片
-		==================================== */
-
-		const imageItems = [];
-
-
-		/* ====================================
-		   1. Cover 圖片
-		==================================== */
-
-		if (featuredImage) {
-			const src =
-				featuredImage.getAttribute(
-					"data-lightbox-image"
-				);
-
-			const alt =
-				featuredImage.getAttribute(
-					"data-lightbox-alt"
-				) || "";
-
-			const caption =
-				featuredImage.getAttribute(
-					"data-lightbox-caption"
-				) || "";
-
-			if (src) {
-				imageItems.push({
-					src,
-					alt,
-					caption,
-				});
-			}
-		}
-
-
-		/* ====================================
-		   2. 作品內容圖片
-		==================================== */
-
-		contentImages.forEach((img) => {
-			const src =
-				img.getAttribute("src");
-
-			if (!src) return;
-
-			const alt =
-				img.getAttribute("alt") || "";
-
-			let caption = "";
-
-
-			/* --------------------------------
-			   嘗試抓取圖片下面的圖說
-			-------------------------------- */
-
-			const parent =
-				img.parentElement;
-
-			if (parent) {
-				const nextElement =
-					parent.nextElementSibling;
-
-				if (
-					nextElement &&
-					nextElement.tagName === "P"
-				) {
-					const em =
-						nextElement.querySelector(
-							"em"
-						);
-
-					if (em) {
-						caption =
-							em.textContent?.trim() ||
-							"";
-					}
-				}
-			}
-
-
-			/* --------------------------------
-			   如果沒有圖說，
-			   使用 alt
-			-------------------------------- */
-
-			if (!caption) {
-				caption = alt;
-			}
-
-
-			imageItems.push({
-				src,
-				alt,
-				caption,
-			});
-		});
-
-
-		/* ====================================
-		   Debug
-		==================================== */
-
-		console.log(
-			"Lightbox 圖片數量：",
-			imageItems.length
-		);
-
-
-		if (!imageItems.length) {
-			console.warn(
-				"沒有找到任何 Lightbox 圖片"
-			);
-
-			return;
-		}
-
-
-		let currentIndex = 0;
-
-
-		/* ====================================
-		   顯示圖片
-		==================================== */
-
-		function showImage(index) {
-			if (!imageItems.length) {
+			if (!lightbox) {
+				console.warn("Lightbox 元素不存在");
 				return;
 			}
 
+			const lightboxImage =
+				lightbox.querySelector("#lightbox-image");
 
-			/* --------------------------------
-			   循環切換
-			-------------------------------- */
+			const lightboxCaption =
+				lightbox.querySelector("#lightbox-caption");
 
-			if (index < 0) {
-				index =
-					imageItems.length - 1;
-			}
+			const lightboxCounter =
+				lightbox.querySelector("#lightbox-counter");
 
-			if (
-				index >=
-				imageItems.length
-			) {
-				index = 0;
-			}
+			const closeButton =
+				lightbox.querySelector(".lightbox-close");
 
+			const prevButton =
+				lightbox.querySelector(".lightbox-prev");
 
-			currentIndex = index;
+			const nextButton =
+				lightbox.querySelector(".lightbox-next");
 
-			const item =
-				imageItems[currentIndex];
-
-
-			/* --------------------------------
-			   設定圖片
-			-------------------------------- */
-
-			lightboxImage.src =
-				item.src;
-
-			lightboxImage.alt =
-				item.alt || "";
-
-
-			/* --------------------------------
-			   設定圖說
-			-------------------------------- */
-
-			lightboxCaption.textContent =
-				item.caption || "";
-
-
-			/* --------------------------------
-			   設定頁數
-			-------------------------------- */
-
-			lightboxCounter.textContent =
-				`${currentIndex + 1} / ${imageItems.length}`;
-
-
-			/* --------------------------------
-			   一張圖片時隱藏左右按鈕
-			-------------------------------- */
+			const backdrop =
+				lightbox.querySelector(".lightbox-backdrop");
 
 			if (
-				imageItems.length <= 1
+				!lightboxImage ||
+				!closeButton ||
+				!prevButton ||
+				!nextButton ||
+				!backdrop
 			) {
-				prevButton.style.display =
-					"none";
-
-				nextButton.style.display =
-					"none";
-
-				lightboxCounter.style.display =
-					"none";
-			} else {
-				prevButton.style.display =
-					"flex";
-
-				nextButton.style.display =
-					"flex";
-
-				lightboxCounter.style.display =
-					"block";
+				console.warn("Lightbox 元件不完整");
+				return;
 			}
-		}
 
+			/*
+			 * 防止 Astro 頁面切換時重複綁定事件。
+			 */
+			if (lightbox.dataset.initialized === "true") {
+				return;
+			}
 
-		/* ====================================
-		   開啟 Lightbox
-		==================================== */
+			lightbox.dataset.initialized = "true";
 
-		function openLightbox(index) {
-			console.log(
-				"開啟 Lightbox：",
-				index
-			);
+			/* -------------------------------------------------------
+			   收集所有圖片
+			   ------------------------------------------------------- */
 
+			const imageItems = [];
 
-			showImage(index);
+			/*
+			 * 1. Cover
+			 */
+			const cover =
+				document.querySelector(".featured-image img");
 
+			if (cover) {
+				imageItems.push({
+					src: cover.currentSrc || cover.src,
+					alt: cover.alt || "",
+					caption:
+						cover
+							.closest("figure")
+							?.querySelector("figcaption")
+							?.textContent?.trim() || "",
+				});
+			}
 
-			lightbox.classList.add(
-				"is-open"
-			);
+			/*
+			 * 2. 文章內圖片
+			 */
+			const contentImages =
+				document.querySelectorAll(".prose img");
 
+			contentImages.forEach((img) => {
+				/*
+				 * 如果文章內圖片跟 Cover 是同一個 DOM，
+				 * 避免重複加入。
+				 */
+				if (img === cover) return;
 
-			lightbox.setAttribute(
-				"aria-hidden",
-				"false"
-			);
+				let caption = "";
 
+				/*
+				 * 嘗試找 figure / figcaption
+				 */
+				const figure = img.closest("figure");
 
-			document.body.classList.add(
-				"lightbox-open"
-			);
-		}
-
-
-		/* ====================================
-		   關閉 Lightbox
-		==================================== */
-
-		function closeLightbox() {
-			lightbox.classList.remove(
-				"is-open"
-			);
-
-
-			lightbox.setAttribute(
-				"aria-hidden",
-				"true"
-			);
-
-
-			document.body.classList.remove(
-				"lightbox-open"
-			);
-
-
-			setTimeout(() => {
-				if (
-					!lightbox.classList.contains(
-						"is-open"
-					)
-				) {
-					lightboxImage.removeAttribute(
-						"src"
-					);
+				if (figure) {
+					caption =
+						figure
+							.querySelector("figcaption")
+							?.textContent?.trim() || "";
 				}
-			}, 250);
-		}
 
+				/*
+				 * 如果沒有 figcaption，
+				 * 嘗試找圖片後面緊接著的斜體文字。
+				 */
+				if (!caption) {
+					const parent = img.parentElement;
 
-		/* ====================================
-		   Cover 點擊
-		==================================== */
+					if (parent) {
+						const nextElement =
+							parent.nextElementSibling;
 
-		if (featuredImage) {
-			featuredImage.onclick =
-				(event) => {
+						if (
+							nextElement?.tagName === "P" &&
+							nextElement.querySelector("em")
+						) {
+							caption =
+								nextElement
+									.querySelector("em")
+									.textContent?.trim() || "";
+						}
+					}
+				}
+
+				imageItems.push({
+					src: img.currentSrc || img.src,
+					alt: img.alt || "",
+					caption,
+				});
+			});
+
+			console.log(
+				"Lightbox 圖片數量：",
+				imageItems.length
+			);
+
+			if (imageItems.length === 0) {
+				console.warn("Lightbox 沒有找到任何圖片");
+				return;
+			}
+
+			/* -------------------------------------------------------
+			   目前圖片
+			   ------------------------------------------------------- */
+
+			let currentIndex = 0;
+
+			/* -------------------------------------------------------
+			   更新圖片
+			   ------------------------------------------------------- */
+
+			function showImage(index) {
+				if (imageItems.length === 0) return;
+
+				/*
+				 * 循環切換
+				 */
+				if (index < 0) {
+					index = imageItems.length - 1;
+				}
+
+				if (index >= imageItems.length) {
+					index = 0;
+				}
+
+				currentIndex = index;
+
+				const item = imageItems[currentIndex];
+
+				lightboxImage.src = item.src;
+				lightboxImage.alt = item.alt;
+
+				if (lightboxCaption) {
+					lightboxCaption.textContent =
+						item.caption || "";
+				}
+
+				if (lightboxCounter) {
+					lightboxCounter.textContent =
+						`${currentIndex + 1} / ${imageItems.length}`;
+				}
+
+				/*
+				 * 只有一張圖片時，不需要左右按鈕。
+				 */
+				if (imageItems.length <= 1) {
+					prevButton.classList.add("is-hidden");
+					nextButton.classList.add("is-hidden");
+				} else {
+					prevButton.classList.remove("is-hidden");
+					nextButton.classList.remove("is-hidden");
+				}
+			}
+
+			/* -------------------------------------------------------
+			   開啟
+			   ------------------------------------------------------- */
+
+			function openLightbox(index) {
+				showImage(index);
+
+				lightbox.classList.add("is-open");
+				lightbox.setAttribute("aria-hidden", "false");
+
+				document.documentElement.classList.add(
+					"lightbox-open"
+				);
+
+				document.body.classList.add(
+					"lightbox-open"
+				);
+			}
+
+			/* -------------------------------------------------------
+			   關閉
+			   ------------------------------------------------------- */
+
+			function closeLightbox() {
+				lightbox.classList.remove("is-open");
+				lightbox.setAttribute("aria-hidden", "true");
+
+				document.documentElement.classList.remove(
+					"lightbox-open"
+				);
+
+				document.body.classList.remove(
+					"lightbox-open"
+				);
+
+				/*
+				 * 清空圖片，避免關閉後仍然載入。
+				 */
+				window.setTimeout(() => {
+					if (
+						!lightbox.classList.contains(
+							"is-open"
+						)
+					) {
+						lightboxImage.src = "";
+					}
+				}, 250);
+			}
+
+			/* -------------------------------------------------------
+			   Cover 點擊
+			   ------------------------------------------------------- */
+
+			if (cover) {
+				cover.style.cursor = "zoom-in";
+
+				cover.onclick = (event) => {
 					event.preventDefault();
+					event.stopPropagation();
 
 					openLightbox(0);
 				};
-
-
-			featuredImage.onkeydown =
-				(event) => {
-					if (
-						event.key === "Enter" ||
-						event.key === " "
-					) {
-						event.preventDefault();
-
-						openLightbox(0);
-					}
-				};
-		}
-
-
-		/* ====================================
-		   內容圖片點擊
-		==================================== */
-
-		contentImages.forEach(
-			(img, index) => {
-				img.classList.add(
-					"lightbox-content-image"
-				);
-
-				img.style.cursor =
-					"zoom-in";
-
-
-				img.onclick =
-					(event) => {
-						event.preventDefault();
-
-
-						/*
-						 * Cover = 第 0 張
-						 *
-						 * 第一張內容圖片
-						 * = 第 1 張
-						 */
-
-						openLightbox(
-							index + 1
-						);
-					};
 			}
-		);
 
+			/* -------------------------------------------------------
+			   文章內圖片點擊
+			   ------------------------------------------------------- */
 
-		/* ====================================
-		   上一張
-		==================================== */
+			contentImages.forEach((img, index) => {
+				if (img === cover) return;
 
-		prevButton.onclick =
-			(event) => {
+				img.style.cursor = "zoom-in";
+
+				img.onclick = (event) => {
+					event.preventDefault();
+					event.stopPropagation();
+
+					/*
+					 * Cover 佔第 0 張，
+					 * 所以文章圖片從第 1 張開始。
+					 */
+					openLightbox(index + 1);
+				};
+			});
+
+			/* -------------------------------------------------------
+			   上一張
+			   ------------------------------------------------------- */
+
+			prevButton.onclick = (event) => {
 				event.preventDefault();
-
 				event.stopPropagation();
 
-				showImage(
-					currentIndex - 1
-				);
+				showImage(currentIndex - 1);
 			};
 
+			/* -------------------------------------------------------
+			   下一張
+			   ------------------------------------------------------- */
 
-		/* ====================================
-		   下一張
-		==================================== */
-
-		nextButton.onclick =
-			(event) => {
+			nextButton.onclick = (event) => {
 				event.preventDefault();
-
 				event.stopPropagation();
 
-				showImage(
-					currentIndex + 1
-				);
+				showImage(currentIndex + 1);
 			};
 
+			/* -------------------------------------------------------
+			   關閉按鈕
+			   ------------------------------------------------------- */
 
-		/* ====================================
-		   關閉按鈕
-		==================================== */
-
-		closeButton.onclick =
-			(event) => {
+			closeButton.onclick = (event) => {
 				event.preventDefault();
-
 				event.stopPropagation();
 
 				closeLightbox();
 			};
 
+			/* -------------------------------------------------------
+			   點背景關閉
+			   ------------------------------------------------------- */
 
-		/* ====================================
-		   點黑色背景關閉
-		==================================== */
+			backdrop.onclick = () => {
+				closeLightbox();
+			};
 
-		lightbox.onclick =
-			(event) => {
-				if (
-					event.target ===
-					lightbox
-				) {
+			/* -------------------------------------------------------
+			   點圖片本身不要關閉
+			   ------------------------------------------------------- */
+
+			lightboxImage.onclick = (event) => {
+				event.stopPropagation();
+			};
+
+			/* -------------------------------------------------------
+			   鍵盤
+			   ------------------------------------------------------- */
+
+			const handleKeydown = (event) => {
+				if (!lightbox.classList.contains("is-open")) {
+					return;
+				}
+
+				if (event.key === "Escape") {
+					event.preventDefault();
 					closeLightbox();
+					return;
+				}
+
+				if (event.key === "ArrowLeft") {
+					event.preventDefault();
+					showImage(currentIndex - 1);
+					return;
+				}
+
+				if (event.key === "ArrowRight") {
+					event.preventDefault();
+					showImage(currentIndex + 1);
 				}
 			};
 
+			document.addEventListener(
+				"keydown",
+				handleKeydown
+			);
 
-		/* ====================================
-		   鍵盤操作
-		==================================== */
+			/* -------------------------------------------------------
+			   手機左右滑動
+			   ------------------------------------------------------- */
 
-		const keyboardHandler =
-			(event) => {
-				if (
-					!lightbox.classList.contains(
-						"is-open"
-					)
-				) {
-					return;
-				}
+			let touchStartX = 0;
+			let touchStartY = 0;
 
+			lightbox.addEventListener(
+				"touchstart",
+				(event) => {
+					if (!lightbox.classList.contains("is-open")) {
+						return;
+					}
 
-				/* Esc */
+					const touch = event.changedTouches[0];
 
-				if (
-					event.key === "Escape"
-				) {
-					event.preventDefault();
+					touchStartX = touch.clientX;
+					touchStartY = touch.clientY;
+				},
+				{ passive: true }
+			);
 
-					closeLightbox();
+			lightbox.addEventListener(
+				"touchend",
+				(event) => {
+					if (!lightbox.classList.contains("is-open")) {
+						return;
+					}
 
-					return;
-				}
+					const touch = event.changedTouches[0];
 
+					const diffX =
+						touch.clientX - touchStartX;
 
-				/* 上一張 */
+					const diffY =
+						touch.clientY - touchStartY;
 
-				if (
-					event.key === "ArrowLeft"
-				) {
-					event.preventDefault();
+					/*
+					 * 必須是明顯的水平滑動。
+					 */
+					if (
+						Math.abs(diffX) > 50 &&
+						Math.abs(diffX) > Math.abs(diffY)
+					) {
+						if (diffX > 0) {
+							showImage(currentIndex - 1);
+						} else {
+							showImage(currentIndex + 1);
+						}
+					}
+				},
+				{ passive: true }
+			);
+		}
 
-					showImage(
-						currentIndex - 1
-					);
+		/* =========================================================
+		   INITIALIZE
+		   ========================================================= */
 
-					return;
-				}
+		function initializeProjectPage() {
+			setupBackButton();
+			setupLightbox();
+		}
 
-
-				/* 下一張 */
-
-				if (
-					event.key === "ArrowRight"
-				) {
-					event.preventDefault();
-
-					showImage(
-						currentIndex + 1
-					);
-
-					return;
-				}
-			};
-
-
-		document.addEventListener(
-			"keydown",
-			keyboardHandler
-		);
-
-
-		/* ====================================
-		   手機左右滑動
-		==================================== */
-
-		let touchStartX = 0;
-		let touchStartY = 0;
-
-
-		lightbox.addEventListener(
-			"touchstart",
-			(event) => {
-				const touch =
-					event.changedTouches[0];
-
-				touchStartX =
-					touch.clientX;
-
-				touchStartY =
-					touch.clientY;
-			},
-			{
-				passive: true,
-			}
-		);
-
-
-		lightbox.addEventListener(
-			"touchend",
-			(event) => {
-				const touch =
-					event.changedTouches[0];
-
-				const deltaX =
-					touch.clientX -
-					touchStartX;
-
-				const deltaY =
-					touch.clientY -
-					touchStartY;
-
-
-				/*
-				 * 太短的不算滑動
-				 */
-
-				if (
-					Math.abs(deltaX) < 50
-				) {
-					return;
-				}
-
-
-				/*
-				 * 上下滑動不算
-				 */
-
-				if (
-					Math.abs(deltaX) <=
-					Math.abs(deltaY)
-				) {
-					return;
-				}
-
-
-				/*
-				 * 往右滑
-				 * → 上一張
-				 */
-
-				if (deltaX > 0) {
-					showImage(
-						currentIndex - 1
-					);
-				}
-
-
-				/*
-				 * 往左滑
-				 * → 下一張
-				 */
-
-				else {
-					showImage(
-						currentIndex + 1
-					);
-				}
-			},
-			{
-				passive: true,
-			}
-		);
-	}
-
-
-	/* ========================================
-	   統一初始化
-	======================================== */
-
-	function initializeProjectPage() {
-		setupBackButton();
-
-		restoreProjectScroll();
-
-		setupLightbox();
-	}
-
-
-	/* ========================================
-	   第一次載入
-	======================================== */
-
-	if (
-		document.readyState ===
-		"loading"
-	) {
-		document.addEventListener(
-			"DOMContentLoaded",
-			initializeProjectPage,
-			{
-				once: true,
-			}
-		);
-	} else {
-		initializeProjectPage();
-	}
-
-
-	/* ========================================
-	   Astro Client Router
-	======================================== */
-
-	document.addEventListener(
-		"astro:page-load",
-		() => {
+		/*
+		 * 初次載入
+		 */
+		if (document.readyState === "loading") {
+			document.addEventListener(
+				"DOMContentLoaded",
+				initializeProjectPage,
+				{ once: true }
+			);
+		} else {
 			initializeProjectPage();
 		}
-	);
-</script>
 
-
-<style>
-	/* ========================================
-	   Project
-	======================================== */
-
-	.project-detail {
-		width: 100%;
-		margin: 1.5rem 0 6rem;
-	}
-
-	.project-header {
-		width: 100%;
-		margin-bottom: 1.5rem;
-	}
-
-	.project-title-row {
-		display: flex;
-		align-items: center;
-		gap: 0.8rem;
-		width: 100%;
-	}
-
-	.back-btn {
-		flex-shrink: 0;
-
-		width: 36px;
-		height: 36px;
-
-		display: flex;
-		align-items: center;
-		justify-content: center;
-
-		padding: 0;
-		margin: 0;
-
-		border: none;
-		border-radius: 0;
-
-		background: #f2f2f2;
-		color: #000000;
-
-		cursor: pointer;
-
-		transition:
-			background-color 0.2s ease,
-			color 0.2s ease,
-			transform 0.2s ease;
-	}
-
-	.back-btn:hover {
-		background: #000000;
-		color: #ffffff;
-
-		transform: translateX(-4px);
-	}
-
-	.back-arrow {
-		font-size: 1.1rem;
-		line-height: 1;
-	}
-
-	.main-title {
-		flex: 1;
-
-		margin: 0;
-
-		font-size: 2rem;
-		font-weight: 600;
-		line-height: 1.3;
-
-		color: #000000;
-	}
-
-
-	/* ========================================
-	   封面圖片
-	======================================== */
-
-	.featured-image {
-		width: 100%;
-
-		margin: 0 0 2.5rem;
-		padding: 0;
-
-		cursor: zoom-in;
-	}
-
-	.featured-image img {
-		display: block;
-
-		width: 100%;
-		height: auto;
-
-		aspect-ratio: 16 / 9;
-		object-fit: cover;
-
-		border-radius: 0;
-
-		filter: blur(0.6px);
-
-		user-select: none;
-		-webkit-user-drag: none;
-
-		transition:
-			filter 0.25s ease;
-	}
-
-	.featured-image:hover img {
-		filter: blur(0);
-	}
-
-
-	/* ========================================
-	   封面圖說
-	======================================== */
-
-	.featured-image figcaption {
-		display: block;
-
-		margin-top: 0.5rem;
-
-		font-size: 0.8rem;
-		line-height: 1.5;
-
-		color: #888888;
-
-		cursor: default;
-	}
-
-
-	/* ========================================
-	   文章內容
-	======================================== */
-
-	.prose {
-		width: 100%;
-		max-width: none;
-
-		font-size: 0.95rem;
-		line-height: 1.85;
-
-		color: #000000;
-	}
-
-	.prose :global(p) {
-		margin: 0 0 1.5rem;
-	}
-
-
-	/* ========================================
-	   中標題
-	======================================== */
-
-	.prose :global(h2) {
-		position: relative;
-
-		margin-top: 3rem;
-		margin-bottom: 2.6rem;
-
-		padding-bottom: 0;
-
-		font-size: 1.1rem;
-		line-height: 1.3;
-	}
-
-	.prose :global(h2)::after {
-		content: "";
-
-		position: absolute;
-
-		left: 0;
-		bottom: -1.5rem;
-
-		width: 2em;
-		height: 1px;
-
-		background: #000000;
-
-		transform: rotate(-25deg);
-		transform-origin: left center;
-	}
-
-	.prose :global(h3) {
-		margin-top: 2.5rem;
-		margin-bottom: 1rem;
-
-		font-size: 1.2rem;
-		line-height: 1.4;
-	}
-
-
-	/* ========================================
-	   一般圖片
-	======================================== */
-
-	.prose :global(img) {
-		display: block;
-
-		width: 100%;
-		height: auto;
-
-		margin: 1.5rem 0;
-
-		border-radius: 0;
-
-		user-select: none;
-		-webkit-user-drag: none;
-
-		transition:
-			opacity 0.2s ease;
-
-		cursor: zoom-in;
-	}
-
-	.prose :global(img:hover) {
-		opacity: 0.9;
-	}
-
-
-	/* ========================================
-	   單張圖片圖說
-	======================================== */
-
-	.prose
-		:global(
-			p:has(> img:only-child)
-			+ p:has(> em:only-child)
-		) {
-		margin-top: -1.2rem;
-		margin-bottom: 2rem;
-	}
-
-	.prose
-		:global(
-			p:has(> img:only-child)
-			+ p:has(> em:only-child)
-		)
-		em {
-		display: block;
-
-		font-size: 0.8rem;
-		line-height: 1.5;
-
-		color: #888888;
-	}
-
-
-	/* ========================================
-	   兩張圖片並排
-	======================================== */
-
-	.prose :global(.image-grid) {
-		display: grid;
-
-		grid-template-columns:
-			repeat(2, minmax(0, 1fr));
-
-		width: 100%;
-
-		column-gap: 0.3rem;
-		row-gap: 0.3rem;
-
-		margin: 1.5rem 0 0;
-		padding: 0;
-	}
-
-	.prose :global(.image-grid img) {
-		display: block;
-
-		width: 100%;
-		height: auto;
-
-		margin: 0 !important;
-		padding: 0;
-
-		border-radius: 0;
-
-		user-select: none;
-		-webkit-user-drag: none;
-
-		cursor: zoom-in;
-	}
-
-
-	/* ========================================
-	   兩張圖片共同圖說
-	======================================== */
-
-	.prose :global(.image-grid + p) {
-		display: block;
-
-		margin-top: 0.5rem;
-		margin-bottom: 2rem;
-	}
-
-	.prose :global(.image-grid + p em) {
-		display: block;
-
-		font-size: 0.8rem;
-		line-height: 1.5;
-
-		color: #888888;
-	}
-
-
-	/* ========================================
-	   連結
-	======================================== */
-
-	.prose :global(a) {
-		color: inherit;
-
-		text-decoration: underline;
-		text-underline-offset: 3px;
-	}
-
-
-	/* ========================================
-	   清單
-	======================================== */
-
-	.prose :global(ul),
-	.prose :global(ol) {
-		margin: 1.5rem 0;
-		padding-left: 1.5rem;
-	}
-
-	.prose :global(li) {
-		margin-bottom: 0.5rem;
-	}
-
-
-	/* ========================================
-	   Lightbox
-	======================================== */
-
-	.lightbox {
-		position: fixed;
-
-		inset: 0;
-
-		z-index: 9999;
-
-		display: flex;
-		align-items: center;
-		justify-content: center;
-
-		width: 100vw;
-		height: 100vh;
-
-		padding: 4rem 5rem;
-
-		box-sizing: border-box;
-
-		background: rgba(0, 0, 0, 0.82);
-
-		backdrop-filter: blur(4px);
-		-webkit-backdrop-filter: blur(4px);
-
-		opacity: 0;
-		visibility: hidden;
-
-		pointer-events: none;
-
-		transition:
-			opacity 0.25s ease,
-			visibility 0.25s ease;
-	}
-
-	.lightbox.is-open {
-		opacity: 1;
-
-		visibility: visible;
-
-		pointer-events: auto;
-	}
-
-
-	/* ========================================
-	   Lightbox 圖片區
-	======================================== */
-
-	.lightbox-content {
-		position: relative;
-
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-
-		width: 100%;
-		height: 100%;
-
-		min-width: 0;
-		min-height: 0;
-
-		pointer-events: none;
-	}
-
-	.lightbox-image {
-		display: block;
-
-		max-width: calc(100vw - 180px);
-		max-height: calc(100vh - 130px);
-
-		width: auto;
-		height: auto;
-
-		object-fit: contain;
-
-		margin: 0;
-
-		filter: none;
-
-		user-select: none;
-		-webkit-user-drag: none;
-
-		pointer-events: auto;
-
-		cursor: default;
-
-		animation:
-			lightbox-image-in 0.25s ease;
-	}
-
-	@keyframes lightbox-image-in {
-		from {
-			opacity: 0;
-
-			transform: scale(0.97);
+		/*
+		 * Astro Client Navigation
+		 */
+		document.addEventListener(
+			"astro:page-load",
+			() => {
+				initializeProjectPage();
+			}
+		);
+	</script>
+
+	<style>
+		/* =========================================================
+		   PROJECT PAGE
+		   ========================================================= */
+
+		.project-page {
+			width: 100%;
+			padding: 0 0 8rem;
 		}
 
-		to {
-			opacity: 1;
-
-			transform: scale(1);
-		}
-	}
-
-
-	/* ========================================
-	   Lightbox 圖說
-	======================================== */
-
-	.lightbox-caption {
-		max-width: 700px;
-
-		margin-top: 1rem;
-
-		font-size: 0.8rem;
-		line-height: 1.5;
-
-		text-align: center;
-
-		color: #ffffff;
-
-		opacity: 0.75;
-
-		pointer-events: none;
-	}
-
-
-	/* ========================================
-	   Lightbox 頁數
-	======================================== */
-
-	.lightbox-counter {
-		margin-top: 0.4rem;
-
-		font-size: 0.7rem;
-
-		line-height: 1.4;
-
-		color: #ffffff;
-
-		opacity: 0.45;
-
-		pointer-events: none;
-	}
-
-
-	/* ========================================
-	   Lightbox 關閉
-	======================================== */
-
-	.lightbox-close {
-		position: absolute;
-
-		top: 1.5rem;
-		right: 1.5rem;
-
-		z-index: 3;
-
-		display: flex;
-		align-items: center;
-		justify-content: center;
-
-		width: 42px;
-		height: 42px;
-
-		padding: 0;
-
-		border: none;
-
-		background: transparent;
-
-		color: #ffffff;
-
-		font-size: 2rem;
-		font-weight: 300;
-
-		line-height: 1;
-
-		cursor: pointer;
-
-		opacity: 0.7;
-
-		transition:
-			opacity 0.2s ease,
-			transform 0.2s ease;
-	}
-
-	.lightbox-close:hover {
-		opacity: 1;
-
-		transform: rotate(90deg);
-	}
-
-
-	/* ========================================
-	   左右按鈕
-	======================================== */
-
-	.lightbox-arrow {
-		position: absolute;
-
-		top: 50%;
-
-		z-index: 3;
-
-		display: flex;
-		align-items: center;
-		justify-content: center;
-
-		width: 50px;
-		height: 70px;
-
-		padding: 0;
-
-		border: none;
-
-		background: transparent;
-
-		color: #ffffff;
-
-		font-size: 1.8rem;
-		font-weight: 300;
-
-		line-height: 1;
-
-		cursor: pointer;
-
-		opacity: 0.6;
-
-		transform: translateY(-50%);
-
-		transition:
-			opacity 0.2s ease,
-			transform 0.2s ease;
-	}
-
-	.lightbox-arrow:hover {
-		opacity: 1;
-	}
-
-	.lightbox-prev {
-		left: 1.5rem;
-	}
-
-	.lightbox-next {
-		right: 1.5rem;
-	}
-
-	.lightbox-prev:hover {
-		transform:
-			translate(-4px, -50%);
-	}
-
-	.lightbox-next:hover {
-		transform:
-			translate(4px, -50%);
-	}
-
-
-	/* ========================================
-	   Lightbox 開啟時禁止背景滾動
-	======================================== */
-
-	:global(body.lightbox-open) {
-		overflow: hidden;
-	}
-
-
-	/* ========================================
-	   手機版
-	======================================== */
-
-	@media (max-width: 768px) {
-		.project-detail {
-			margin-top: 1rem;
-			margin-bottom: 4rem;
+		.project-top {
+			display: flex;
+			align-items: center;
+			margin: 1.5rem 0 4rem;
 		}
 
-		.project-title-row {
-			gap: 0.6rem;
+		.back-button {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			color: #111;
+			text-decoration: none;
+			font-size: 0.85rem;
+			letter-spacing: 0.03em;
+			transition:
+				opacity 0.2s ease,
+				transform 0.2s ease;
 		}
 
-		.back-btn {
-			width: 32px;
-			height: 32px;
+		.back-button:hover {
+			opacity: 0.55;
+			transform: translateX(-3px);
 		}
 
-		.main-title {
-			font-size: 1.3rem;
+		.back-arrow {
+			font-size: 1.1rem;
+			line-height: 1;
+		}
+
+		.project-header {
+			display: flex;
+			align-items: flex-end;
+			justify-content: space-between;
+			gap: 2rem;
+			margin-bottom: 2rem;
+		}
+
+		.project-header h1 {
+			margin: 0;
+			font-size: clamp(2.5rem, 7vw, 7rem);
+			font-weight: 400;
+			line-height: 0.95;
+			letter-spacing: -0.05em;
+		}
+
+		.project-meta {
+			display: flex;
+			align-items: center;
+			gap: 1rem;
+			font-size: 0.75rem;
+			color: #777;
+			white-space: nowrap;
+			padding-bottom: 0.5rem;
+		}
+
+		.project-meta span + span::before {
+			content: "/";
+			margin-right: 1rem;
+			color: #bbb;
+		}
+
+		/* =========================================================
+		   FEATURED IMAGE
+		   ========================================================= */
+
+		.featured-image {
+			margin: 0;
+			width: 100%;
+			cursor: zoom-in;
+		}
+
+		.featured-image img {
+			display: block;
+			width: 100%;
+			height: auto;
+			max-height: 80vh;
+			object-fit: contain;
+			user-select: none;
+			-webkit-user-drag: none;
+		}
+
+		.featured-image figcaption {
+			margin-top: 0.75rem;
+			font-size: 0.75rem;
+			line-height: 1.5;
+			color: #777;
+		}
+
+		/* =========================================================
+		   CONTENT
+		   ========================================================= */
+
+		.project-content {
+			width: 100%;
+			max-width: 1000px;
+			margin: 5rem auto 0;
 		}
 
 		.prose {
-			font-size: 0.8rem;
+			font-size: 1rem;
 			line-height: 1.8;
+			color: #333;
 		}
 
-
-		/* ================================
-		   手機封面圖說
-		================================ */
-
-		.featured-image figcaption {
-			margin-top: 0.4rem;
-
-			font-size: 0.75rem;
-			line-height: 1.5;
-		}
-
-
-		/* ================================
-		   手機單張圖片圖說
-		================================ */
-
-		.prose
-			:global(
-				p:has(> img:only-child)
-				+ p:has(> em:only-child)
-			) {
-			margin-top: -1.2rem;
+		.prose h2 {
+			margin-top: 4rem;
 			margin-bottom: 1.5rem;
+			font-size: 2rem;
+			font-weight: 400;
+			line-height: 1.2;
 		}
 
-		.prose
-			:global(
-				p:has(> img:only-child)
-				+ p:has(> em:only-child)
-			)
-			em {
-			font-size: 0.75rem;
+		.prose h3 {
+			margin-top: 3rem;
+			margin-bottom: 1rem;
+			font-size: 1.4rem;
+			font-weight: 400;
 		}
 
-
-		/* ================================
-		   手機兩張圖片
-		================================ */
-
-		.prose :global(.image-grid) {
-			display: flex;
-
-			flex-direction: column;
-
-			width: 100%;
-
-			gap: 0.3rem;
-
-			margin: 1.5rem 0 0;
-			padding: 0;
+		.prose p {
+			margin: 0 0 1.5rem;
 		}
 
-		.prose :global(.image-grid img) {
+		.prose img {
 			display: block;
-
 			width: 100%;
 			height: auto;
+			margin: 2rem 0;
+			cursor: zoom-in;
+			user-select: none;
+			-webkit-user-drag: none;
+		}
 
-			margin: 0 !important;
-			padding: 0 !important;
+		.prose a {
+			color: inherit;
+		}
 
-			border: 0;
-			border-radius: 0;
+		.prose ul,
+		.prose ol {
+			padding-left: 1.5rem;
+			margin-bottom: 2rem;
+		}
+
+		.prose li {
+			margin-bottom: 0.5rem;
+		}
+
+		.prose blockquote {
+			margin: 2rem 0;
+			padding-left: 1.5rem;
+			border-left: 1px solid #111;
+		}
+
+		/* =========================================================
+		   IMAGE GRID
+		   ========================================================= */
+
+		.prose .image-grid {
+			display: grid;
+			grid-template-columns: repeat(2, minmax(0, 1fr));
+			gap: 1rem;
+			margin: 2rem 0;
+		}
+
+		.prose .image-grid img {
+			width: 100%;
+			height: auto;
+			margin: 0;
+		}
+
+		/* =========================================================
+		   LIGHTBOX
+		   ========================================================= */
+
+		html.lightbox-open,
+		body.lightbox-open {
+			overflow: hidden !important;
+		}
+
+		.lightbox {
+			position: fixed;
+			inset: 0;
+			z-index: 999999;
+
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			width: 100vw;
+			height: 100vh;
+
+			padding: 3rem;
+
+			visibility: hidden;
+			opacity: 0;
+
+			pointer-events: none;
+
+			transition:
+				opacity 0.25s ease,
+				visibility 0.25s ease;
+		}
+
+		.lightbox.is-open {
+			visibility: visible;
+			opacity: 1;
+			pointer-events: auto;
+		}
+
+		/* =========================================================
+		   BLACK BACKGROUND
+		   ========================================================= */
+
+		.lightbox-backdrop {
+			position: absolute;
+			inset: 0;
+
+			width: 100%;
+			height: 100%;
+
+			background: rgba(0, 0, 0, 0.92);
+
+			backdrop-filter: blur(8px);
+			-webkit-backdrop-filter: blur(8px);
+
+			cursor: zoom-out;
+		}
+
+		/* =========================================================
+		   LIGHTBOX CONTENT
+		   ========================================================= */
+
+		.lightbox-content {
+			position: relative;
+			z-index: 2;
+
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
+
+			width: 100%;
+			height: 100%;
+
+			pointer-events: none;
+		}
+
+		.lightbox-content img {
+			display: block;
+
+			max-width: min(86vw, 1400px);
+			max-height: 82vh;
+
+			width: auto;
+			height: auto;
+
+			object-fit: contain;
 
 			user-select: none;
 			-webkit-user-drag: none;
 
-			cursor: zoom-in;
+			pointer-events: auto;
+
+			box-shadow:
+				0 20px 80px rgba(0, 0, 0, 0.45);
 		}
 
-
-		/* ================================
-		   手機共同圖說
-		================================ */
-
-		.prose :global(.image-grid + p) {
-			display: block;
-
-			margin-top: 0.5rem;
-			margin-bottom: 1.5rem;
-		}
-
-		.prose :global(.image-grid + p em) {
-			font-size: 0.75rem;
-		}
-
-
-		/* ================================
-		   手機中標題
-		================================ */
-
-		.prose :global(h2) {
-			margin-top: 2.5rem;
-			margin-bottom: 2.3rem;
-
-			padding-bottom: 0;
-
-			font-size: 1rem;
-		}
-
-		.prose :global(h2)::after {
-			width: 2em;
-			height: 1px;
-
-			bottom: -1.3rem;
-
-			transform: rotate(-25deg);
-		}
-
-
-		/* ================================
-		   手機 Lightbox
-		================================ */
-
-		.lightbox {
-			padding: 3.5rem 1rem 2.5rem;
-
-			background: rgba(0, 0, 0, 0.82);
-
-			backdrop-filter: blur(3px);
-			-webkit-backdrop-filter: blur(3px);
-		}
-
-		.lightbox-content {
-			width: 100%;
-			height: 100%;
-		}
-
-		.lightbox-image {
-			max-width: calc(100vw - 2rem);
-			max-height: calc(100vh - 120px);
-		}
+		/* =========================================================
+		   CAPTION
+		   ========================================================= */
 
 		.lightbox-caption {
-			max-width: calc(100vw - 3rem);
+			position: relative;
+			z-index: 3;
 
-			margin-top: 0.7rem;
+			min-height: 1.5rem;
 
-			font-size: 0.75rem;
+			margin-top: 1rem;
+
+			color: rgba(255, 255, 255, 0.8);
+
+			font-size: 0.8rem;
+			line-height: 1.5;
+			text-align: center;
+
+			pointer-events: none;
 		}
+
+		/* =========================================================
+		   COUNTER
+		   ========================================================= */
 
 		.lightbox-counter {
-			font-size: 0.65rem;
+			position: relative;
+			z-index: 3;
+
+			margin-top: 0.4rem;
+
+			color: rgba(255, 255, 255, 0.45);
+
+			font-size: 0.7rem;
+			letter-spacing: 0.08em;
+
+			pointer-events: none;
 		}
 
+		/* =========================================================
+		   CLOSE
+		   ========================================================= */
 
-		/* ================================
-		   手機左右按鈕
-		================================ */
+		.lightbox-close {
+			position: absolute;
+			z-index: 10;
+
+			top: 1.5rem;
+			right: 1.5rem;
+
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			width: 3rem;
+			height: 3rem;
+
+			padding: 0;
+
+			border: 0;
+			border-radius: 50%;
+
+			background: rgba(255, 255, 255, 0.12);
+			color: #fff;
+
+			font-family: inherit;
+			font-size: 2rem;
+			font-weight: 300;
+			line-height: 1;
+
+			cursor: pointer;
+
+			transition:
+				background 0.2s ease,
+				transform 0.2s ease;
+		}
+
+		.lightbox-close:hover {
+			background: rgba(255, 255, 255, 0.25);
+			transform: rotate(90deg);
+		}
+
+		.lightbox-close span {
+			display: block;
+			transform: translateY(-1px);
+		}
+
+		/* =========================================================
+		   ARROWS
+		   ========================================================= */
 
 		.lightbox-arrow {
-			width: 42px;
-			height: 60px;
+			position: absolute;
+			z-index: 10;
 
-			font-size: 1.4rem;
+			top: 50%;
+			transform: translateY(-50%);
 
-			opacity: 0.5;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+
+			width: 4rem;
+			height: 4rem;
+
+			padding: 0;
+
+			border: 0;
+			border-radius: 50%;
+
+			background: rgba(255, 255, 255, 0.12);
+			color: #fff;
+
+			font-family: inherit;
+			font-size: 2rem;
+			font-weight: 300;
+			line-height: 1;
+
+			cursor: pointer;
+
+			transition:
+				background 0.2s ease,
+				transform 0.2s ease;
+		}
+
+		.lightbox-arrow:hover {
+			background: rgba(255, 255, 255, 0.25);
 		}
 
 		.lightbox-prev {
-			left: 0.2rem;
+			left: 1.5rem;
+		}
+
+		.lightbox-prev:hover {
+			transform: translateY(-50%) translateX(-3px);
 		}
 
 		.lightbox-next {
-			right: 0.2rem;
+			right: 1.5rem;
 		}
 
-
-		/* ================================
-		   手機關閉
-		================================ */
-
-		.lightbox-close {
-			top: 0.75rem;
-			right: 0.75rem;
-
-			width: 36px;
-			height: 36px;
-
-			font-size: 1.7rem;
+		.lightbox-next:hover {
+			transform: translateY(-50%) translateX(3px);
 		}
-	}
-</style>
+
+		.lightbox-arrow.is-hidden {
+			display: none;
+		}
+
+		/* =========================================================
+		   MOBILE
+		   ========================================================= */
+
+		@media (max-width: 700px) {
+			.project-top {
+				margin-top: 1rem;
+				margin-bottom: 3rem;
+			}
+
+			.project-header {
+				display: block;
+			}
+
+			.project-header h1 {
+				font-size: clamp(2.5rem, 13vw, 5rem);
+			}
+
+			.project-meta {
+				margin-top: 1rem;
+				padding-bottom: 0;
+			}
+
+			.featured-image img {
+				max-height: 65vh;
+			}
+
+			.project-content {
+				margin-top: 3rem;
+			}
+
+			.prose .image-grid {
+				grid-template-columns: 1fr;
+				gap: 0;
+			}
+
+			.prose .image-grid img {
+				margin: 1rem 0;
+			}
+
+			.lightbox {
+				padding: 1rem;
+			}
+
+			.lightbox-content img {
+				max-width: 92vw;
+				max-height: 75vh;
+			}
+
+			.lightbox-close {
+				top: 0.75rem;
+				right: 0.75rem;
+
+				width: 2.75rem;
+				height: 2.75rem;
+			}
+
+			.lightbox-arrow {
+				top: auto;
+				bottom: 1rem;
+				transform: none;
+
+				width: 3rem;
+				height: 3rem;
+
+				font-size: 1.5rem;
+			}
+
+			.lightbox-prev {
+				left: calc(50% - 4rem);
+			}
+
+			.lightbox-next {
+				right: calc(50% - 4rem);
+			}
+
+			.lightbox-prev:hover,
+			.lightbox-next:hover {
+				transform: none;
+			}
+
+			.lightbox-caption {
+				max-width: 80vw;
+				margin-top: 0.75rem;
+			}
+		}
+	</style>
+</BaseLayout>
