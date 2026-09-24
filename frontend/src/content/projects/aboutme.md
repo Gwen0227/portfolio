@@ -5,6 +5,13 @@ year: 2026
 cover: /images/visual/bn-Tw Mansion-meat.jpg
 category: "Visual"
 mode: "zoom"
+
+gallery:
+  - /images/visual/bn-Tw Mansion-meat.jpg
+  - /images/visual/bn-Tw Mansion-meat.jpg
+  - /images/visual/bn-Tw Mansion-meat.jpg
+  - /images/visual/bn-Tw Mansion-meat.jpg
+
 tech:
   - Astro
   - TypeScript
