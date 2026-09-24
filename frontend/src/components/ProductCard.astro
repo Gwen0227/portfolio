@@ -8,15 +8,64 @@ type Props = {
 const { product } = Astro.props;
 
 const mode = product.data.mode || "page";
-const projectLink = `/${product.data.slug || product.id}`;
-const year = product.data.year || "2026";
+
+const projectLink =
+	`/${product.data.slug || product.id}`;
+
+const year =
+	product.data.year || "2026";
+
+const category =
+	product.data.category || "Visual";
+
+/*
+ * ========================================
+ * 建立這個作品自己的 Lightbox 圖片清單
+ *
+ * 第一張：
+ * cover
+ *
+ * 後面：
+ * Markdown 內文裡的所有圖片
+ * ========================================
+ */
+
+const cover =
+	product.data.cover;
+
+const renderedHtml =
+	product.rendered?.html || "";
+
+const contentImages =
+	Array.from(
+		renderedHtml.matchAll(
+			/<img[^>]+src=["']([^"']+)["']/gi
+		)
+	)
+	.map((match) => match[1])
+	.filter(Boolean);
+
+const galleryImages =
+	Array.from(
+		new Set([
+			cover,
+			...contentImages,
+		])
+	);
+
+const galleryJson =
+	JSON.stringify(
+		galleryImages
+	);
 ---
 
 {mode === "zoom" ? (
 	<div
 		class="product-card is-zoom-mode"
-		data-zoom={product.data.cover}
-		data-category={product.data.category || "Visual"}
+		data-zoom-gallery={galleryJson}
+		data-title={product.data.title}
+		data-category={category}
+		data-year={year}
 	>
 		<div class="image-container">
 			<img
@@ -24,15 +73,18 @@ const year = product.data.year || "2026";
 				alt={product.data.title}
 				loading="lazy"
 				class="protected-img"
+				draggable="false"
 			/>
 		</div>
 
 		<div class="project-info">
-			<h3>{product.data.title}</h3>
+			<h3>
+				{product.data.title}
+			</h3>
 
 			<div class="project-meta">
 				<span class="category-tag">
-					{product.data.category || "Visual"}
+					{category}
 				</span>
 
 				<span class="year-tag">
@@ -46,7 +98,7 @@ const year = product.data.year || "2026";
 		href={projectLink}
 		class="product-card is-page-mode project-link"
 		data-project-link={projectLink}
-		data-category={product.data.category || "Visual"}
+		data-category={category}
 	>
 		<div class="image-container">
 			<img
@@ -54,15 +106,18 @@ const year = product.data.year || "2026";
 				alt={product.data.title}
 				loading="lazy"
 				class="protected-img"
+				draggable="false"
 			/>
 		</div>
 
 		<div class="project-info">
-			<h3>{product.data.title}</h3>
+			<h3>
+				{product.data.title}
+			</h3>
 
 			<div class="project-meta">
 				<span class="category-tag">
-					{product.data.category || "Visual"}
+					{category}
 				</span>
 
 				<span class="year-tag">
@@ -74,30 +129,11 @@ const year = product.data.year || "2026";
 )}
 
 <script>
-	/**
-	 * =========================================================
-	 * 記錄「作品列表 → 作品詳細頁」之前的狀態
-	 * =========================================================
-	 *
-	 * 例如：
-	 *
-	 * 首頁
-	 * ↓
-	 * Brand
-	 * ↓
-	 * /?category=Brand
-	 * ↓
-	 * 往下滑到 1800px
-	 * ↓
-	 * 點作品
-	 *
-	 * 會記錄：
-	 *
-	 * {
-	 *   url: "/?category=Brand",
-	 *   scrollY: 1800,
-	 *   category: "Brand"
-	 * }
+	/*
+	 * ========================================
+	 * 記錄「作品列表 → 作品詳細頁」
+	 * 回去時保留原本的位置
+	 * ========================================
 	 */
 
 	function saveProjectReturnState() {
@@ -106,9 +142,10 @@ const year = product.data.year || "2026";
 			window.location.search +
 			window.location.hash;
 
-		const params = new URLSearchParams(
-			window.location.search
-		);
+		const params =
+			new URLSearchParams(
+				window.location.search
+			);
 
 		const category =
 			params.get("category") || "all";
@@ -125,48 +162,20 @@ const year = product.data.year || "2026";
 		);
 	}
 
-
-	/**
-	 * =========================================================
-	 * 綁定作品連結
-	 * =========================================================
-	 *
-	 * 使用 onclick：
-	 *
-	 * Astro ClientRouter / astro:page-load
-	 * 重跑時不會一直累積 click listener。
-	 */
-
 	function setupProjectLinks() {
 		const links =
 			document.querySelectorAll(
 				"a.project-link"
 			);
 
-		if (!links.length) return;
-
 		links.forEach((link) => {
-			(link as HTMLElement).onclick = () => {
+			link.onclick = () => {
 				saveProjectReturnState();
 			};
 		});
 	}
 
-
-	/**
-	 * =========================================================
-	 * 第一次載入
-	 * =========================================================
-	 */
-
 	setupProjectLinks();
-
-
-	/**
-	 * =========================================================
-	 * Astro ClientRouter / View Transitions
-	 * =========================================================
-	 */
 
 	document.addEventListener(
 		"astro:page-load",
@@ -174,12 +183,7 @@ const year = product.data.year || "2026";
 	);
 </script>
 
-
 <style>
-	/* ========================================
-	   基礎卡片樣式重置
-	======================================== */
-
 	.product-card,
 	.product-card *,
 	.product-card:hover,
@@ -189,7 +193,6 @@ const year = product.data.year || "2026";
 		outline: none !important;
 		border: none !important;
 	}
-
 
 	.product-card {
 		display: flex !important;
@@ -206,20 +209,13 @@ const year = product.data.year || "2026";
 		filter: none !important;
 	}
 
-
 	.is-zoom-mode {
 		cursor: zoom-in;
 	}
 
-
 	.is-page-mode {
 		cursor: pointer;
 	}
-
-
-	/* ========================================
-	   圖片容器
-	======================================== */
 
 	.image-container {
 		width: 100% !important;
@@ -238,11 +234,6 @@ const year = product.data.year || "2026";
 
 		filter: none !important;
 	}
-
-
-	/* ========================================
-	   黑色遮罩
-	======================================== */
 
 	.image-container::after {
 		content: "";
@@ -264,12 +255,9 @@ const year = product.data.year || "2026";
 			opacity 0.3s ease;
 
 		z-index: 1;
+
+		pointer-events: none;
 	}
-
-
-	/* ========================================
-	   圖片
-	======================================== */
 
 	.protected-img {
 		width: 100% !important;
@@ -296,20 +284,10 @@ const year = product.data.year || "2026";
 		z-index: 0;
 	}
 
-
-	/* ========================================
-	   Hover → 移除遮罩
-	======================================== */
-
 	.product-card:hover
 	.image-container::after {
 		opacity: 0;
 	}
-
-
-	/* ========================================
-	   Hover → 圖片變清晰
-	======================================== */
 
 	.product-card:hover
 	.protected-img {
@@ -321,17 +299,12 @@ const year = product.data.year || "2026";
 		opacity: 1 !important;
 	}
 
-
-	/* ========================================
-	   項目資訊
-	======================================== */
-
 	.project-info {
-		padding: 0.5rem 0 0 0 !important;
+		padding:
+			0.5rem 0 0 0 !important;
 
 		width: 100% !important;
 	}
-
 
 	.project-info h3 {
 		margin: 0 !important;
@@ -345,11 +318,6 @@ const year = product.data.year || "2026";
 		color: #000000 !important;
 	}
 
-
-	/* ========================================
-	   分類 + 年份
-	======================================== */
-
 	.project-meta {
 		display: flex !important;
 
@@ -360,11 +328,11 @@ const year = product.data.year || "2026";
 
 		align-items: baseline !important;
 
-		margin-top: 0.2rem !important;
+		margin-top:
+			0.2rem !important;
 
 		width: 100% !important;
 	}
-
 
 	.category-tag {
 		font-size: 0.8rem !important;
@@ -376,7 +344,6 @@ const year = product.data.year || "2026";
 		line-height: 1 !important;
 	}
 
-
 	.year-tag {
 		font-size: 0.72rem !important;
 
@@ -385,13 +352,7 @@ const year = product.data.year || "2026";
 		color: #aaaaaa !important;
 	}
 
-
-	/* ========================================
-	   手機版
-	======================================== */
-
 	@media (max-width: 768px) {
-
 		.project-info h3 {
 			font-size: 0.9rem !important;
 		}
