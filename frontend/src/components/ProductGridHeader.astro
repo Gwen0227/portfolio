@@ -6,294 +6,758 @@ type Props = {
 	activeCategory?: string;
 };
 
-const { productsTotal = 3, activeCategory = "all" } = Astro.props;
+const {
+	productsTotal = 3,
+	activeCategory = "all",
+} = Astro.props;
+
+
+/*
+ * ========================================
+ * 作品分類
+ * ========================================
+ *
+ * All
+ * Visual
+ * Graphic
+ * Product
+ *
+ * All 不是作品本身的 category，
+ * 只是顯示全部作品。
+ */
 
 const categories = [
-	{ id: "all", label: "All" },
-	{ id: "Brand", label: "Brand" },
-	{ id: "Visual", label: "Visual" },
-	{ id: "Packaging", label: "Packaging" },
+	{
+		id: "all",
+		label: "All",
+	},
+
+	{
+		id: "Visual",
+		label: "Visual",
+	},
+
+	{
+		id: "Graphic",
+		label: "Graphic",
+	},
+
+	{
+		id: "Product",
+		label: "Product",
+	},
 ];
+
 ---
 
 <div class="category-wrapper">
+
 	<div class="full-width-bg"></div>
 
+
 	<header class="project-filter">
+
 		<div class="categories">
+
 			{categories.map((cat) => {
+
 				const isActive =
-					cat.id.toLowerCase() === activeCategory.toLowerCase();
+					cat.id.toLowerCase() ===
+					activeCategory.toLowerCase();
 
 				return (
+
 					<button
 						type="button"
-						data-filter={cat.id}
-						class={isActive ? "active" : ""}
+
+						data-filter={
+							cat.id
+						}
+
+						class={
+							isActive
+								? "active"
+								: ""
+						}
 					>
-						<TextSlider content={cat.label} />
+
+						<TextSlider
+							content={
+								cat.label
+							}
+						/>
+
 					</button>
+
 				);
+
 			})}
+
 		</div>
 
+
 		<span class="count">
-			<TextSlider content={`${productsTotal} Projects`} />
+
+			<TextSlider
+				content={
+					`${productsTotal} Projects`
+				}
+			/>
+
 		</span>
+
 	</header>
+
 </div>
 
+
 <script>
+
+	/*
+	 * ========================================
+	 * 取得目前網址分類
+	 * ========================================
+	 */
+
 	function getCategoryFromUrl() {
-		const params = new URLSearchParams(window.location.search);
-		return params.get("category") || "all";
+
+		const params =
+			new URLSearchParams(
+				window.location.search
+			);
+
+		return (
+			params.get("category") ||
+			"all"
+		);
+
 	}
+
+
+	/*
+	 * ========================================
+	 * 更新網址
+	 * ========================================
+	 */
 
 	function updateUrl(category) {
-		const url = new URL(window.location.href);
+
+		const url =
+			new URL(
+				window.location.href
+			);
+
 
 		if (category === "all") {
-			url.searchParams.delete("category");
+
+			url.searchParams.delete(
+				"category"
+			);
+
 		} else {
-			url.searchParams.set("category", category);
+
+			url.searchParams.set(
+				"category",
+				category
+			);
+
 		}
 
+
 		/*
-		 * 不重新整理頁面，只更新網址。
-		 * 這樣分類、作品列表、瀏覽位置都可以維持。
+		 * 不重新整理頁面，
+		 * 只更新網址。
 		 */
+
 		window.history.replaceState(
+
 			{ category },
+
 			"",
-			url.pathname + url.search + url.hash
-		);
-	}
 
-	function applyFilter(filterValue) {
-		const cards = document.querySelectorAll(
-			"[data-category]"
-		) as NodeListOf<HTMLElement>;
+			url.pathname +
+			url.search +
+			url.hash
 
-		cards.forEach((card) => {
-			const cardCategory = card.getAttribute("data-category");
-
-			if (
-				filterValue === "all" ||
-				cardCategory === filterValue
-			) {
-				card.style.display = "";
-				card.style.opacity = "1";
-			} else {
-				card.style.display = "none";
-			}
-		});
-	}
-
-	function updateActiveButton(filterValue) {
-		const buttons = document.querySelectorAll(
-			".categories button"
 		);
 
-		buttons.forEach((button) => {
-			const value = button.getAttribute("data-filter");
-
-			if (
-				value?.toLowerCase() ===
-				filterValue.toLowerCase()
-			) {
-				button.classList.add("active");
-			} else {
-				button.classList.remove("active");
-			}
-		});
 	}
+
+
+	/*
+	 * ========================================
+	 * 套用分類篩選
+	 * ========================================
+	 */
+
+	function applyFilter(
+		filterValue
+	) {
+
+		const cards =
+			document.querySelectorAll(
+				"[data-category]"
+			) as NodeListOf<HTMLElement>;
+
+
+		cards.forEach(
+			(card) => {
+
+				const cardCategory =
+					card.getAttribute(
+						"data-category"
+					);
+
+
+				if (
+
+					filterValue ===
+					"all"
+
+					||
+
+					cardCategory ===
+					filterValue
+
+				) {
+
+					card.style.display =
+						"";
+
+					card.style.opacity =
+						"1";
+
+				} else {
+
+					card.style.display =
+						"none";
+
+				}
+
+			}
+		);
+
+	}
+
+
+	/*
+	 * ========================================
+	 * 更新目前按鈕
+	 * ========================================
+	 */
+
+	function updateActiveButton(
+		filterValue
+	) {
+
+		const buttons =
+			document.querySelectorAll(
+				".categories button"
+			);
+
+
+		buttons.forEach(
+			(button) => {
+
+				const value =
+					button.getAttribute(
+						"data-filter"
+					);
+
+
+				if (
+
+					value?.toLowerCase() ===
+					filterValue.toLowerCase()
+
+				) {
+
+					button.classList.add(
+						"active"
+					);
+
+				} else {
+
+					button.classList.remove(
+						"active"
+					);
+
+				}
+
+			}
+		);
+
+	}
+
+
+	/*
+	 * ========================================
+	 * 保存目前作品列表狀態
+	 * ========================================
+	 */
 
 	function saveCurrentListingState() {
+
 		const currentUrl =
 			window.location.pathname +
 			window.location.search +
 			window.location.hash;
 
+
 		const state = {
-			url: currentUrl,
-			scrollY: window.scrollY,
-			category: getCategoryFromUrl(),
+
+			url:
+				currentUrl,
+
+			scrollY:
+				window.scrollY,
+
+			category:
+				getCategoryFromUrl(),
+
 		};
 
+
 		sessionStorage.setItem(
+
 			"projectReturnState",
-			JSON.stringify(state)
+
+			JSON.stringify(
+				state
+			)
+
 		);
+
 	}
 
+
+	/*
+	 * ========================================
+	 * 初始化分類
+	 * ========================================
+	 */
+
 	function initFilter() {
-		const buttons = document.querySelectorAll(
-			".categories button"
-		);
 
-		if (!buttons.length) return;
+		const buttons =
+			document.querySelectorAll(
+				".categories button"
+			);
 
-		/*
-		 * 先根據網址套用目前分類。
-		 *
-		 * 例如：
-		 * /?category=Brand
-		 *
-		 * 就會自動顯示 Brand。
-		 */
-		const currentCategory = getCategoryFromUrl();
 
-		updateActiveButton(currentCategory);
+		if (!buttons.length) {
 
-		/*
-		 * 只有首頁才真正篩選作品。
-		 */
-		if (window.location.pathname === "/") {
-			applyFilter(currentCategory);
+			return;
+
 		}
 
-		buttons.forEach((button) => {
-			/*
-			 * 避免 Astro ClientRouter / astro:page-load
-			 * 重複綁定 click。
-			 */
-			button.onclick = () => {
-				const filterValue =
-					button.getAttribute("data-filter") || "all";
-
-				/*
-				 * 如果現在不在首頁：
-				 * 直接回首頁並帶上分類。
-				 */
-				if (window.location.pathname !== "/") {
-					const targetUrl =
-						filterValue === "all"
-							? "/"
-							: `/?category=${encodeURIComponent(filterValue)}`;
-
-					window.location.href = targetUrl;
-					return;
-				}
-
-				/*
-				 * 首頁：
-				 * 先記錄目前分類到網址。
-				 */
-				updateUrl(filterValue);
-
-				updateActiveButton(filterValue);
-
-				applyFilter(filterValue);
-			};
-		});
 
 		/*
-		 * 在作品卡片被點擊之前，
-		 * 保存「目前作品列表」的網址與捲動位置。
+		 * 取得網址目前分類
 		 */
+
+		const currentCategory =
+			getCategoryFromUrl();
+
+
+		updateActiveButton(
+			currentCategory
+		);
+
+
+		/*
+		 * 只有首頁真正篩選作品
+		 */
+
+		if (
+			window.location.pathname === "/"
+		) {
+
+			applyFilter(
+				currentCategory
+			);
+
+		}
+
+
+		/*
+		 * ========================================
+		 * 分類按鈕
+		 * ========================================
+		 */
+
+		buttons.forEach(
+			(button) => {
+
+				/*
+				 * 避免 Astro ClientRouter /
+				 * astro:page-load 重複綁定
+				 */
+
+				button.onclick = () => {
+
+					const filterValue =
+						button.getAttribute(
+							"data-filter"
+						) ||
+						"all";
+
+
+					/*
+					 * 不在首頁
+					 *
+					 * 回首頁並帶分類
+					 */
+
+					if (
+						window.location.pathname !== "/"
+					) {
+
+						const targetUrl =
+
+							filterValue === "all"
+
+								? "/"
+
+								: `/?category=${encodeURIComponent(
+										filterValue
+									)}`;
+
+
+						window.location.href =
+							targetUrl;
+
+						return;
+
+					}
+
+
+					/*
+					 * ========================================
+					 * 首頁
+					 * ========================================
+					 */
+
+					updateUrl(
+						filterValue
+					);
+
+
+					updateActiveButton(
+						filterValue
+					);
+
+
+					applyFilter(
+						filterValue
+					);
+
+				};
+
+			}
+		);
+
+
+		/*
+		 * ========================================
+		 * 保存作品返回位置
+		 * ========================================
+		 */
+
 		const projectLinks =
 			document.querySelectorAll(
 				"a.project-link"
 			);
 
-		projectLinks.forEach((link) => {
-			link.addEventListener("click", () => {
-				saveCurrentListingState();
-			});
-		});
+
+		projectLinks.forEach(
+			(link) => {
+
+				link.addEventListener(
+					"click",
+					() => {
+
+						saveCurrentListingState();
+
+					}
+				);
+
+			}
+		);
+
 	}
 
+
+	/*
+	 * ========================================
+	 * 初始執行
+	 * ========================================
+	 */
+
 	initFilter();
+
+
+	/*
+	 * Astro ClientRouter
+	 */
 
 	document.addEventListener(
 		"astro:page-load",
 		initFilter
 	);
+
 </script>
 
+
 <style>
+
+	/*
+	 * ========================================
+	 * CATEGORY WRAPPER
+	 * ========================================
+	 */
+
 	.category-wrapper {
-		position: relative;
-		width: 100%;
-		margin-top: 0.5rem;
-		margin-bottom: 0.5rem;
+
+		position:
+			relative;
+
+		width:
+			100%;
+
+		margin-top:
+			0.5rem;
+
+		margin-bottom:
+			0.5rem;
+
 	}
+
+
+	/*
+	 * ========================================
+	 * BACKGROUND
+	 * ========================================
+	 */
 
 	.full-width-bg {
-		position: absolute;
-		top: 0;
-		bottom: 0;
-		left: 50%;
-		width: 100vw;
-		transform: translateX(-50%);
-		background-color: #f1f1f1;
-		z-index: 0;
+
+		position:
+			absolute;
+
+		top:
+			0;
+
+		bottom:
+			0;
+
+		left:
+			50%;
+
+		width:
+			100vw;
+
+		transform:
+			translateX(-50%);
+
+		background-color:
+			#f1f1f1;
+
+		z-index:
+			0;
+
 	}
+
+
+	/*
+	 * ========================================
+	 * FILTER
+	 * ========================================
+	 */
 
 	.project-filter {
-		position: relative;
-		z-index: 1;
-		width: 100%;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.15rem 0;
-		font-size: 0.85rem;
-		box-sizing: border-box;
-		white-space: nowrap;
+
+		position:
+			relative;
+
+		z-index:
+			1;
+
+		width:
+			100%;
+
+		display:
+			flex;
+
+		justify-content:
+			space-between;
+
+		align-items:
+			center;
+
+		padding:
+			0.15rem 0;
+
+		font-size:
+			0.85rem;
+
+		box-sizing:
+			border-box;
+
+		white-space:
+			nowrap;
+
 	}
+
+
+	/*
+	 * ========================================
+	 * CATEGORIES
+	 * ========================================
+	 */
 
 	.categories {
-		display: flex;
-		align-items: center;
-		gap: 1.5rem;
-		overflow-x: auto;
-		scrollbar-width: none;
+
+		display:
+			flex;
+
+		align-items:
+			center;
+
+		gap:
+			1.5rem;
+
+		overflow-x:
+			auto;
+
+		scrollbar-width:
+			none;
+
 	}
+
 
 	.categories::-webkit-scrollbar {
-		display: none;
+
+		display:
+			none;
+
 	}
 
+
+	/*
+	 * ========================================
+	 * BUTTON
+	 * ========================================
+	 */
+
 	.categories button {
-		background: transparent;
-		border: none;
-		padding: 0.2rem 0;
 
-		font-family: inherit;
-		font-size: inherit;
-		font-weight: normal;
+		background:
+			transparent;
 
-		cursor: pointer;
-		color: #888888;
+		border:
+			none;
+
+		padding:
+			0.2rem 0;
+
+		font-family:
+			inherit;
+
+		font-size:
+			inherit;
+
+		font-weight:
+			normal;
+
+		cursor:
+			pointer;
+
+		color:
+			#888888;
 
 		transition:
 			color 0.2s ease,
 			font-weight 0.2s ease;
 
-		flex-shrink: 0;
+		flex-shrink:
+			0;
+
 	}
+
+
+	/*
+	 * ========================================
+	 * ACTIVE
+	 * ========================================
+	 */
 
 	.categories button.active {
-		color: #000000;
-		font-weight: 700;
+
+		color:
+			#000000;
+
+		font-weight:
+			700;
+
 	}
+
+
+	/*
+	 * ========================================
+	 * HOVER
+	 * ========================================
+	 */
 
 	.categories button:hover {
-		color: #000000;
+
+		color:
+			#000000;
+
 	}
+
+
+	/*
+	 * ========================================
+	 * PROJECT COUNT
+	 * ========================================
+	 */
 
 	.count {
-		font-weight: normal;
-		color: #888888;
-		white-space: nowrap;
-		flex-shrink: 0;
-		margin-left: 1rem;
+
+		font-weight:
+			normal;
+
+		color:
+			#888888;
+
+		white-space:
+			nowrap;
+
+		flex-shrink:
+			0;
+
+		margin-left:
+			1rem;
+
 	}
 
+
+	/*
+	 * ========================================
+	 * MOBILE
+	 * ========================================
+	 */
+
 	@media (max-width: 768px) {
+
 		.categories {
-			gap: 1rem;
+
+			gap:
+				1rem;
+
 		}
+
 	}
+
 </style>
