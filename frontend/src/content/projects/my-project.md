@@ -2,9 +2,9 @@
 title: "my-project"
 slug: "my-project"
 year: 2026
-cover: /images/brand/0000.png
+cover: /images/product/Duct Tape Mockup.jpg
 coverCaption: "這是封面的圖說文字"
-category: "Brand"
+category: "Product"
 tech:
   - Astro
   - TypeScript
