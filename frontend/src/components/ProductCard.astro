@@ -23,8 +23,26 @@ const projectLink =
 const year =
 	product.data.year || "2026";
 
+
+/*
+ * ========================================
+ * 作品分類
+ *
+ * 只允許：
+ * Visual
+ * Graphic
+ * Product
+ *
+ * All 是篩選按鈕，不是作品分類
+ * ========================================
+ */
+
 const category =
-	product.data.category || "Visual";
+	product.data.category === "Visual" ||
+	product.data.category === "Graphic" ||
+	product.data.category === "Product"
+		? product.data.category
+		: "Visual";
 
 
 /*
