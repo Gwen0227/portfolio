@@ -42,11 +42,30 @@ const projects = defineCollection({
 		tech:
 			z.array(z.string()),
 
+		/*
+		 * 作品模式
+		 *
+		 * zoom
+		 * → 點擊開啟 Lightbox
+		 *
+		 * page
+		 * → 點擊進入作品詳細頁
+		 *
+		 * link
+		 * → 點擊前往外部網站
+		 */
 		mode:
 			z.enum([
 				"zoom",
 				"page",
+				"link",
 			]).optional(),
+
+		/*
+		 * link 模式使用的外部網址
+		 */
+		link:
+			z.string().url().optional(),
 	}),
 });
 

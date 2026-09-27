@@ -20,6 +20,9 @@ const mode =
 const projectLink =
 	`/${product.data.slug || product.id}`;
 
+const externalLink =
+	product.data.link || "";
+
 const year =
 	product.data.year || "2026";
 
@@ -148,6 +151,69 @@ const galleryJson =
 
 	</div>
 
+) : mode === "link" ? (
+
+	<a
+		href={
+			externalLink
+		}
+
+		target="_blank"
+
+		rel="noopener noreferrer"
+
+		class="product-card is-link-mode"
+
+		data-category={
+			category
+		}
+	>
+
+		<div class="image-container">
+
+			<img
+				src={
+					product.data.cover
+				}
+
+				alt={
+					product.data.title
+				}
+
+				loading="lazy"
+
+				class="protected-img"
+
+				draggable="false"
+			/>
+
+		</div>
+
+
+		<div class="project-info">
+
+			<h3>
+				{product.data.title}
+			</h3>
+
+
+			<div class="project-meta">
+
+				<span class="category-tag">
+					{category}
+				</span>
+
+
+				<span class="year-tag">
+					/{year}
+				</span>
+
+			</div>
+
+		</div>
+
+	</a>
+
 ) : (
 
 	<a
@@ -271,6 +337,12 @@ const galleryJson =
 	/*
 	 * ========================================
 	 * PAGE MODE 連結
+	 *
+	 * 只有原本的 page mode
+	 * 才保存作品集返回位置。
+	 *
+	 * link mode 不處理，
+	 * 因為它是外部網站。
 	 * ========================================
 	 */
 
@@ -381,6 +453,14 @@ const galleryJson =
 
 
 	.is-page-mode {
+
+		cursor:
+			pointer;
+
+	}
+
+
+	.is-link-mode {
 
 		cursor:
 			pointer;
