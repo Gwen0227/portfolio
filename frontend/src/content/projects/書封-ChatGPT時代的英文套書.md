@@ -1,6 +1,6 @@
 ---
-title: 從不怕輸開始贏
-slug: 從不怕輸開始贏
+title: ChatGPT時代的英文套書
+slug: ChatGPT時代的英文套書
 year: 2025
 cover: /images/visual/bn-Tw Mansion-meat.jpg
 category: "Graphic"
