@@ -1,14 +1,12 @@
 ---
-title: About Me
-slug: aboutme
-year: 2026
+title: 禪香不二 DM
+slug: 禪香不二 DM
+year: 2023
 cover: /images/visual/bn-Tw Mansion-meat.jpg
 category: "Visual"
 mode: "zoom"
 
 gallery:
-  - /images/visual/bn-Tw Mansion-meat.jpg
-  - /images/visual/bn-Tw Mansion-meat.jpg
   - /images/visual/bn-Tw Mansion-meat.jpg
   - /images/visual/bn-Tw Mansion-meat.jpg
 
