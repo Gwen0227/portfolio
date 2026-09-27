@@ -1,8 +1,9 @@
 ---
-title: 陽明海運 永續報告書
-slug: 陽明海運 永續報告書
-over: /images/graphic/0000.png
-category: "Graphic"
+title: GUSHA Logo
+slug: GUSHA Logo
+year: 2019
+cover: /images/visual/bn-Tw Mansion-meat.jpg
+category: "Visual"
 mode: "zoom"
 
 gallery:
