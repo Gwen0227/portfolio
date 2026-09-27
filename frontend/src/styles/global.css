@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@100..900&display=swap");
+
 * {
 	box-sizing: border-box;
 
@@ -28,7 +30,19 @@ body {
 	color: var(--color-text);
 	background-color: var(--color-bg);
 	line-height: 1;
-	font-family: "Instrument Sans Variable", serif;
+
+	/*
+	 * 英文 / 數字：
+	 * Instrument Sans Variable
+	 *
+	 * 中文：
+	 * Noto Sans TC
+	 */
+	font-family:
+		"Instrument Sans Variable",
+		"Noto Sans TC",
+		sans-serif;
+
 	font-variant-ligatures: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
