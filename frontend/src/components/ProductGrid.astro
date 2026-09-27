@@ -8,6 +8,32 @@ type Props = {
 
 const { projects } = Astro.props;
 
+
+/*
+ * ========================================
+ * 作品年份排序
+ *
+ * 新 → 舊
+ *
+ * 例如：
+ * 2026
+ * 2026
+ * 2025
+ * 2024
+ * 2023
+ *
+ * 其他作品資料與功能完全不變
+ * ========================================
+ */
+
+const sortedProjects = [
+	...projects,
+].sort(
+	(a, b) =>
+		b.data.year - a.data.year
+);
+
+
 const grid = "projects";
 ---
 
@@ -16,7 +42,7 @@ const grid = "projects";
 	id="grid"
 	data-grid={grid}
 >
-	{projects.map((project) => {
+	{sortedProjects.map((project) => {
 		const currentCategory =
 			project.data.category || "None";
 
