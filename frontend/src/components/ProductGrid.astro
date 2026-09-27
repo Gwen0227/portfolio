@@ -100,7 +100,7 @@ const grid = "projects";
 		class="lightbox-prev"
 		aria-label="上一張"
 	>
-		&lt;
+		<span></span>
 	</button>
 
 	<div class="lightbox-content">
@@ -136,7 +136,7 @@ const grid = "projects";
 		class="lightbox-next"
 		aria-label="下一張"
 	>
-		&gt;
+		<span></span>
 	</button>
 </div>
 
@@ -839,7 +839,7 @@ const grid = "projects";
 				0,
 				0,
 				0,
-				0.65
+				0.80
 			);
 	}
 
@@ -1051,6 +1051,11 @@ const grid = "projects";
 	/*
 	 * ========================================
 	 * 左右箭頭
+	 *
+	 * 使用 CSS 線條繪製
+	 * 不使用 < > 字元
+	 *
+	 * 角度約 120°
 	 * ========================================
 	 */
 
@@ -1070,13 +1075,60 @@ const grid = "projects";
 				-50%
 			);
 
-		font-size:
-			42px;
+		padding:
+			0;
 
-		font-weight:
-			200;
+		display:
+			flex;
+
+		align-items:
+			center;
+
+		justify-content:
+			center;
 	}
 
+
+	/*
+	 * 箭頭線條
+	 */
+
+	.lightbox-prev span,
+	.lightbox-next span {
+		display:
+			block;
+
+		width:
+			24px;
+
+		height:
+			24px;
+
+		border-top:
+			1.5px solid
+			#ffffff;
+
+		border-right:
+			1.5px solid
+			#ffffff;
+
+		transition:
+			transform
+			0.2s ease,
+
+			opacity
+			0.2s ease;
+	}
+
+
+	/*
+	 * ========================================
+	 * 左箭頭
+	 *
+	 * < 
+	 * 約 120° 張開
+	 * ========================================
+	 */
 
 	.lightbox-prev {
 		left:
@@ -1084,11 +1136,42 @@ const grid = "projects";
 	}
 
 
+	.lightbox-prev span {
+		transform:
+			rotate(
+				-135deg
+			);
+	}
+
+
+	/*
+	 * ========================================
+	 * 右箭頭
+	 *
+	 * >
+	 * 約 120° 張開
+	 * ========================================
+	 */
+
 	.lightbox-next {
 		right:
 			20px;
 	}
 
+
+	.lightbox-next span {
+		transform:
+			rotate(
+				45deg
+			);
+	}
+
+
+	/*
+	 * ========================================
+	 * Hover
+	 * ========================================
+	 */
 
 	.lightbox-close:hover,
 	.lightbox-prev:hover,
@@ -1098,7 +1181,17 @@ const grid = "projects";
 	}
 
 
-	.lightbox-prev:hover,
+	.lightbox-prev:hover {
+		transform:
+			translateY(
+				-50%
+			)
+			scale(
+				1.08
+			);
+	}
+
+
 	.lightbox-next:hover {
 		transform:
 			translateY(
@@ -1186,6 +1279,10 @@ const grid = "projects";
 		}
 
 
+		/*
+		 * 手機左右箭頭
+		 */
+
 		.lightbox-prev,
 		.lightbox-next {
 			width:
@@ -1193,9 +1290,19 @@ const grid = "projects";
 
 			height:
 				70px;
+		}
 
-			font-size:
-				30px;
+
+		.lightbox-prev span,
+		.lightbox-next span {
+			width:
+				20px;
+
+			height:
+				20px;
+
+			border-width:
+				1.5px;
 		}
 
 
