@@ -539,6 +539,7 @@ const grid = "projects";
 
 				event.stopPropagation();
 
+
 				showImage(
 					currentIndex - 1
 				);
@@ -558,6 +559,7 @@ const grid = "projects";
 			(event) => {
 
 				event.stopPropagation();
+
 
 				showImage(
 					currentIndex + 1
@@ -604,9 +606,11 @@ const grid = "projects";
 
 					event.preventDefault();
 
+
 					showImage(
 						currentIndex - 1
 					);
+
 
 					return;
 				}
@@ -618,6 +622,7 @@ const grid = "projects";
 				) {
 
 					event.preventDefault();
+
 
 					showImage(
 						currentIndex + 1
@@ -726,6 +731,7 @@ const grid = "projects";
 
 
 <style>
+
 	/*
 	 * ========================================
 	 * Grid
@@ -782,6 +788,7 @@ const grid = "projects";
 		inset: 0;
 
 		width: 100%;
+
 		height: 100%;
 
 		background:
@@ -1125,7 +1132,7 @@ const grid = "projects";
 	 * ========================================
 	 * 左箭頭
 	 *
-	 * < 
+	 * <
 	 * 約 120° 張開
 	 * ========================================
 	 */
@@ -1244,6 +1251,15 @@ const grid = "projects";
 	/*
 	 * ========================================
 	 * Mobile
+	 *
+	 * 手機版 Lightbox：
+	 * - 滿版
+	 * - 圖片縮小
+	 * - 上下留白
+	 * - 標題跟在圖片下方
+	 * - 分類 / 年份跟在標題下方
+	 * - 1 / 5 最後顯示
+	 * - 左右箭頭靠近螢幕邊緣
 	 * ========================================
 	 */
 
@@ -1251,19 +1267,75 @@ const grid = "projects";
 
 		.lightbox-content {
 			width:
-				92vw;
+				100vw;
 
 			height:
-				88vh;
+				100vh;
+
+			padding:
+				60px
+				20px
+				40px;
+
+			box-sizing:
+				border-box;
+
+			justify-content:
+				center;
 		}
 
 
 		.lightbox-content img {
+			width:
+				auto;
+
 			max-width:
-				92vw;
+				88vw;
 
 			max-height:
-				72vh;
+				68vh;
+
+			object-fit:
+				contain;
+		}
+
+
+		.lightbox-title {
+			margin-top:
+				14px;
+
+			font-size:
+				14px;
+
+			line-height:
+				1.4;
+
+			max-width:
+				80vw;
+
+			text-align:
+				center;
+		}
+
+
+		.lightbox-meta {
+			margin-top:
+				4px;
+
+			font-size:
+				11px;
+
+			line-height:
+				1.4;
+		}
+
+
+		.lightbox-counter {
+			margin-top:
+				8px;
+
+			font-size:
+				12px;
 		}
 
 
@@ -1273,6 +1345,12 @@ const grid = "projects";
 
 			right:
 				10px;
+
+			width:
+				45px;
+
+			height:
+				45px;
 
 			font-size:
 				36px;
@@ -1285,24 +1363,14 @@ const grid = "projects";
 
 		.lightbox-prev,
 		.lightbox-next {
+			top:
+				50%;
+
 			width:
 				45px;
 
 			height:
 				70px;
-		}
-
-
-		.lightbox-prev span,
-		.lightbox-next span {
-			width:
-				20px;
-
-			height:
-				20px;
-
-			border-width:
-				1.5px;
 		}
 
 
@@ -1318,22 +1386,18 @@ const grid = "projects";
 		}
 
 
-		.lightbox-title {
-			font-size:
-				14px;
-		}
+		.lightbox-prev span,
+		.lightbox-next span {
+			width:
+				20px;
 
+			height:
+				20px;
 
-		.lightbox-meta {
-			font-size:
-				11px;
-		}
-
-
-		.lightbox-counter {
-			font-size:
-				12px;
+			border-width:
+				1.5px;
 		}
 
 	}
+
 </style>
