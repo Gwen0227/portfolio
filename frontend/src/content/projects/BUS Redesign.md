@@ -4,7 +4,7 @@ slug: 全台公車動態時刻查詢應用服務
 year: 2023
 cover: /images/visual/bn-Tw Mansion-meat.jpg
 coverCaption: "六角學院與台灣交通部合作競賽 -UI個人組佳作 以高雄公車資訊網的內容再設計"
-category: "Visual"
+category: "Product"
 tech:
   - Astro
   - TypeScript
