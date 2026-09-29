@@ -1,0 +1,26 @@
+---
+title: 公車查詢 Redesign
+slug: BUS Redesign
+year: 2023
+cover: /images/visual/bn-Tw Mansion-meat.jpg
+category: "Visual"
+tech:
+  - Astro
+  - TypeScript
+  - CSS
+github: https://github.com/Gwen0227
+demo: https://example.com
+# mode: "page"  <-- 這裡不寫，或者註解掉，它就會自動導向頁面
+---
+
+多元包容、人文質感、蘊含能量，三種基石 組成一個具有精緻質感的生活體驗
+​傳達璞邸的想帶給旅客的美好意象
+
+## 自然  樸拙  有機
+
+不規則的有機形狀傳達璞邸所囊括的文化/藝術/飲食多元性，
+與旅人在這此可隨性、自在而行，無需刻意。
+
+## 使用技術
+簡樸的色調、安定的氛圍，
+象徵璞邸對待旅人深刻、真誠的情感。
