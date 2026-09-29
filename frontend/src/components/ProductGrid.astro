@@ -144,20 +144,36 @@ const grid = "projects";
 <script>
 	/*
 	 * ========================================
-	 * 防止 Astro 導頁後重複建立事件
+	 * Lightbox 初始化
+	 *
+	 * 修正：
+	 * Astro 頁面切換後偶爾無法開啟 Lightbox
+	 *
+	 * 只有在 DOM 完整存在後
+	 * 才會設定 initialized
 	 * ========================================
 	 */
 
 	let lightboxInitialized = false;
 
+
 	function initLightbox() {
+
+		/*
+		 * 如果目前這個 DOM 已經初始化
+		 * 就不要重複綁定
+		 */
 
 		if (lightboxInitialized) {
 			return;
 		}
 
-		lightboxInitialized = true;
 
+		/*
+		 * ========================================
+		 * 取得 DOM
+		 * ========================================
+		 */
 
 		const modal =
 			document.getElementById(
@@ -205,6 +221,19 @@ const grid = "projects";
 			);
 
 
+		/*
+		 * ========================================
+		 * DOM 還沒準備好
+		 *
+		 * 這裡不能設定：
+		 *
+		 * lightboxInitialized = true
+		 *
+		 * 否則之後 DOM 準備好時
+		 * 就不會再次初始化
+		 * ========================================
+		 */
+
 		if (
 			!modal ||
 			!lightboxImg ||
@@ -222,7 +251,18 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * 目前正在看的作品圖片
+		 * DOM 完整存在
+		 *
+		 * 現在才正式標記初始化完成
+		 * ========================================
+		 */
+
+		lightboxInitialized = true;
+
+
+		/*
+		 * ========================================
+		 * Lightbox 狀態
 		 * ========================================
 		 */
 
@@ -235,7 +275,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * 讀取目前點擊的作品
+		 * 取得作品 Gallery
 		 * ========================================
 		 */
 
@@ -246,9 +286,11 @@ const grid = "projects";
 					"data-zoom-gallery"
 				);
 
+
 			if (!galleryData) {
 				return [];
 			}
+
 
 			try {
 
@@ -257,20 +299,28 @@ const grid = "projects";
 						galleryData
 					);
 
+
 				if (
 					!Array.isArray(images)
 				) {
 					return [];
 				}
 
+
 				return images.filter(
 					(image) =>
 						typeof image ===
-						"string" &&
+							"string" &&
 						image.length > 0
 				);
 
-			} catch {
+			} catch (error) {
+
+				console.warn(
+					"Lightbox gallery 讀取失敗：",
+					error
+				);
+
 				return [];
 			}
 		}
@@ -278,7 +328,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * 顯示指定圖片
+		 * 顯示圖片
 		 * ========================================
 		 */
 
@@ -300,6 +350,7 @@ const grid = "projects";
 
 			}
 
+
 			if (
 				index >= gallery.length
 			) {
@@ -318,20 +369,16 @@ const grid = "projects";
 				];
 
 
-			lightboxImg.src =
-				image;
-
-
 			/*
-			 * 如果圖片本身載入失敗
-			 * 就不留下舊圖片
+			 * 清除舊的錯誤事件
 			 */
 
 			lightboxImg.onerror =
-				() => {
-					lightboxImg.src =
-						image;
-				};
+				null;
+
+
+			lightboxImg.src =
+				image;
 
 
 			counter.textContent =
@@ -345,21 +392,35 @@ const grid = "projects";
 		 * ========================================
 		 */
 
-		function openLightbox(
-			card
-		) {
+		function openLightbox(card) {
 
 			gallery =
 				getGallery(card);
 
 
+			/*
+			 * 沒有圖片就不開啟
+			 */
+
 			if (!gallery.length) {
+
+				console.warn(
+					"Lightbox 沒有找到圖片：",
+					card
+				);
+
 				return;
 			}
 
 
 			currentIndex = 0;
 
+
+			/*
+			 * ========================================
+			 * 作品資料
+			 * ========================================
+			 */
 
 			const projectTitle =
 				card.getAttribute(
@@ -387,8 +448,16 @@ const grid = "projects";
 				`${projectCategory} /${projectYear}`;
 
 
+			/*
+			 * 第一張圖片
+			 */
+
 			showImage(0);
 
+
+			/*
+			 * 開啟
+			 */
 
 			modal.classList.add(
 				"active"
@@ -447,6 +516,8 @@ const grid = "projects";
 						meta.textContent =
 							"";
 
+						counter.textContent =
+							"1 / 1";
 					}
 
 				},
@@ -457,7 +528,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * 首頁作品圖片點擊
+		 * 點擊作品
 		 *
 		 * 只有：
 		 *
@@ -466,12 +537,14 @@ const grid = "projects";
 		 * 才會進 Lightbox
 		 *
 		 * mode="page"
-		 * 完全不會被攔截
+		 * 不會被攔截
+		 *
+		 * mode="link"
+		 * 不會被攔截
 		 * ========================================
 		 */
 
-		document.addEventListener(
-			"click",
+		const handleCardClick =
 			(event) => {
 
 				const target =
@@ -505,7 +578,12 @@ const grid = "projects";
 				openLightbox(
 					card
 				);
-			}
+			};
+
+
+		document.addEventListener(
+			"click",
+			handleCardClick
 		);
 
 
@@ -575,8 +653,7 @@ const grid = "projects";
 		 * ========================================
 		 */
 
-		document.addEventListener(
-			"keydown",
+		const handleKeydown =
 			(event) => {
 
 				if (
@@ -588,6 +665,10 @@ const grid = "projects";
 				}
 
 
+				/*
+				 * ESC
+				 */
+
 				if (
 					event.key ===
 					"Escape"
@@ -598,6 +679,10 @@ const grid = "projects";
 					return;
 				}
 
+
+				/*
+				 * 上一張
+				 */
 
 				if (
 					event.key ===
@@ -616,6 +701,10 @@ const grid = "projects";
 				}
 
 
+				/*
+				 * 下一張
+				 */
+
 				if (
 					event.key ===
 					"ArrowRight"
@@ -627,10 +716,13 @@ const grid = "projects";
 					showImage(
 						currentIndex + 1
 					);
-
 				}
+			};
 
-			}
+
+		document.addEventListener(
+			"keydown",
+			handleKeydown
 		);
 
 
@@ -640,13 +732,12 @@ const grid = "projects";
 		 * ========================================
 		 */
 
-		modal.addEventListener(
-			"touchstart",
+		const handleTouchStart =
 			(event) => {
 
 				if (
-					!event.changedTouches
-						.length
+					!event.changedTouches ||
+					!event.changedTouches.length
 				) {
 					return;
 				}
@@ -656,21 +747,15 @@ const grid = "projects";
 					event
 						.changedTouches[0]
 						.screenX;
-
-			},
-			{
-				passive: true,
-			}
-		);
+			};
 
 
-		modal.addEventListener(
-			"touchend",
+		const handleTouchEnd =
 			(event) => {
 
 				if (
-					!event.changedTouches
-						.length
+					!event.changedTouches ||
+					!event.changedTouches.length
 				) {
 					return;
 				}
@@ -689,7 +774,7 @@ const grid = "projects";
 
 				/*
 				 * 滑動距離太短
-				 * 視為普通觸控
+				 * 視為普通點擊
 				 */
 
 				if (
@@ -701,6 +786,10 @@ const grid = "projects";
 				}
 
 
+				/*
+				 * 左滑
+				 */
+
 				if (
 					distance < 0
 				) {
@@ -709,15 +798,34 @@ const grid = "projects";
 						currentIndex + 1
 					);
 
-				} else {
+				}
+
+				/*
+				 * 右滑
+				 */
+
+				else {
 
 					showImage(
 						currentIndex - 1
 					);
 
 				}
+			};
 
-			},
+
+		modal.addEventListener(
+			"touchstart",
+			handleTouchStart,
+			{
+				passive: true,
+			}
+		);
+
+
+		modal.addEventListener(
+			"touchend",
+			handleTouchEnd,
 			{
 				passive: true,
 			}
@@ -726,7 +834,63 @@ const grid = "projects";
 	}
 
 
-	initLightbox();
+	/*
+	 * ========================================
+	 * 初次載入
+	 * ========================================
+	 */
+
+	if (
+		document.readyState ===
+		"loading"
+	) {
+
+		document.addEventListener(
+			"DOMContentLoaded",
+			initLightbox,
+			{
+				once: true,
+			}
+		);
+
+	} else {
+
+		initLightbox();
+
+	}
+
+
+	/*
+	 * ========================================
+	 * Astro View Transitions
+	 *
+	 * 頁面切換完成後
+	 * 重新初始化 Lightbox
+	 * ========================================
+	 */
+
+	document.addEventListener(
+		"astro:after-swap",
+		() => {
+
+			/*
+			 * 新頁面已經產生新的 DOM
+			 *
+			 * 舊的 initialized 狀態不能保留
+			 */
+
+			lightboxInitialized =
+				false;
+
+
+			/*
+			 * 重新初始化
+			 */
+
+			initLightbox();
+
+		}
+	);
 </script>
 
 
