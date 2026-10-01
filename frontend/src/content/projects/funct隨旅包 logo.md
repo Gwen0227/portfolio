@@ -2,7 +2,7 @@
 title: funct隨旅包 logo
 slug: funct隨旅包 logo
 year: 2019
-cover: /images/Packaging/Duct Tape Mockup.jpg
+cover: /images/visual/visual01-funct.jpeg
 category: "Visual"
 mode: "zoom"
 imageCrop: square
