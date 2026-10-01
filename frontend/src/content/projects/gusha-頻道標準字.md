@@ -5,6 +5,7 @@ year: 2019
 cover: /images/visual/bn-Tw Mansion-meat.jpg
 category: "Graphic"
 mode: "zoom"
+imageCrop: contain
 
 gallery:
   - /images/visual/gusha-頻道標準字.png

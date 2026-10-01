@@ -5,6 +5,7 @@ year: 2019
 cover: /images/Packaging/Duct Tape Mockup.jpg
 category: "Visual"
 mode: "zoom"
+imageCrop: square
 
 gallery:
   - /images/visual/visual01-funct.jpeg

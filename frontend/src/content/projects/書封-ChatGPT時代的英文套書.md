@@ -5,6 +5,7 @@ year: 2025
 cover: /images/visual/bn-Tw Mansion-meat.jpg
 category: "Graphic"
 mode: "zoom"
+imageCrop: square
 
 gallery:
   - /images/graphic/book07-ChatGPT時代的英文套書.png

@@ -12,7 +12,6 @@ const { projects } = Astro.props;
 /*
  * ========================================
  * 作品年份排序
- *
  * 新 → 舊
  * ========================================
  */
@@ -39,29 +38,12 @@ const grid = "projects";
 			const currentCategory =
 				project.data.category || "None";
 
-			/*
-			 * Lightbox 圖片裁切模式
-			 *
-			 * contain
-			 * → 完整顯示
-			 *
-			 * square
-			 * → 正方形裁切
-			 */
 			const imageCrop =
 				project.data.imageCrop || "contain";
 
-
-			/*
-			 * Lightbox 固定說明
-			 */
 			const lightboxCaption =
 				(project.data as any).lightboxCaption || "";
 
-
-			/*
-			 * 每張圖片自己的說明
-			 */
 			const galleryCaptions =
 				(project.data as any).galleryCaptions || [];
 
@@ -88,20 +70,6 @@ const grid = "projects";
 
 <!-- ========================================
      首頁 Lightbox
-
-     只有 mode="zoom" 的作品會使用
-
-     功能：
-
-     1. cover + gallery
-     2. 左右切換
-     3. ESC 關閉
-     4. 鍵盤左右鍵
-     5. 手機左右滑動
-     6. 圖片縮放
-     7. 圖片拖曳
-     8. 正方形裁切
-     9. 圖片說明
      ======================================== -->
 
 <div
@@ -133,6 +101,49 @@ const grid = "projects";
 
 
 	<div class="lightbox-content">
+
+		<!-- ====================================
+		     Zoom 控制
+		     現在固定放在圖片上方
+		     ==================================== -->
+
+		<div
+			class="lightbox-zoom-controls"
+			aria-label="圖片縮放"
+		>
+
+			<button
+				type="button"
+				class="lightbox-zoom-out"
+				aria-label="縮小"
+			>
+				−
+			</button>
+
+
+			<button
+				type="button"
+				class="lightbox-zoom-reset"
+				aria-label="恢復原始大小"
+			>
+				100%
+			</button>
+
+
+			<button
+				type="button"
+				class="lightbox-zoom-in"
+				aria-label="放大"
+			>
+				+
+			</button>
+
+		</div>
+
+
+		<!-- ====================================
+		     圖片
+		     ==================================== -->
 
 		<div
 			class="lightbox-image-wrap"
@@ -174,40 +185,6 @@ const grid = "projects";
 			id="lightbox-caption"
 		></div>
 
-
-		<div
-			class="lightbox-zoom-controls"
-			aria-label="圖片縮放"
-		>
-
-			<button
-				type="button"
-				class="lightbox-zoom-out"
-				aria-label="縮小"
-			>
-				−
-			</button>
-
-
-			<button
-				type="button"
-				class="lightbox-zoom-reset"
-				aria-label="恢復原始大小"
-			>
-				100%
-			</button>
-
-
-			<button
-				type="button"
-				class="lightbox-zoom-in"
-				aria-label="放大"
-			>
-				+
-			</button>
-
-		</div>
-
 	</div>
 
 
@@ -222,18 +199,6 @@ const grid = "projects";
 
 
 <script>
-	/*
-	 * ========================================
-	 * Lightbox
-	 * ========================================
-	 *
-	 * 這裡使用單一初始化函式。
-	 *
-	 * Astro View Transitions 切頁後，
-	 * 會重新初始化新的 DOM。
-	 * ========================================
-	 */
-
 	let lightboxInitialized = false;
 
 
@@ -334,10 +299,6 @@ const grid = "projects";
 			);
 
 
-		/*
-		 * DOM 尚未準備完成
-		 */
-
 		if (
 			!modal ||
 			!imageWrap ||
@@ -417,7 +378,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * 取得 Gallery
+		 * Gallery
 		 * ========================================
 		 */
 
@@ -471,7 +432,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * 取得 Gallery Captions
+		 * Gallery Captions
 		 * ========================================
 		 */
 
@@ -554,15 +515,11 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * 更新 Zoom
+		 * Update Zoom
 		 * ========================================
 		 */
 
 		function updateZoom() {
-
-			/*
-			 * 限制範圍
-			 */
 
 			zoomLevel =
 				Math.max(
@@ -574,10 +531,6 @@ const grid = "projects";
 				);
 
 
-			/*
-			 * 1 倍時清除位移
-			 */
-
 			if (zoomLevel <= 1) {
 
 				translateX = 0;
@@ -585,10 +538,6 @@ const grid = "projects";
 				translateY = 0;
 			}
 
-
-			/*
-			 * 圖片 Transform
-			 */
 
 			lightboxImg.style.transform =
 				`translate3d(
@@ -598,10 +547,6 @@ const grid = "projects";
 				)
 				scale(${zoomLevel})`;
 
-
-			/*
-			 * Zoom class
-			 */
 
 			if (zoomLevel > 1) {
 
@@ -617,22 +562,12 @@ const grid = "projects";
 			}
 
 
-			/*
-			 * 顯示百分比
-			 */
-
 			zoomResetBtn.textContent =
 				`${Math.round(
 					zoomLevel * 100
 				)}%`;
 		}
 
-
-		/*
-		 * ========================================
-		 * 設定 Zoom
-		 * ========================================
-		 */
 
 		function setZoom(
 			value: number
@@ -644,12 +579,6 @@ const grid = "projects";
 		}
 
 
-		/*
-		 * ========================================
-		 * Zoom In
-		 * ========================================
-		 */
-
 		function zoomIn() {
 
 			setZoom(
@@ -658,12 +587,6 @@ const grid = "projects";
 			);
 		}
 
-
-		/*
-		 * ========================================
-		 * Zoom Out
-		 * ========================================
-		 */
 
 		function zoomOut() {
 
@@ -688,10 +611,6 @@ const grid = "projects";
 				return;
 			}
 
-
-			/*
-			 * 循環切換
-			 */
 
 			if (index < 0) {
 
@@ -718,25 +637,12 @@ const grid = "projects";
 				];
 
 
-			/*
-			 * 每換一張圖片
-			 * 都重新恢復 100%
-			 */
-
 			resetZoom();
 
-
-			/*
-			 * 清除舊錯誤
-			 */
 
 			lightboxImg.onerror =
 				null;
 
-
-			/*
-			 * 圖片載入
-			 */
 
 			lightboxImg.classList.add(
 				"is-loading"
@@ -747,22 +653,9 @@ const grid = "projects";
 				image;
 
 
-			/*
-			 * 頁數
-			 */
-
 			counter.textContent =
 				`${currentIndex + 1} / ${gallery.length}`;
 
-
-			/*
-			 * 圖說
-			 *
-			 * galleryCaptions 優先
-			 *
-			 * 沒有單張圖說時，
-			 * 使用 projectCaption
-			 */
 
 			const individualCaption =
 				galleryCaptions[
@@ -780,10 +673,6 @@ const grid = "projects";
 				finalCaption;
 
 
-			/*
-			 * 沒有說明就隱藏
-			 */
-
 			if (finalCaption) {
 
 				caption.classList.add(
@@ -798,10 +687,6 @@ const grid = "projects";
 			}
 
 
-			/*
-			 * 圖片載入完成
-			 */
-
 			lightboxImg.onload =
 				() => {
 
@@ -810,10 +695,6 @@ const grid = "projects";
 					);
 				};
 
-
-			/*
-			 * 圖片載入失敗
-			 */
 
 			lightboxImg.onerror =
 				() => {
@@ -840,15 +721,6 @@ const grid = "projects";
 			card: Element
 		) {
 
-			/*
-			 * 找到外層 grid-item
-			 *
-			 * imageCrop
-			 * galleryCaptions
-			 * lightboxCaption
-			 * 都放在這裡
-			 */
-
 			const wrapper =
 				card.closest(
 					".grid-item"
@@ -859,10 +731,6 @@ const grid = "projects";
 				return;
 			}
 
-
-			/*
-			 * Gallery
-			 */
 
 			gallery =
 				getGallery(card);
@@ -879,10 +747,6 @@ const grid = "projects";
 			}
 
 
-			/*
-			 * 裁切模式
-			 */
-
 			const crop =
 				wrapper.getAttribute(
 					"data-image-crop"
@@ -895,29 +759,17 @@ const grid = "projects";
 					: "contain";
 
 
-			/*
-			 * Project Caption
-			 */
-
 			projectCaption =
 				wrapper.getAttribute(
 					"data-lightbox-caption"
 				) || "";
 
 
-			/*
-			 * Gallery Captions
-			 */
-
 			galleryCaptions =
 				getGalleryCaptions(
 					wrapper
 				);
 
-
-			/*
-			 * 套用圖片裁切模式
-			 */
 
 			if (
 				currentCrop === "square"
@@ -934,10 +786,6 @@ const grid = "projects";
 				);
 			}
 
-
-			/*
-			 * 作品資料
-			 */
 
 			const projectTitle =
 				card.getAttribute(
@@ -965,18 +813,10 @@ const grid = "projects";
 				`${projectCategory} / ${projectYear}`;
 
 
-			/*
-			 * 第一張圖片
-			 */
-
 			currentIndex = 0;
 
 			showImage(0);
 
-
-			/*
-			 * 顯示 Lightbox
-			 */
 
 			modal.classList.add(
 				"active"
@@ -1070,15 +910,6 @@ const grid = "projects";
 		/*
 		 * ========================================
 		 * 點擊作品
-		 *
-		 * 只有：
-		 *
-		 * .is-zoom-mode
-		 *
-		 * 才進 Lightbox
-		 *
-		 * page / link
-		 * 都不攔截
 		 * ========================================
 		 */
 
@@ -1110,11 +941,6 @@ const grid = "projects";
 				}
 
 
-				/*
-				 * 如果點到按鈕或連結
-				 * 不攔截
-				 */
-
 				const interactive =
 					target.closest(
 						"a, button"
@@ -1125,11 +951,6 @@ const grid = "projects";
 					interactive &&
 					interactive !== card
 				) {
-
-					/*
-					 * 仍然讓 card 本身
-					 * 控制 Lightbox
-					 */
 
 					if (
 						interactive.matches(
@@ -1147,6 +968,7 @@ const grid = "projects";
 
 
 				event.preventDefault();
+
 
 				openLightbox(
 					card
@@ -1220,7 +1042,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * Zoom buttons
+		 * Zoom Buttons
 		 * ========================================
 		 */
 
@@ -1321,7 +1143,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * 滑鼠拖曳圖片
+		 * 滑鼠拖曳
 		 * ========================================
 		 */
 
@@ -1416,7 +1238,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * ESC / 鍵盤左右鍵
+		 * ESC / 鍵盤
 		 * ========================================
 		 */
 
@@ -1432,10 +1254,6 @@ const grid = "projects";
 				}
 
 
-				/*
-				 * ESC
-				 */
-
 				if (
 					event.key ===
 					"Escape"
@@ -1446,10 +1264,6 @@ const grid = "projects";
 					return;
 				}
 
-
-				/*
-				 * 放大
-				 */
 
 				if (
 					event.key ===
@@ -1466,10 +1280,6 @@ const grid = "projects";
 				}
 
 
-				/*
-				 * 縮小
-				 */
-
 				if (
 					event.key ===
 					"-"
@@ -1483,10 +1293,6 @@ const grid = "projects";
 				}
 
 
-				/*
-				 * 100%
-				 */
-
 				if (
 					event.key ===
 					"0"
@@ -1499,10 +1305,6 @@ const grid = "projects";
 					return;
 				}
 
-
-				/*
-				 * 上一張
-				 */
 
 				if (
 					event.key ===
@@ -1520,10 +1322,6 @@ const grid = "projects";
 					return;
 				}
 
-
-				/*
-				 * 下一張
-				 */
 
 				if (
 					event.key ===
@@ -1615,35 +1413,18 @@ const grid = "projects";
 					touchStartY;
 
 
-				/*
-				 * 放大時
-				 *
-				 * 優先當作拖曳
-				 */
-
 				if (
 					zoomLevel > 1
 				) {
 
-					/*
-					 * 只有水平距離比較大
-					 * 才切換圖片
-					 */
-
 					if (
 						Math.abs(
 							distanceX
-						) <
-						100
+						) < 100
 					) {
 						return;
 					}
 
-
-					/*
-					 * 如果垂直位移也很大
-					 * 不切換
-					 */
 
 					if (
 						Math.abs(
@@ -1658,10 +1439,6 @@ const grid = "projects";
 				}
 
 
-				/*
-				 * 滑動距離太短
-				 */
-
 				if (
 					Math.abs(
 						distanceX
@@ -1670,10 +1447,6 @@ const grid = "projects";
 					return;
 				}
 
-
-				/*
-				 * 左滑
-				 */
 
 				if (
 					distanceX < 0
@@ -1684,10 +1457,6 @@ const grid = "projects";
 					);
 
 				} else {
-
-					/*
-					 * 右滑
-					 */
 
 					showImage(
 						currentIndex - 1
@@ -1752,17 +1521,9 @@ const grid = "projects";
 		"astro:after-swap",
 		() => {
 
-			/*
-			 * 新 DOM
-			 */
-
 			lightboxInitialized =
 				false;
 
-
-			/*
-			 * 重新初始化
-			 */
 
 			initLightbox();
 
@@ -1873,7 +1634,7 @@ const grid = "projects";
 
 	/*
 	 * ========================================
-	 * 黑色透明背景
+	 * 黑色背景
 	 * ========================================
 	 */
 
@@ -1925,6 +1686,199 @@ const grid = "projects";
 
 		pointer-events:
 			none;
+	}
+
+
+	/*
+	 * ========================================
+	 * Zoom 控制
+	 *
+	 * 重要：
+	 * 控制器現在位於圖片上方
+	 *
+	 * 外框本身有固定高度，
+	 * 三個按鈕完全在外框內。
+	 * ========================================
+	 */
+
+	.lightbox-zoom-controls {
+		position: relative;
+
+		z-index: 20;
+
+		display: flex;
+
+		flex-shrink: 0;
+
+		align-items: center;
+
+		justify-content: center;
+
+		width: max-content;
+
+		height: 32px;
+
+		margin:
+			0
+			0
+			12px;
+
+		padding: 0;
+
+		box-sizing: border-box;
+
+		border:
+			1px solid
+			rgba(
+				255,
+				255,
+				255,
+				0.25
+			);
+
+		border-radius:
+			999px;
+
+		overflow:
+			hidden;
+
+		pointer-events:
+			auto;
+
+		line-height:
+			1;
+	}
+
+
+	/*
+	 * ========================================
+	 * Zoom 按鈕
+	 * ========================================
+	 */
+
+	.lightbox-zoom-controls button {
+		display: flex;
+
+		align-items: center;
+
+		justify-content: center;
+
+		flex-shrink: 0;
+
+		height: 30px;
+
+		width: 38px;
+
+		margin: 0;
+
+		padding: 0;
+
+		box-sizing: border-box;
+
+		border: 0;
+
+		border-right:
+			1px solid
+			rgba(
+				255,
+				255,
+				255,
+				0.2
+			);
+
+		border-radius: 0;
+
+		background:
+			transparent;
+
+		color:
+			#ffffff;
+
+		font-family:
+			inherit;
+
+		font-size:
+			14px;
+
+		font-weight:
+			400;
+
+		line-height:
+			1;
+
+		text-align:
+			center;
+
+		vertical-align:
+			middle;
+
+		cursor:
+			pointer;
+
+		appearance:
+			none;
+
+		-webkit-appearance:
+			none;
+
+		transition:
+			background
+			0.2s ease,
+
+			opacity
+			0.2s ease;
+	}
+
+
+	/*
+	 * 最後一個按鈕取消右邊分隔線
+	 */
+
+	.lightbox-zoom-controls
+		button:last-child {
+		border-right:
+			0;
+	}
+
+
+	/*
+	 * Hover
+	 */
+
+	.lightbox-zoom-controls
+		button:hover {
+		background:
+			rgba(
+				255,
+				255,
+				255,
+				0.12
+			);
+	}
+
+
+	/*
+	 * 100%
+	 *
+	 * 比 + / − 稍寬，
+	 * 確保百分比永遠不會跑出外框。
+	 */
+
+	.lightbox-zoom-reset {
+		width:
+			50px !important;
+
+		min-width:
+			50px;
+
+		font-size:
+			11px !important;
+
+		line-height:
+			1 !important;
+
+		opacity:
+			0.7;
 	}
 
 
@@ -2048,10 +2002,6 @@ const grid = "projects";
 	}
 
 
-	/*
-	 * 正方形圖片
-	 */
-
 	.lightbox-image-wrap.is-square img {
 		width:
 			100%;
@@ -2071,7 +2021,9 @@ const grid = "projects";
 
 
 	/*
+	 * ========================================
 	 * Zoom
+	 * ========================================
 	 */
 
 	.lightbox-content img.is-zoomed {
@@ -2151,7 +2103,7 @@ const grid = "projects";
 
 	/*
 	 * ========================================
-	 * 1 / 5
+	 * Counter
 	 * ========================================
 	 */
 
@@ -2175,9 +2127,7 @@ const grid = "projects";
 
 	/*
 	 * ========================================
-	 * 圖片說明
-	 *
-	 * 頁數下面
+	 * Caption
 	 * ========================================
 	 */
 
@@ -2216,126 +2166,7 @@ const grid = "projects";
 
 	/*
 	 * ========================================
-	 * Zoom 控制
-	 * ========================================
-	 */
-
-	.lightbox-zoom-controls {
-		display:
-			flex;
-
-		align-items:
-			center;
-
-		justify-content:
-			center;
-
-		gap:
-			0;
-
-		margin-top:
-			12px;
-
-		pointer-events:
-			auto;
-
-		border:
-			1px solid
-			rgba(
-				255,
-				255,
-				255,
-				0.25
-			);
-
-		border-radius:
-			999px;
-
-		overflow:
-			hidden;
-	}
-
-
-	.lightbox-zoom-controls button {
-		width:
-			38px;
-
-		height:
-			30px;
-
-		padding:
-			0;
-
-		border:
-			0;
-
-		border-right:
-			1px solid
-			rgba(
-				255,
-				255,
-				255,
-				0.2
-			);
-
-		background:
-			transparent;
-
-		color:
-			#ffffff;
-
-		font-family:
-			inherit;
-
-		font-size:
-			14px;
-
-		cursor:
-			pointer;
-
-		transition:
-			background
-			0.2s ease,
-
-			opacity
-			0.2s ease;
-	}
-
-
-	.lightbox-zoom-controls
-		button:last-child {
-		border-right:
-			0;
-	}
-
-
-	.lightbox-zoom-controls
-		button:hover {
-		background:
-			rgba(
-				255,
-				255,
-				255,
-				0.12
-			);
-	}
-
-
-	.lightbox-zoom-reset {
-		min-width:
-			50px;
-
-		font-size:
-			11px !important;
-
-		opacity:
-			0.7;
-	}
-
-
-	/*
-	 * ========================================
-	 * 按鈕
+	 * Lightbox 按鈕
 	 * ========================================
 	 */
 
@@ -2435,10 +2266,6 @@ const grid = "projects";
 	}
 
 
-	/*
-	 * 箭頭線條
-	 */
-
 	.lightbox-prev span,
 	.lightbox-next span {
 		display:
@@ -2467,10 +2294,6 @@ const grid = "projects";
 	}
 
 
-	/*
-	 * 左箭頭
-	 */
-
 	.lightbox-prev {
 		left:
 			20px;
@@ -2484,10 +2307,6 @@ const grid = "projects";
 			);
 	}
 
-
-	/*
-	 * 右箭頭
-	 */
 
 	.lightbox-next {
 		right:
@@ -2606,7 +2425,7 @@ const grid = "projects";
 
 
 		/*
-		 * Mobile 圖片外框
+		 * Mobile 圖片
 		 */
 
 		.lightbox-image-wrap {
@@ -2617,10 +2436,6 @@ const grid = "projects";
 				65vh;
 		}
 
-
-		/*
-		 * Mobile 正方形
-		 */
 
 		.lightbox-image-wrap.is-square {
 			width:
@@ -2668,7 +2483,49 @@ const grid = "projects";
 
 
 		/*
+		 * ====================================
+		 * Mobile Zoom 控制
+		 *
+		 * 同樣固定在圖片上方
+		 * ====================================
+		 */
+
+		.lightbox-zoom-controls {
+			height:
+				30px;
+
+			margin:
+				0
+				0
+				9px;
+		}
+
+
+		.lightbox-zoom-controls button {
+			width:
+				34px;
+
+			height:
+				28px;
+
+			font-size:
+				13px;
+		}
+
+
+		.lightbox-zoom-reset {
+			width:
+				46px !important;
+
+			min-width:
+				46px;
+		}
+
+
+		/*
+		 * ====================================
 		 * 標題
+		 * ====================================
 		 */
 
 		.lightbox-title {
@@ -2689,10 +2546,6 @@ const grid = "projects";
 		}
 
 
-		/*
-		 * Meta
-		 */
-
 		.lightbox-meta {
 			margin-top:
 				4px;
@@ -2705,10 +2558,6 @@ const grid = "projects";
 		}
 
 
-		/*
-		 * Counter
-		 */
-
 		.lightbox-counter {
 			margin-top:
 				7px;
@@ -2717,10 +2566,6 @@ const grid = "projects";
 				12px;
 		}
 
-
-		/*
-		 * Caption
-		 */
 
 		.lightbox-caption {
 			max-width:
@@ -2738,35 +2583,9 @@ const grid = "projects";
 
 
 		/*
-		 * Zoom 控制
-		 */
-
-		.lightbox-zoom-controls {
-			margin-top:
-				9px;
-		}
-
-
-		.lightbox-zoom-controls button {
-			width:
-				34px;
-
-			height:
-				28px;
-
-			font-size:
-				13px;
-		}
-
-
-		.lightbox-zoom-reset {
-			min-width:
-				46px;
-		}
-
-
-		/*
+		 * ====================================
 		 * Close
+		 * ====================================
 		 */
 
 		.lightbox-close {
@@ -2788,7 +2607,9 @@ const grid = "projects";
 
 
 		/*
+		 * ====================================
 		 * Mobile 左右箭頭
+		 * ====================================
 		 */
 
 		.lightbox-prev,

@@ -5,6 +5,7 @@ year: 2019
 cover: /images/visual/bn-Tw Mansion-meat.jpg
 category: "Visual"
 mode: "zoom"
+imageCrop: contain
 
 gallery:
   - /images/visual/brand01-gusha.jpg

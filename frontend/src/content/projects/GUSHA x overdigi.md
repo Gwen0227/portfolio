@@ -5,6 +5,7 @@ year: 2019
 cover: /images/product/phonecase01.jpg
 category: "Product"
 mode: "zoom"
+imageCrop: square
 
 gallery:
   - /images/product/phonecase01.jpg

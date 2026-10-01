@@ -5,6 +5,7 @@ year: 2024
 cover: /images/visual/visual01-inzense.png
 category: "Visual"
 mode: "zoom"
+imageCrop: square
 
 gallery:
   - /images/visual/visual01-inzense.png
