@@ -10,6 +10,70 @@ const { product } = Astro.props;
 
 /*
  * ========================================
+ * 圖片 WebP
+ *
+ * .png / .jpg / .jpeg
+ * 自動改用同名 .webp
+ *
+ * 例如：
+ *
+ * /images/visual/brand01-bouti.png
+ * ↓
+ * /images/visual/brand01-bouti.webp
+ *
+ * 外部網址不處理。
+ * 已經是 WebP 也不處理。
+ * ========================================
+ */
+
+function getWebpPath(
+	image: string | undefined
+): string {
+
+	if (!image) {
+		return "";
+	}
+
+
+	/*
+	 * 外部網址
+	 */
+
+	if (
+		image.startsWith("http://") ||
+		image.startsWith("https://") ||
+		image.startsWith("//")
+	) {
+		return image;
+	}
+
+
+	/*
+	 * 已經是 WebP
+	 */
+
+	if (
+		/\.webp(?:[?#].*)?$/i.test(image)
+	) {
+		return image;
+	}
+
+
+	/*
+	 * PNG / JPG / JPEG
+	 * 自動轉成 WebP 路徑
+	 */
+
+	return image.replace(
+		/\.(png|jpe?g)(?=([?#].*)?$)/i,
+		".webp"
+	);
+
+}
+
+
+/*
+ * ========================================
  * 基本資料
  * ========================================
  */
@@ -17,11 +81,14 @@ const { product } = Astro.props;
 const mode =
 	product.data.mode || "page";
 
+
 const projectLink =
 	`/${product.data.slug || product.id}`;
 
+
 const externalLink =
 	product.data.link || "";
+
 
 const year =
 	product.data.year || "2026";
@@ -60,29 +127,45 @@ const category =
  * gallery 沒設定
  * → 使用 cover
  *
- * 注意：
- * 不使用 Set
- * 不刪除重複圖片
+ * 所有圖片自動使用 WebP。
+ *
+ * 不使用 Set。
+ * 不刪除重複圖片。
  * ========================================
  */
 
-const galleryImages =
+const galleryImages: string[] =
 	product.data.gallery?.length
 		? product.data.gallery
-		: [product.data.cover];
+			.map(
+				(image: string) =>
+					getWebpPath(image)
+			)
+			.filter(
+				(image: string): image is string =>
+					Boolean(image)
+			)
+		: [
+			getWebpPath(
+				product.data.cover
+			)
+		].filter(
+			(image: string): image is string =>
+				Boolean(image)
+		);
 
 
 /*
+ * ========================================
  * 傳給 ProductGrid.astro
+ * ========================================
  */
 
 const galleryJson =
 	JSON.stringify(
-		galleryImages.filter(
-			(image): image is string =>
-				Boolean(image)
-		)
+		galleryImages
 	);
+
 ---
 
 
@@ -110,7 +193,9 @@ const galleryJson =
 
 			<img
 				src={
-					product.data.cover
+					getWebpPath(
+						product.data.cover
+					)
 				}
 
 				alt={
@@ -175,7 +260,9 @@ const galleryJson =
 
 			<img
 				src={
-					product.data.cover
+					getWebpPath(
+						product.data.cover
+					)
 				}
 
 				alt={
@@ -240,7 +327,9 @@ const galleryJson =
 
 			<img
 				src={
-					product.data.cover
+					getWebpPath(
+						product.data.cover
+					)
 				}
 
 				alt={
@@ -290,7 +379,7 @@ const galleryJson =
 
 	/*
 	 * ========================================
-	 * 保存文章返回位置
+	 * 保存作品集返回位置
 	 * ========================================
 	 */
 
@@ -344,18 +433,18 @@ const galleryJson =
 	 * ========================================
 	 * PAGE MODE 連結
 	 *
-	 * 只有原本的 page mode
+	 * 只有 page mode
 	 * 才保存作品集返回位置。
 	 *
-	 * link mode 不處理，
-	 * 因為它是外部網站。
+	 * link mode 是外部網站，
+	 * 不需要保存返回位置。
 	 * ========================================
 	 */
 
 	function setupProjectLinks() {
 
 		const links =
-			document.querySelectorAll(
+			document.querySelectorAll<HTMLAnchorElement>(
 				"a.project-link"
 			);
 
@@ -399,7 +488,7 @@ const galleryJson =
 	 */
 
 	.product-card,
-	.product-card * ,
+	.product-card *,
 	.product-card:hover,
 	.product-card:hover * {
 

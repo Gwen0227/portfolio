@@ -1,601 +1,1274 @@
 ---
-import { getCollection, render } from "astro:content";
+import {
+	getCollection,
+	render
+} from "astro:content";
+
+import type {
+	CollectionEntry
+} from "astro:content";
+
 import BaseLayout from "../layouts/BaseLayout.astro";
-import ProductGridHeader from "../components/ProductGridHeader.astro";
+
+import ProductGridHeader
+	from "../components/ProductGridHeader.astro";
+
+
+/*
+ * ========================================
+ * Astro Props 型別
+ *
+ * 修正：
+ * project.data
+ * Property 'data' does not exist on type 'never'
+ * ========================================
+ */
+
+type Props = {
+	project: CollectionEntry<"projects">;
+};
+
+
+/*
+ * ========================================
+ * WebP 圖片路徑
+ *
+ * .png / .jpg / .jpeg
+ * 自動改成同名 .webp
+ *
+ * 例如：
+ *
+ * /images/visual/example.png
+ * ↓
+ * /images/visual/example.webp
+ *
+ * 外部圖片不處理。
+ * 已經是 WebP 不處理。
+ * ========================================
+ */
+
+function getWebpPath(
+	image: string | undefined
+): string {
+
+	if (!image) {
+		return "";
+	}
+
+
+	/*
+	 * 外部網址
+	 */
+
+	if (
+		image.startsWith("http://") ||
+		image.startsWith("https://") ||
+		image.startsWith("//")
+	) {
+		return image;
+	}
+
+
+	/*
+	 * 已經是 WebP
+	 */
+
+	if (
+		/\.webp(?:[?#].*)?$/i.test(image)
+	) {
+		return image;
+	}
+
+
+	/*
+	 * PNG / JPG / JPEG
+	 */
+
+	return image.replace(
+		/\.(png|jpe?g)(?=([?#].*)?$)/i,
+		".webp"
+	);
+
+}
+
+
+/*
+ * ========================================
+ * 取得作品
+ * ========================================
+ */
 
 export async function getStaticPaths() {
-	const projects = await getCollection("projects");
 
-	return projects.map((project) => ({
-		params: {
-			slug: project.data.slug,
-		},
-		props: {
-			project,
-		},
-	}));
+	const projects =
+		await getCollection("projects");
+
+
+	return projects.map(
+		(
+			project: CollectionEntry<"projects">
+		) => ({
+
+			params: {
+				slug: project.data.slug,
+			},
+
+			props: {
+				project,
+			},
+
+		})
+	);
+
 }
 
-const { project } = Astro.props;
+
+const {
+	project
+}: Props = Astro.props;
+
 
 if (!project) {
-	throw new Error("Project not found");
+
+	throw new Error(
+		"Project not found"
+	);
+
 }
 
-const { Content } = await render(project);
 
-const allProjects = await getCollection("projects");
-const productsTotal = allProjects.length;
+const {
+	Content
+} = await render(project);
 
-const activeCategory = project.data?.category || "all";
+
+const allProjects =
+	await getCollection("projects");
+
+
+const productsTotal =
+	allProjects.length;
+
+
+const activeCategory =
+	project.data?.category ||
+	"all";
+
 ---
 
-<BaseLayout title={project.data.title}>
+
+<BaseLayout
+	title={
+		project.data.title
+	}
+>
+
 	<ProductGridHeader
-		activeCategory={activeCategory}
-		productsTotal={productsTotal}
+		activeCategory={
+			activeCategory
+		}
+		productsTotal={
+			productsTotal
+		}
 	/>
 
-	<article class="project-detail">
-		<header class="project-header">
-			<div class="project-title-row">
+
+	<article
+		class="project-detail"
+	>
+
+		<header
+			class="project-header"
+		>
+
+			<div
+				class="project-title-row"
+			>
+
 				<button
 					id="back-btn"
+
 					class="back-btn"
+
 					type="button"
+
 					aria-label="返回作品列表"
 				>
-					<span class="back-arrow">←</span>
+
+					<span
+						class="back-arrow"
+					>
+						←
+					</span>
+
 				</button>
 
-				<h1 class="main-title">
+
+				<h1
+					class="main-title"
+				>
 					{project.data.title}
 				</h1>
+
 			</div>
+
 		</header>
 
+
 		{project.data.cover && (
-			<figure class="featured-image">
+
+			<figure
+				class="featured-image"
+			>
+
 				<img
-					src={project.data.cover}
-					alt={project.data.title}
+					src={
+						getWebpPath(
+							project.data.cover
+						)
+					}
+
+					alt={
+						project.data.title
+					}
+
 					class="protected-img"
+
+					draggable="false"
+
+					decoding="async"
 				/>
 
+
 				{project.data.coverCaption && (
+
 					<figcaption>
-						{project.data.coverCaption}
+						{
+							project.data.coverCaption
+						}
 					</figcaption>
+
 				)}
+
 			</figure>
+
 		)}
 
-		<div class="prose">
+
+		<div
+			class="prose"
+		>
+
 			<Content />
+
 		</div>
+
 	</article>
+
 </BaseLayout>
 
-<script>
-	function setupBackButton() {
-		const button = document.getElementById("back-btn");
 
-		if (!button) return;
+<script>
+
+	/*
+	 * ========================================
+	 * 返回作品列表
+	 * ========================================
+	 */
+
+	function setupBackButton() {
+
+		const button =
+			document.getElementById(
+				"back-btn"
+			) as HTMLButtonElement | null;
+
+
+		if (!button) {
+			return;
+		}
+
 
 		button.onclick = () => {
+
 			const savedState =
-				sessionStorage.getItem("projectReturnState");
+				sessionStorage.getItem(
+					"projectReturnState"
+				);
+
 
 			if (savedState) {
-				try {
-					const state = JSON.parse(savedState);
 
-					if (state.url) {
-						sessionStorage.setItem(
-							"restoreProjectScroll",
-							String(state.scrollY || 0)
+				try {
+
+					const state =
+						JSON.parse(
+							savedState
 						);
 
-						window.location.href = state.url;
+
+					if (state.url) {
+
+						sessionStorage.setItem(
+
+							"restoreProjectScroll",
+
+							String(
+								state.scrollY || 0
+							)
+
+						);
+
+
+						window.location.href =
+							state.url;
+
 						return;
+
 					}
+
 				} catch (error) {
+
 					console.error(
+
 						"無法讀取作品列表返回狀態：",
+
 						error
+
 					);
+
 				}
+
 			}
 
-			window.location.href = "/";
+
+			window.location.href =
+				"/";
+
 		};
+
 	}
+
+
+	/*
+	 * ========================================
+	 * 回到原本滾動位置
+	 * ========================================
+	 */
 
 	function restoreProjectScroll() {
+
 		const scrollValue =
-			sessionStorage.getItem("restoreProjectScroll");
+			sessionStorage.getItem(
+				"restoreProjectScroll"
+			);
 
-		if (!scrollValue) return;
 
-		sessionStorage.removeItem("restoreProjectScroll");
+		if (!scrollValue) {
+			return;
+		}
 
-		const scrollY = Number(scrollValue);
+
+		sessionStorage.removeItem(
+			"restoreProjectScroll"
+		);
+
+
+		const scrollY =
+			Number(
+				scrollValue
+			);
+
 
 		requestAnimationFrame(() => {
+
 			requestAnimationFrame(() => {
+
 				window.scrollTo({
-					top: scrollY,
-					behavior: "instant",
+
+					top:
+						scrollY,
+
+					behavior:
+						"instant",
+
 				});
+
 			});
+
 		});
+
 	}
+
 
 	setupBackButton();
 
+
 	document.addEventListener(
+
 		"astro:page-load",
+
 		() => {
+
 			setupBackButton();
+
 			restoreProjectScroll();
+
 		}
+
 	);
+
 </script>
 
+
 <style>
-	.project-detail {
-		width: 100%;
-		margin: 1.5rem 0 6rem;
-	}
-
-	.project-header {
-		width: 100%;
-		margin-bottom: 1.5rem;
-	}
-
-	.project-title-row {
-		display: flex;
-		align-items: center;
-		gap: 0.8rem;
-		width: 100%;
-	}
-
-	.back-btn {
-		flex-shrink: 0;
-
-		width: 36px;
-		height: 36px;
-
-		display: flex;
-		align-items: center;
-		justify-content: center;
-
-		padding: 0;
-		margin: 0;
-
-		border: none;
-		border-radius: 0;
-
-		background: #f2f2f2;
-		color: #000000;
-
-		cursor: pointer;
-
-		transition:
-			background-color 0.2s ease,
-			color 0.2s ease,
-			transform 0.2s ease;
-	}
-
-	.back-btn:hover {
-		background: #000000;
-		color: #ffffff;
-		transform: translateX(-4px);
-	}
-
-	.back-arrow {
-		font-size: 1.1rem;
-		line-height: 1;
-	}
-
-	.main-title {
-		flex: 1;
-
-		margin: 0;
-
-		font-size: 2rem;
-		font-weight: 600;
-		line-height: 1.3;
-
-		color: #000000;
-	}
 
 	/*
-	 * =========================
+	 * ========================================
+	 * PROJECT DETAIL
+	 * ========================================
+	 */
+
+	.project-detail {
+
+		width:
+			100%;
+
+		margin:
+			1.5rem
+			0
+			6rem;
+
+	}
+
+
+	/*
+	 * ========================================
+	 * HEADER
+	 * ========================================
+	 */
+
+	.project-header {
+
+		width:
+			100%;
+
+		margin-bottom:
+			1.5rem;
+
+	}
+
+
+	.project-title-row {
+
+		display:
+			flex;
+
+		align-items:
+			center;
+
+		gap:
+			0.8rem;
+
+		width:
+			100%;
+
+	}
+
+
+	/*
+	 * ========================================
+	 * BACK BUTTON
+	 * ========================================
+	 */
+
+	.back-btn {
+
+		flex-shrink:
+			0;
+
+		width:
+			36px;
+
+		height:
+			36px;
+
+		display:
+			flex;
+
+		align-items:
+			center;
+
+		justify-content:
+			center;
+
+		padding:
+			0;
+
+		margin:
+			0;
+
+		border:
+			none;
+
+		border-radius:
+			0;
+
+		background:
+			#f2f2f2;
+
+		color:
+			#000000;
+
+		cursor:
+			pointer;
+
+		transition:
+			background-color
+			0.2s ease,
+			color
+			0.2s ease,
+			transform
+			0.2s ease;
+
+	}
+
+
+	.back-btn:hover {
+
+		background:
+			#000000;
+
+		color:
+			#ffffff;
+
+		transform:
+			translateX(-4px);
+
+	}
+
+
+	.back-arrow {
+
+		font-size:
+			1.1rem;
+
+		line-height:
+			1;
+
+	}
+
+
+	/*
+	 * ========================================
+	 * TITLE
+	 * ========================================
+	 */
+
+	.main-title {
+
+		flex:
+			1;
+
+		margin:
+			0;
+
+		font-size:
+			2rem;
+
+		font-weight:
+			600;
+
+		line-height:
+			1.3;
+
+		color:
+			#000000;
+
+	}
+
+
+	/*
+	 * ========================================
 	 * 封面圖片
-	 * =========================
+	 * ========================================
 	 */
 
 	.featured-image {
-		width: 100%;
 
-		margin: 0 0 2.5rem;
-		padding: 0;
+		width:
+			100%;
+
+		margin:
+			0
+			0
+			2.5rem;
+
+		padding:
+			0;
+
 	}
+
 
 	.featured-image img {
-		display: block;
 
-		width: 100%;
-		height: auto;
+		display:
+			block;
 
-		aspect-ratio: 16 / 9;
-		object-fit: cover;
+		width:
+			100%;
 
-		border-radius: 0;
+		height:
+			auto;
 
-		filter: blur(0.6px);
+		aspect-ratio:
+			16 / 9;
 
-		user-select: none;
-		-webkit-user-drag: none;
+		object-fit:
+			cover;
+
+		border-radius:
+			0;
+
+		filter:
+			blur(0.6px);
+
+		user-select:
+			none;
+
+		-webkit-user-drag:
+			none;
+
 	}
 
+
 	/*
+	 * ========================================
 	 * 封面圖說
+	 * ========================================
 	 */
 
 	.featured-image figcaption {
-		display: block;
 
-		margin-top: 0.5rem;
+		display:
+			block;
 
-		font-size: 0.8rem;
-		line-height: 1.5;
+		margin-top:
+			0.5rem;
 
-		color: #888888;
+		font-size:
+			0.8rem;
+
+		line-height:
+			1.5;
+
+		color:
+			#888888;
+
 	}
 
+
 	/*
-	 * =========================
+	 * ========================================
 	 * 文章內容
-	 * =========================
+	 * ========================================
 	 */
 
 	.prose {
-		width: 100%;
-		max-width: none;
 
-		font-size: 0.95rem;
-		line-height: 1.85;
+		width:
+			100%;
 
-		color: #000000;
+		max-width:
+			none;
+
+		font-size:
+			0.95rem;
+
+		line-height:
+			1.85;
+
+		color:
+			#000000;
+
 	}
+
 
 	.prose :global(p) {
-		margin: 0 0 1.5rem;
+
+		margin:
+			0
+			0
+			1.5rem;
+
 	}
 
+
 	/*
-	 * =========================
+	 * ========================================
 	 * 中標題
-	 * =========================
+	 * ========================================
 	 */
 
 	.prose :global(h2) {
-		position: relative;
 
-		margin-top: 3rem;
-		margin-bottom: 2.6rem;
+		position:
+			relative;
 
-		padding-bottom: 0;
+		margin-top:
+			3rem;
 
-		font-size: 1.25rem;
-		line-height: 1.3;
+		margin-bottom:
+			2.6rem;
+
+		padding-bottom:
+			0;
+
+		font-size:
+			1.25rem;
+
+		line-height:
+			1.3;
+
 	}
+
 
 	.prose :global(h2)::after {
-		content: "";
 
-		position: absolute;
+		content:
+			"";
 
-		left: 0;
-		bottom: -1.5rem;
+		position:
+			absolute;
 
-		width: 2em;
-		height: 1px;
+		left:
+			0;
 
-		background: #000000;
+		bottom:
+			-1.5rem;
 
-		transform: rotate(-25deg);
-		transform-origin: left center;
+		width:
+			2em;
+
+		height:
+			1px;
+
+		background:
+			#000000;
+
+		transform:
+			rotate(-25deg);
+
+		transform-origin:
+			left center;
+
 	}
+
 
 	.prose :global(h3) {
-		margin-top: 2.5rem;
-		margin-bottom: 1rem;
 
-		font-size: 1.2rem;
-		line-height: 1.4;
+		margin-top:
+			2.5rem;
+
+		margin-bottom:
+			1rem;
+
+		font-size:
+			1.2rem;
+
+		line-height:
+			1.4;
+
 	}
 
+
 	/*
-	 * =========================
+	 * ========================================
 	 * 一般圖片
 	 *
 	 * 普通 Markdown 圖片：
 	 * → 永遠上下排列
 	 * → 不會自動並排
-	 * =========================
+	 *
+	 * 注意：
+	 * Markdown 產生的圖片仍然會使用
+	 * 原本的圖片路徑。
+	 *
+	 * 這裡透過 CSS 不改變內容結構。
+	 * ========================================
 	 */
 
 	.prose :global(img) {
-		display: block;
 
-		width: 100%;
-		height: auto;
+		display:
+			block;
 
-		margin: 0.5rem 0;
+		width:
+			100%;
 
-		border-radius: 0;
+		height:
+			auto;
 
-		user-select: none;
-		-webkit-user-drag: none;
+		margin:
+			0.5rem 0;
+
+		border-radius:
+			0;
+
+		user-select:
+			none;
+
+		-webkit-user-drag:
+			none;
+
 	}
 
+
 	/*
-	 * =========================
+	 * ========================================
 	 * 單張圖片圖說
-	 * =========================
+	 * ========================================
 	 */
 
 	.prose
-		:global(p:has(> img:only-child) + p:has(> em:only-child)) {
-		margin-top: -0.2rem;
-		margin-bottom: 2rem;
+		:global(
+			p:has(> img:only-child)
+			+ p:has(> em:only-child)
+		) {
+
+		margin-top:
+			-0.2rem;
+
+		margin-bottom:
+			2rem;
+
 	}
+
 
 	.prose
-		:global(p:has(> img:only-child) + p:has(> em:only-child) em) {
-		display: block;
+		:global(
+			p:has(> img:only-child)
+			+ p:has(> em:only-child)
+			em
+		) {
 
-		font-size: 0.8rem;
-		line-height: 1.5;
+		display:
+			block;
 
-		color: #888888;
+		font-size:
+			0.8rem;
+
+		line-height:
+			1.5;
+
+		color:
+			#888888;
+
 	}
 
+
 	/*
-	 * =========================
+	 * ========================================
 	 * 手動並排圖片
 	 *
-	 * 只有寫：
+	 * 只有：
 	 *
 	 * <div class="image-grid">
 	 *
 	 * 的圖片才會並排。
-	 * =========================
+	 * ========================================
 	 */
 
 	.prose :global(.image-grid) {
-		display: grid;
 
-		grid-template-columns: repeat(
-			2,
-			minmax(0, 1fr)
-		);
+		display:
+			grid;
 
-		width: 100%;
+		grid-template-columns:
+			repeat(
+				2,
+				minmax(
+					0,
+					1fr
+				)
+			);
 
-		column-gap: 0.3rem;
-		row-gap: 0.3rem;
+		width:
+			100%;
 
-		margin: 0.5rem 0 0;
-		padding: 0;
+		column-gap:
+			0.3rem;
+
+		row-gap:
+			0.3rem;
+
+		margin:
+			0.5rem
+			0
+			0;
+
+		padding:
+			0;
+
 	}
+
 
 	.prose :global(.image-grid img) {
-		display: block;
 
-		width: 100%;
-		height: auto;
+		display:
+			block;
 
-		margin: 0 !important;
-		padding: 0;
+		width:
+			100%;
 
-		border-radius: 0;
+		height:
+			auto;
 
-		user-select: none;
-		-webkit-user-drag: none;
+		margin:
+			0 !important;
+
+		padding:
+			0;
+
+		border-radius:
+			0;
+
+		user-select:
+			none;
+
+		-webkit-user-drag:
+			none;
+
 	}
 
+
 	/*
-	 * =========================
+	 * ========================================
 	 * 兩張圖片共同圖說
-	 * =========================
+	 * ========================================
 	 */
 
 	.prose :global(.image-grid + p) {
-		display: block;
 
-		margin-top: 0.3rem;
-		margin-bottom: 2rem;
+		display:
+			block;
+
+		margin-top:
+			0.3rem;
+
+		margin-bottom:
+			2rem;
+
 	}
+
 
 	.prose :global(.image-grid + p em) {
-		display: block;
 
-		font-size: 0.8rem;
-		line-height: 1.5;
+		display:
+			block;
 
-		color: #888888;
+		font-size:
+			0.8rem;
+
+		line-height:
+			1.5;
+
+		color:
+			#888888;
+
 	}
 
+
 	/*
-	 * =========================
+	 * ========================================
 	 * 連結
-	 * =========================
+	 * ========================================
 	 */
 
 	.prose :global(a) {
-		color: inherit;
 
-		text-decoration: underline;
-		text-underline-offset: 3px;
+		color:
+			inherit;
+
+		text-decoration:
+			underline;
+
+		text-underline-offset:
+			3px;
+
 	}
 
+
 	/*
-	 * =========================
+	 * ========================================
 	 * 清單
-	 * =========================
+	 * ========================================
 	 */
 
 	.prose :global(ul),
 	.prose :global(ol) {
-		margin: 1.5rem 0;
-		padding-left: 1.5rem;
+
+		margin:
+			1.5rem
+			0;
+
+		padding-left:
+			1.5rem;
+
 	}
+
 
 	.prose :global(li) {
-		margin-bottom: 0.5rem;
+
+		margin-bottom:
+			0.5rem;
+
 	}
 
+
 	/*
-	 * =========================
+	 * ========================================
 	 * 手機版
-	 * =========================
+	 * ========================================
 	 */
 
 	@media (max-width: 768px) {
+
 		.project-detail {
-			margin-top: 1rem;
-			margin-bottom: 4rem;
+
+			margin-top:
+				1rem;
+
+			margin-bottom:
+				4rem;
+
 		}
+
 
 		.project-title-row {
-			gap: 0.6rem;
+
+			gap:
+				0.6rem;
+
 		}
+
 
 		.back-btn {
-			width: 32px;
-			height: 32px;
+
+			width:
+				32px;
+
+			height:
+				32px;
+
 		}
+
 
 		.main-title {
-			font-size: 1.3rem;
+
+			font-size:
+				1.3rem;
+
 		}
 
+
 		.prose {
-			font-size: 0.95rem;
-			line-height: 1.85;
+
+			font-size:
+				0.95rem;
+
+			line-height:
+				1.85;
+
 		}
+
 
 		/*
 		 * 手機版封面圖說
 		 */
 
 		.featured-image figcaption {
-			margin-top: 0.4rem;
 
-			font-size: 0.75rem;
-			line-height: 1.5;
+			margin-top:
+				0.4rem;
+
+			font-size:
+				0.75rem;
+
+			line-height:
+				1.5;
+
 		}
 
+
 		/*
-		 * =========================
+		 * ========================================
 		 * 手機版單張圖片圖說
-		 * =========================
+		 * ========================================
 		 */
 
 		.prose
 			:global(
-				p:has(> img:only-child) + p:has(> em:only-child)
+				p:has(> img:only-child)
+				+ p:has(> em:only-child)
 			) {
-			margin-top: -0.2rem;
-			margin-bottom: 1.5rem;
+
+			margin-top:
+				-0.2rem;
+
+			margin-bottom:
+				1.5rem;
+
 		}
+
 
 		.prose
 			:global(
-				p:has(> img:only-child) + p:has(> em:only-child) em
+				p:has(> img:only-child)
+				+ p:has(> em:only-child)
+				em
 			) {
-			font-size: 0.75rem;
+
+			font-size:
+				0.75rem;
+
 		}
 
+
 		/*
-		 * =========================
+		 * ========================================
 		 * 手機版手動並排區塊
-		 * =========================
 		 *
-		 * 桌面：兩張並排
-		 * 手機：上下排列
+		 * 桌面：
+		 * 兩張並排
+		 *
+		 * 手機：
+		 * 上下排列
+		 * ========================================
 		 */
 
 		.prose :global(.image-grid) {
-			display: flex;
 
-			flex-direction: column;
+			display:
+				flex;
 
-			width: 100%;
+			flex-direction:
+				column;
 
-			gap: 0.3rem;
+			width:
+				100%;
 
-			margin: 0.5rem 0 0;
-			padding: 0;
+			gap:
+				0.3rem;
+
+			margin:
+				0.5rem
+				0
+				0;
+
+			padding:
+				0;
+
 		}
+
 
 		.prose :global(.image-grid img) {
-			display: block;
 
-			width: 100%;
-			height: auto;
+			display:
+				block;
 
-			margin: 0 !important;
-			padding: 0 !important;
+			width:
+				100%;
 
-			border: 0;
-			border-radius: 0;
+			height:
+				auto;
 
-			user-select: none;
-			-webkit-user-drag: none;
+			margin:
+				0 !important;
+
+			padding:
+				0 !important;
+
+			border:
+				0;
+
+			border-radius:
+				0;
+
+			user-select:
+				none;
+
+			-webkit-user-drag:
+				none;
+
 		}
+
 
 		/*
 		 * 手機版共同圖說
 		 */
 
 		.prose :global(.image-grid + p) {
-			display: block;
 
-			margin-top: 0.3rem;
-			margin-bottom: 1.5rem;
+			display:
+				block;
+
+			margin-top:
+				0.3rem;
+
+			margin-bottom:
+				1.5rem;
+
 		}
+
 
 		.prose :global(.image-grid + p em) {
-			font-size: 0.75rem;
+
+			font-size:
+				0.75rem;
+
 		}
 
+
 		/*
-		 * =========================
+		 * ========================================
 		 * 手機版中標題
-		 * =========================
+		 * ========================================
 		 */
 
 		.prose :global(h2) {
-			margin-top: 2.5rem;
-			margin-bottom: 2.3rem;
 
-			padding-bottom: 0;
+			margin-top:
+				2.5rem;
 
-			font-size: 1.15rem;
+			margin-bottom:
+				2.3rem;
+
+			padding-bottom:
+				0;
+
+			font-size:
+				1.15rem;
+
 		}
+
 
 		.prose :global(h2)::after {
-			width: 2em;
-			height: 1px;
 
-			bottom: -1.3rem;
+			width:
+				2em;
 
-			transform: rotate(-25deg);
+			height:
+				1px;
+
+			bottom:
+				-1.3rem;
+
+			transform:
+				rotate(-25deg);
+
 		}
+
 	}
+
 </style>
