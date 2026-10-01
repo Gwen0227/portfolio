@@ -12,6 +12,7 @@ const { projects } = Astro.props;
 /*
  * ========================================
  * 作品年份排序
+ *
  * 新 → 舊
  * ========================================
  */
@@ -104,7 +105,7 @@ const grid = "projects";
 
 		<!-- ====================================
 		     Zoom 控制
-		     現在固定放在圖片上方
+		     固定在圖片上方
 		     ==================================== -->
 
 		<div
@@ -155,6 +156,7 @@ const grid = "projects";
 				src=""
 				alt=""
 				draggable="false"
+				decoding="async"
 			/>
 
 		</div>
@@ -199,6 +201,12 @@ const grid = "projects";
 
 
 <script>
+	/*
+	 * ========================================
+	 * Lightbox
+	 * ========================================
+	 */
+
 	let lightboxInitialized = false;
 
 
@@ -342,6 +350,239 @@ const grid = "projects";
 
 		/*
 		 * ========================================
+		 * 圖片快取
+		 *
+		 * key:
+		 * 圖片 URL
+		 *
+		 * value:
+		 * 已建立的 Image
+		 *
+		 * 這個 Map 會一直保留，
+		 * 因此切換回之前看過的圖片時，
+		 * 不需要重新建立載入流程。
+		 * ========================================
+		 */
+
+		const imageCache =
+			new Map<
+				string,
+				HTMLImageElement
+			>();
+
+
+		/*
+		 * 正在載入中的圖片
+		 *
+		 * 避免同一張圖片
+		 * 同時被重複 preload。
+		 * ========================================
+		 */
+
+		const imageLoading =
+			new Map<
+				string,
+				Promise<HTMLImageElement>
+			>();
+
+
+		/*
+		 * ========================================
+		 * 預載入單張圖片
+		 * ========================================
+		 */
+
+		function preloadImage(
+			src: string
+		): Promise<HTMLImageElement> {
+
+			/*
+			 * 已經快取
+			 */
+
+			const cached =
+				imageCache.get(src);
+
+
+			if (cached) {
+
+				return Promise.resolve(
+					cached
+				);
+			}
+
+
+			/*
+			 * 已經有人正在載入
+			 */
+
+			const loading =
+				imageLoading.get(src);
+
+
+			if (loading) {
+
+				return loading;
+			}
+
+
+			/*
+			 * 建立新的 Image
+			 */
+
+			const promise =
+				new Promise<HTMLImageElement>(
+					(resolve, reject) => {
+
+						const image =
+							new Image();
+
+
+						image.decoding =
+							"async";
+
+
+						image.onload =
+							() => {
+
+								imageCache.set(
+									src,
+									image
+								);
+
+
+								imageLoading.delete(
+									src
+								);
+
+
+								resolve(
+									image
+								);
+							};
+
+
+						image.onerror =
+							(error) => {
+
+								imageLoading.delete(
+									src
+								);
+
+
+								reject(
+									error
+								);
+							};
+
+
+						image.src =
+							src;
+					}
+				);
+
+
+			imageLoading.set(
+				src,
+				promise
+			);
+
+
+			return promise;
+		}
+
+
+		/*
+		 * ========================================
+		 * 背景預載入
+		 *
+		 * 不阻塞目前圖片。
+		 * ========================================
+		 */
+
+		function preloadInBackground(
+			src: string
+		) {
+
+			if (!src) {
+				return;
+			}
+
+
+			if (
+				imageCache.has(src)
+			) {
+				return;
+			}
+
+
+			preloadImage(src)
+				.catch(
+					() => {
+						/*
+						 * 預載入失敗不影響 Lightbox。
+						 */
+					}
+				);
+		}
+
+
+		/*
+		 * ========================================
+		 * 預載入附近圖片
+		 *
+		 * 目前圖片左右各一張。
+		 *
+		 * 這樣不會一次把整個
+		 * 超大的 gallery 全部下載。
+		 * ========================================
+		 */
+
+		function preloadNearbyImages(
+			index: number
+		) {
+
+			if (!gallery.length) {
+				return;
+			}
+
+
+			const previousIndex =
+				index - 1;
+
+
+			const nextIndex =
+				index + 1;
+
+
+			if (
+				previousIndex >= 0
+			) {
+
+				preloadInBackground(
+					gallery[
+						previousIndex
+					]
+				);
+			}
+
+
+			if (
+				nextIndex <
+				gallery.length
+			) {
+
+				preloadInBackground(
+					gallery[
+						nextIndex
+					]
+				);
+			}
+		}
+
+
+		/*
+		 * ========================================
 		 * Zoom 狀態
 		 * ========================================
 		 */
@@ -378,11 +619,13 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * Gallery
+		 * 取得 Gallery
 		 * ========================================
 		 */
 
-		function getGallery(card: Element) {
+		function getGallery(
+			card: Element
+		) {
 
 			const galleryData =
 				card.getAttribute(
@@ -432,7 +675,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * Gallery Captions
+		 * 取得 Gallery Captions
 		 * ========================================
 		 */
 
@@ -515,7 +758,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * Update Zoom
+		 * 更新 Zoom
 		 * ========================================
 		 */
 
@@ -569,6 +812,12 @@ const grid = "projects";
 		}
 
 
+		/*
+		 * ========================================
+		 * 設定 Zoom
+		 * ========================================
+		 */
+
 		function setZoom(
 			value: number
 		) {
@@ -579,6 +828,12 @@ const grid = "projects";
 		}
 
 
+		/*
+		 * ========================================
+		 * Zoom In
+		 * ========================================
+		 */
+
 		function zoomIn() {
 
 			setZoom(
@@ -587,6 +842,12 @@ const grid = "projects";
 			);
 		}
 
+
+		/*
+		 * ========================================
+		 * Zoom Out
+		 * ========================================
+		 */
 
 		function zoomOut() {
 
@@ -600,10 +861,21 @@ const grid = "projects";
 		/*
 		 * ========================================
 		 * 顯示圖片
+		 *
+		 * 這裡是圖片速度改善的核心。
+		 *
+		 * 如果圖片已經在 imageCache：
+		 *
+		 * → 直接使用
+		 *
+		 * 如果還沒有：
+		 *
+		 * → preloadImage()
+		 * → 載入完成後顯示
 		 * ========================================
 		 */
 
-		function showImage(
+		async function showImage(
 			index: number
 		) {
 
@@ -611,6 +883,10 @@ const grid = "projects";
 				return;
 			}
 
+
+			/*
+			 * 循環切換
+			 */
 
 			if (index < 0) {
 
@@ -637,25 +913,27 @@ const grid = "projects";
 				];
 
 
+			/*
+			 * 每換一張圖片
+			 * 都恢復 100%
+			 */
+
 			resetZoom();
 
 
-			lightboxImg.onerror =
-				null;
-
-
-			lightboxImg.classList.add(
-				"is-loading"
-			);
-
-
-			lightboxImg.src =
-				image;
-
+			/*
+			 * 頁數先立即更新。
+			 *
+			 * 不需要等圖片載入。
+			 */
 
 			counter.textContent =
 				`${currentIndex + 1} / ${gallery.length}`;
 
+
+			/*
+			 * Caption
+			 */
 
 			const individualCaption =
 				galleryCaptions[
@@ -687,27 +965,126 @@ const grid = "projects";
 			}
 
 
-			lightboxImg.onload =
-				() => {
+			/*
+			 * ====================================
+			 * 如果已經快取
+			 *
+			 * 直接切換。
+			 * ====================================
+			 */
 
-					lightboxImg.classList.remove(
-						"is-loading"
-					);
-				};
+			const cached =
+				imageCache.get(
+					image
+				);
 
 
-			lightboxImg.onerror =
-				() => {
+			if (cached) {
 
-					lightboxImg.classList.remove(
-						"is-loading"
-					);
+				lightboxImg.classList.remove(
+					"is-loading"
+				);
 
-					console.warn(
-						"Lightbox 圖片載入失敗：",
+
+				lightboxImg.src =
+					cached.src;
+
+
+				/*
+				 * 立即預載下一張。
+				 */
+
+				preloadNearbyImages(
+					currentIndex
+				);
+
+
+				return;
+			}
+
+
+			/*
+			 * ====================================
+			 * 尚未快取
+			 *
+			 * 顯示 loading 狀態。
+			 * ====================================
+			 */
+
+			lightboxImg.classList.add(
+				"is-loading"
+			);
+
+
+			/*
+			 * 先保留目前畫面，
+			 * 等新圖片載入完成後再切換。
+			 *
+			 * 這樣切圖時不會先閃成空白。
+			 */
+
+			try {
+
+				const loadedImage =
+					await preloadImage(
 						image
 					);
-				};
+
+
+				/*
+				 * 確認使用者在等待期間
+				 * 沒有切到其他圖片。
+				 */
+
+				if (
+					gallery[
+						currentIndex
+					] !== image
+				) {
+					return;
+				}
+
+
+				lightboxImg.src =
+					loadedImage.src;
+
+
+				lightboxImg.classList.remove(
+					"is-loading"
+				);
+
+
+				/*
+				 * 圖片顯示後，
+				 * 預載附近圖片。
+				 */
+
+				preloadNearbyImages(
+					currentIndex
+				);
+
+			} catch (error) {
+
+				/*
+				 * 即使 preload 失敗，
+				 * 仍然讓原本 img 嘗試載入。
+				 */
+
+				lightboxImg.src =
+					image;
+
+
+				lightboxImg.classList.remove(
+					"is-loading"
+				);
+
+
+				console.warn(
+					"Lightbox 圖片預載入失敗：",
+					image,
+					error
+				);
+			}
 		}
 
 
@@ -732,6 +1109,10 @@ const grid = "projects";
 			}
 
 
+			/*
+			 * Gallery
+			 */
+
 			gallery =
 				getGallery(card);
 
@@ -747,6 +1128,10 @@ const grid = "projects";
 			}
 
 
+			/*
+			 * 裁切模式
+			 */
+
 			const crop =
 				wrapper.getAttribute(
 					"data-image-crop"
@@ -759,17 +1144,29 @@ const grid = "projects";
 					: "contain";
 
 
+			/*
+			 * Project Caption
+			 */
+
 			projectCaption =
 				wrapper.getAttribute(
 					"data-lightbox-caption"
 				) || "";
 
 
+			/*
+			 * Gallery Captions
+			 */
+
 			galleryCaptions =
 				getGalleryCaptions(
 					wrapper
 				);
 
+
+			/*
+			 * 套用圖片裁切模式
+			 */
 
 			if (
 				currentCrop === "square"
@@ -786,6 +1183,10 @@ const grid = "projects";
 				);
 			}
 
+
+			/*
+			 * 作品資料
+			 */
 
 			const projectTitle =
 				card.getAttribute(
@@ -813,10 +1214,16 @@ const grid = "projects";
 				`${projectCategory} / ${projectYear}`;
 
 
+			/*
+			 * 第一張圖片
+			 */
+
 			currentIndex = 0;
 
-			showImage(0);
 
+			/*
+			 * 先顯示 Lightbox
+			 */
 
 			modal.classList.add(
 				"active"
@@ -831,6 +1238,26 @@ const grid = "projects";
 
 			document.body.style.overflow =
 				"hidden";
+
+
+			/*
+			 * 顯示第一張圖片。
+			 *
+			 * 同時開始背景預載入
+			 * 第二張圖片。
+			 */
+
+			showImage(0);
+
+
+			if (
+				gallery.length > 1
+			) {
+
+				preloadInBackground(
+					gallery[1]
+				);
+			}
 		}
 
 
@@ -1143,7 +1570,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * 滑鼠拖曳
+		 * 滑鼠拖曳圖片
 		 * ========================================
 		 */
 
@@ -1238,7 +1665,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * ESC / 鍵盤
+		 * ESC / 鍵盤左右鍵
 		 * ========================================
 		 */
 
@@ -1254,6 +1681,10 @@ const grid = "projects";
 				}
 
 
+				/*
+				 * ESC
+				 */
+
 				if (
 					event.key ===
 					"Escape"
@@ -1264,6 +1695,10 @@ const grid = "projects";
 					return;
 				}
 
+
+				/*
+				 * 放大
+				 */
 
 				if (
 					event.key ===
@@ -1280,6 +1715,10 @@ const grid = "projects";
 				}
 
 
+				/*
+				 * 縮小
+				 */
+
 				if (
 					event.key ===
 					"-"
@@ -1293,6 +1732,10 @@ const grid = "projects";
 				}
 
 
+				/*
+				 * 100%
+				 */
+
 				if (
 					event.key ===
 					"0"
@@ -1305,6 +1748,10 @@ const grid = "projects";
 					return;
 				}
 
+
+				/*
+				 * 上一張
+				 */
 
 				if (
 					event.key ===
@@ -1322,6 +1769,10 @@ const grid = "projects";
 					return;
 				}
 
+
+				/*
+				 * 下一張
+				 */
 
 				if (
 					event.key ===
@@ -1413,6 +1864,12 @@ const grid = "projects";
 					touchStartY;
 
 
+				/*
+				 * 放大時
+				 *
+				 * 優先當作拖曳
+				 */
+
 				if (
 					zoomLevel > 1
 				) {
@@ -1439,6 +1896,10 @@ const grid = "projects";
 				}
 
 
+				/*
+				 * 滑動距離太短
+				 */
+
 				if (
 					Math.abs(
 						distanceX
@@ -1447,6 +1908,10 @@ const grid = "projects";
 					return;
 				}
 
+
+				/*
+				 * 左滑
+				 */
 
 				if (
 					distanceX < 0
@@ -1457,6 +1922,10 @@ const grid = "projects";
 					);
 
 				} else {
+
+					/*
+					 * 右滑
+					 */
 
 					showImage(
 						currentIndex - 1
@@ -1634,7 +2103,7 @@ const grid = "projects";
 
 	/*
 	 * ========================================
-	 * 黑色背景
+	 * 黑色透明背景
 	 * ========================================
 	 */
 
@@ -1693,11 +2162,7 @@ const grid = "projects";
 	 * ========================================
 	 * Zoom 控制
 	 *
-	 * 重要：
-	 * 控制器現在位於圖片上方
-	 *
-	 * 外框本身有固定高度，
-	 * 三個按鈕完全在外框內。
+	 * 固定在圖片上方
 	 * ========================================
 	 */
 
@@ -1710,22 +2175,28 @@ const grid = "projects";
 
 		flex-shrink: 0;
 
-		align-items: center;
+		align-items:
+			center;
 
-		justify-content: center;
+		justify-content:
+			center;
 
-		width: max-content;
+		width:
+			max-content;
 
-		height: 32px;
+		height:
+			32px;
 
 		margin:
 			0
 			0
 			12px;
 
-		padding: 0;
+		padding:
+			0;
 
-		box-sizing: border-box;
+		box-sizing:
+			border-box;
 
 		border:
 			1px solid
@@ -1750,32 +2221,34 @@ const grid = "projects";
 	}
 
 
-	/*
-	 * ========================================
-	 * Zoom 按鈕
-	 * ========================================
-	 */
-
 	.lightbox-zoom-controls button {
 		display: flex;
 
-		align-items: center;
+		align-items:
+			center;
 
-		justify-content: center;
+		justify-content:
+			center;
 
 		flex-shrink: 0;
 
-		height: 30px;
+		width:
+			38px;
 
-		width: 38px;
+		height:
+			30px;
 
-		margin: 0;
+		margin:
+			0;
 
-		padding: 0;
+		padding:
+			0;
 
-		box-sizing: border-box;
+		box-sizing:
+			border-box;
 
-		border: 0;
+		border:
+			0;
 
 		border-right:
 			1px solid
@@ -1786,7 +2259,8 @@ const grid = "projects";
 				0.2
 			);
 
-		border-radius: 0;
+		border-radius:
+			0;
 
 		background:
 			transparent;
@@ -1830,20 +2304,12 @@ const grid = "projects";
 	}
 
 
-	/*
-	 * 最後一個按鈕取消右邊分隔線
-	 */
-
 	.lightbox-zoom-controls
 		button:last-child {
 		border-right:
 			0;
 	}
 
-
-	/*
-	 * Hover
-	 */
 
 	.lightbox-zoom-controls
 		button:hover {
@@ -1856,13 +2322,6 @@ const grid = "projects";
 			);
 	}
 
-
-	/*
-	 * 100%
-	 *
-	 * 比 + / − 稍寬，
-	 * 確保百分比永遠不會跑出外框。
-	 */
 
 	.lightbox-zoom-reset {
 		width:
@@ -1919,12 +2378,6 @@ const grid = "projects";
 	}
 
 
-	/*
-	 * ========================================
-	 * 正方形裁切
-	 * ========================================
-	 */
-
 	.lightbox-image-wrap.is-square {
 		width:
 			min(
@@ -1950,7 +2403,8 @@ const grid = "projects";
 	 */
 
 	.lightbox-content img {
-		display: block;
+		display:
+			block;
 
 		max-width:
 			100%;
@@ -2103,7 +2557,7 @@ const grid = "projects";
 
 	/*
 	 * ========================================
-	 * Counter
+	 * 1 / 5
 	 * ========================================
 	 */
 
@@ -2127,7 +2581,7 @@ const grid = "projects";
 
 	/*
 	 * ========================================
-	 * Caption
+	 * 圖片說明
 	 * ========================================
 	 */
 
@@ -2166,7 +2620,7 @@ const grid = "projects";
 
 	/*
 	 * ========================================
-	 * Lightbox 按鈕
+	 * 按鈕
 	 * ========================================
 	 */
 
@@ -2425,7 +2879,7 @@ const grid = "projects";
 
 
 		/*
-		 * Mobile 圖片
+		 * Mobile 圖片外框
 		 */
 
 		.lightbox-image-wrap {
@@ -2436,6 +2890,10 @@ const grid = "projects";
 				65vh;
 		}
 
+
+		/*
+		 * Mobile 正方形
+		 */
 
 		.lightbox-image-wrap.is-square {
 			width:
@@ -2485,8 +2943,6 @@ const grid = "projects";
 		/*
 		 * ====================================
 		 * Mobile Zoom 控制
-		 *
-		 * 同樣固定在圖片上方
 		 * ====================================
 		 */
 
@@ -2546,6 +3002,12 @@ const grid = "projects";
 		}
 
 
+		/*
+		 * ====================================
+		 * Meta
+		 * ====================================
+		 */
+
 		.lightbox-meta {
 			margin-top:
 				4px;
@@ -2558,6 +3020,12 @@ const grid = "projects";
 		}
 
 
+		/*
+		 * ====================================
+		 * Counter
+		 * ====================================
+		 */
+
 		.lightbox-counter {
 			margin-top:
 				7px;
@@ -2566,6 +3034,12 @@ const grid = "projects";
 				12px;
 		}
 
+
+		/*
+		 * ====================================
+		 * Caption
+		 * ====================================
+		 */
 
 		.lightbox-caption {
 			max-width:
