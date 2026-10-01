@@ -2,13 +2,15 @@
 title: GUSHA x overdigi
 slug: GUSHA x overdigi
 year: 2019
-cover: /images/visual/bn-Tw Mansion-meat.jpg
+cover: /images/product/phonecase01.jpg
 category: "Product"
 mode: "zoom"
 
 gallery:
-  - /images/visual/bn-Tw Mansion-meat.jpg
-  - /images/visual/bn-Tw Mansion-meat.jpg
+  - /images/product/phonecase02.jpg
+  - /images/product/phonecase03.jpg
+    - /images/product/phonecase03.jpg
+      - /images/product/phonecase03.jpg
 
 tech:
   - Astro

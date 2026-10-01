@@ -2,35 +2,15 @@
 title: 禪香不二 DM
 slug: 禪香不二 DM
 year: 2023
-cover: /images/visual/bn-Tw Mansion-meat.jpg
+cover: /images/visual/visual01-inzense.png
 category: "Visual"
 mode: "zoom"
 
 gallery:
-  - /images/visual/bn-Tw Mansion-meat.jpg
-  - /images/visual/bn-Tw Mansion-meat.jpg
+  - /images/visual/visual02-inzense.png
 
 tech:
   - Astro
   - TypeScript
 ---
 
-我是 Gwen，專注於前端開發與使用者體驗設計。
-
-## About Me
-
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
-
-這是第一張測試圖片。
-
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
-
-這是第二張測試圖片。
-
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
-
-這是第三張測試圖片。
-
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
-
-這是第四張測試圖片。
