@@ -44,6 +44,47 @@ const projects = defineCollection({
 
 		/*
 		 * ========================================
+		 * Lightbox 作品說明
+		 *
+		 * 顯示在燈箱圖片下方。
+		 *
+		 * 例如：
+		 *
+		 * lightboxCaption: 這是一個品牌視覺設計專案。
+		 * ========================================
+		 */
+
+		lightboxCaption:
+			z.string().optional(),
+
+
+		/*
+		 * ========================================
+		 * Lightbox 每張圖片的個別圖說
+		 *
+		 * 順序會對應 gallery。
+		 *
+		 * 例如：
+		 *
+		 * gallery:
+		 *   - /images/project/01.jpg
+		 *   - /images/project/02.jpg
+		 *
+		 * galleryCaptions:
+		 *   - 第一張圖片的說明
+		 *   - 第二張圖片的說明
+		 *
+		 * 如果沒有設定個別圖說，
+		 * Lightbox 會使用 lightboxCaption。
+		 * ========================================
+		 */
+
+		galleryCaptions:
+			z.array(z.string()).optional(),
+
+
+		/*
+		 * ========================================
 		 * Lightbox 圖片裁切模式
 		 *
 		 * contain
