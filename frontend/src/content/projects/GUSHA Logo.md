@@ -2,7 +2,7 @@
 title: GUSHA Logo
 slug: GUSHA Logo
 year: 2019
-cover: /images/visual/bn-Tw Mansion-meat.jpg
+cover: /images/visual/brand01-gusha.jpg
 category: "Visual"
 mode: "zoom"
 imageCrop: contain
