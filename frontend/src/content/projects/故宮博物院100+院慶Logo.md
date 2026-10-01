@@ -8,7 +8,7 @@ mode: "zoom"
 imageCrop: square
 
 gallery:
-  - /images/visual/brand01-故宮博物院100+院慶Logo.jpg
+  - /images/visual/brand01-故宮博物院100院慶Logo.jpg
 
 tech:
   - Astro
