@@ -3,11 +3,10 @@ import type { CollectionEntry } from "astro:content";
 import ProductCard from "./ProductCard.astro";
 
 type Props = {
-	projects: CollectionEntry<"projects">[];
+  projects: CollectionEntry<"projects">[];
 };
 
 const { projects } = Astro.props;
-
 
 /*
  * ========================================
@@ -17,3112 +16,2118 @@ const { projects } = Astro.props;
  * ========================================
  */
 
-const sortedProjects = [
-	...projects,
-].sort(
-	(a, b) =>
-		b.data.year - a.data.year
+const sortedProjects = [...projects].sort(
+  (a, b) => b.data.year - a.data.year
 );
-
 
 const grid = "projects";
 ---
 
-
 <section
-	class="product-grid"
-	id="grid"
-	data-grid={grid}
+  class="product-grid"
+  id="grid"
+  data-grid={grid}
 >
-	{
-		sortedProjects.map((project) => {
-			const currentCategory =
-				project.data.category || "None";
+  {
+    sortedProjects.map((project) => {
+      const currentCategory =
+        project.data.category || "None";
 
-			const imageCrop =
-				project.data.imageCrop || "contain";
+      const imageCrop =
+        project.data.imageCrop || "contain";
 
-			const lightboxCaption =
-				(project.data as any).lightboxCaption || "";
+      const lightboxCaption =
+        (project.data as any).lightboxCaption || "";
 
-			const galleryCaptions =
-				(project.data as any).galleryCaptions || [];
+      const galleryCaptions =
+        (project.data as any).galleryCaptions || [];
 
-
-			return (
-				<div
-					data-category={currentCategory}
-					data-image-crop={imageCrop}
-					data-lightbox-caption={lightboxCaption}
-					data-gallery-captions={
-						JSON.stringify(galleryCaptions)
-					}
-					class="grid-item"
-				>
-					<ProductCard
-						product={project}
-					/>
-				</div>
-			);
-		})
-	}
+      return (
+        <div
+          data-category={currentCategory}
+          data-image-crop={imageCrop}
+          data-lightbox-caption={lightboxCaption}
+          data-gallery-captions={
+            JSON.stringify(galleryCaptions)
+          }
+          class="grid-item"
+        >
+          <ProductCard product={project} />
+        </div>
+      );
+    })
+  }
 </section>
 
-
-<!-- ========================================
-     首頁 Lightbox
-     ======================================== -->
-
 <div
-	id="lightbox-modal"
-	class="lightbox"
-	aria-hidden="true"
+  id="lightbox-modal"
+  class="lightbox"
+  aria-hidden="true"
 >
-	<div
-		class="lightbox-backdrop"
-	></div>
+  <div class="lightbox-backdrop"></div>
 
+  <button
+    type="button"
+    class="lightbox-close"
+    aria-label="關閉"
+  >
+    ×
+  </button>
 
-	<button
-		type="button"
-		class="lightbox-close"
-		aria-label="關閉"
-	>
-		×
-	</button>
+  <button
+    type="button"
+    class="lightbox-prev"
+    aria-label="上一張"
+  >
+    <span></span>
+  </button>
 
+  <div class="lightbox-content">
 
-	<button
-		type="button"
-		class="lightbox-prev"
-		aria-label="上一張"
-	>
-		<span></span>
-	</button>
+    <!-- 縮放控制放在圖片上方 -->
+    <div
+      class="lightbox-zoom-controls"
+      aria-label="圖片縮放"
+    >
+      <button
+        type="button"
+        class="lightbox-zoom-out"
+        aria-label="縮小"
+      >
+        −
+      </button>
 
+      <button
+        type="button"
+        class="lightbox-zoom-reset"
+        aria-label="恢復原始大小"
+      >
+        100%
+      </button>
 
-	<div class="lightbox-content">
+      <button
+        type="button"
+        class="lightbox-zoom-in"
+        aria-label="放大"
+      >
+        +
+      </button>
+    </div>
 
-		<!-- ====================================
-		     Zoom 控制
-		     固定在圖片上方
-		     ==================================== -->
+    <div
+      class="lightbox-image-wrap"
+      id="lightbox-image-wrap"
+    >
+      <img
+        id="lightbox-img"
+        src=""
+        alt=""
+        draggable="false"
+      />
 
-		<div
-			class="lightbox-zoom-controls"
-			aria-label="圖片縮放"
-		>
+      <!-- 圖片尚未載入時顯示的簡單 loading -->
+      <div
+        id="lightbox-loading"
+        class="lightbox-loading"
+        aria-hidden="true"
+      ></div>
+    </div>
 
-			<button
-				type="button"
-				class="lightbox-zoom-out"
-				aria-label="縮小"
-			>
-				−
-			</button>
+    <div
+      class="lightbox-title"
+      id="lightbox-title"
+    ></div>
 
+    <div
+      class="lightbox-meta"
+      id="lightbox-meta"
+    ></div>
 
-			<button
-				type="button"
-				class="lightbox-zoom-reset"
-				aria-label="恢復原始大小"
-			>
-				100%
-			</button>
+    <div
+      class="lightbox-counter"
+      id="lightbox-counter"
+    >
+      1 / 1
+    </div>
 
+    <div
+      class="lightbox-caption"
+      id="lightbox-caption"
+    ></div>
+  </div>
 
-			<button
-				type="button"
-				class="lightbox-zoom-in"
-				aria-label="放大"
-			>
-				+
-			</button>
-
-		</div>
-
-
-		<!-- ====================================
-		     圖片
-		     ==================================== -->
-
-		<div
-			class="lightbox-image-wrap"
-			id="lightbox-image-wrap"
-		>
-
-			<img
-				id="lightbox-img"
-				src=""
-				alt=""
-				draggable="false"
-				decoding="async"
-			/>
-
-		</div>
-
-
-		<div
-			class="lightbox-title"
-			id="lightbox-title"
-		></div>
-
-
-		<div
-			class="lightbox-meta"
-			id="lightbox-meta"
-		></div>
-
-
-		<div
-			class="lightbox-counter"
-			id="lightbox-counter"
-		>
-			1 / 1
-		</div>
-
-
-		<div
-			class="lightbox-caption"
-			id="lightbox-caption"
-		></div>
-
-	</div>
-
-
-	<button
-		type="button"
-		class="lightbox-next"
-		aria-label="下一張"
-	>
-		<span></span>
-	</button>
+  <button
+    type="button"
+    class="lightbox-next"
+    aria-label="下一張"
+  >
+    <span></span>
+  </button>
 </div>
 
-
 <script>
-	/*
-	 * ========================================
-	 * Lightbox
-	 * ========================================
-	 */
-
-	let lightboxInitialized = false;
-
-
-	function initLightbox() {
-
-		if (lightboxInitialized) {
-			return;
-		}
-
-
-		/*
-		 * ========================================
-		 * DOM
-		 * ========================================
-		 */
-
-		const modal =
-			document.getElementById(
-				"lightbox-modal"
-			);
-
-
-		const imageWrap =
-			document.getElementById(
-				"lightbox-image-wrap"
-			);
-
-
-		const lightboxImg =
-			document.getElementById(
-				"lightbox-img"
-			);
-
-
-		const title =
-			document.getElementById(
-				"lightbox-title"
-			);
-
-
-		const meta =
-			document.getElementById(
-				"lightbox-meta"
-			);
-
-
-		const counter =
-			document.getElementById(
-				"lightbox-counter"
-			);
-
-
-		const caption =
-			document.getElementById(
-				"lightbox-caption"
-			);
-
-
-		const closeBtn =
-			modal?.querySelector(
-				".lightbox-close"
-			);
-
-
-		const prevBtn =
-			modal?.querySelector(
-				".lightbox-prev"
-			);
-
-
-		const nextBtn =
-			modal?.querySelector(
-				".lightbox-next"
-			);
-
-
-		const backdrop =
-			modal?.querySelector(
-				".lightbox-backdrop"
-			);
-
-
-		const zoomOutBtn =
-			modal?.querySelector(
-				".lightbox-zoom-out"
-			);
-
-
-		const zoomResetBtn =
-			modal?.querySelector(
-				".lightbox-zoom-reset"
-			);
-
-
-		const zoomInBtn =
-			modal?.querySelector(
-				".lightbox-zoom-in"
-			);
-
-
-		if (
-			!modal ||
-			!imageWrap ||
-			!lightboxImg ||
-			!title ||
-			!meta ||
-			!counter ||
-			!caption ||
-			!closeBtn ||
-			!prevBtn ||
-			!nextBtn ||
-			!backdrop ||
-			!zoomOutBtn ||
-			!zoomResetBtn ||
-			!zoomInBtn
-		) {
-			return;
-		}
-
-
-		lightboxInitialized = true;
-
-
-		/*
-		 * ========================================
-		 * Lightbox 狀態
-		 * ========================================
-		 */
-
-		let gallery: string[] = [];
-
-		let galleryCaptions: string[] = [];
-
-		let projectCaption = "";
-
-		let currentIndex = 0;
-
-		let currentCrop:
-			"contain" | "square" = "contain";
-
-
-		/*
-		 * ========================================
-		 * 圖片快取
-		 *
-		 * key:
-		 * 圖片 URL
-		 *
-		 * value:
-		 * 已建立的 Image
-		 *
-		 * 這個 Map 會一直保留，
-		 * 因此切換回之前看過的圖片時，
-		 * 不需要重新建立載入流程。
-		 * ========================================
-		 */
-
-		const imageCache =
-			new Map<
-				string,
-				HTMLImageElement
-			>();
-
-
-		/*
-		 * 正在載入中的圖片
-		 *
-		 * 避免同一張圖片
-		 * 同時被重複 preload。
-		 * ========================================
-		 */
-
-		const imageLoading =
-			new Map<
-				string,
-				Promise<HTMLImageElement>
-			>();
-
-
-		/*
-		 * ========================================
-		 * 預載入單張圖片
-		 * ========================================
-		 */
-
-		function preloadImage(
-			src: string
-		): Promise<HTMLImageElement> {
-
-			/*
-			 * 已經快取
-			 */
-
-			const cached =
-				imageCache.get(src);
-
-
-			if (cached) {
-
-				return Promise.resolve(
-					cached
-				);
-			}
-
-
-			/*
-			 * 已經有人正在載入
-			 */
-
-			const loading =
-				imageLoading.get(src);
-
-
-			if (loading) {
-
-				return loading;
-			}
-
-
-			/*
-			 * 建立新的 Image
-			 */
-
-			const promise =
-				new Promise<HTMLImageElement>(
-					(resolve, reject) => {
-
-						const image =
-							new Image();
-
-
-						image.decoding =
-							"async";
-
-
-						image.onload =
-							() => {
-
-								imageCache.set(
-									src,
-									image
-								);
-
-
-								imageLoading.delete(
-									src
-								);
-
-
-								resolve(
-									image
-								);
-							};
-
-
-						image.onerror =
-							(error) => {
-
-								imageLoading.delete(
-									src
-								);
-
-
-								reject(
-									error
-								);
-							};
-
-
-						image.src =
-							src;
-					}
-				);
-
-
-			imageLoading.set(
-				src,
-				promise
-			);
-
-
-			return promise;
-		}
-
-
-		/*
-		 * ========================================
-		 * 背景預載入
-		 *
-		 * 不阻塞目前圖片。
-		 * ========================================
-		 */
-
-		function preloadInBackground(
-			src: string
-		) {
-
-			if (!src) {
-				return;
-			}
-
-
-			if (
-				imageCache.has(src)
-			) {
-				return;
-			}
-
-
-			preloadImage(src)
-				.catch(
-					() => {
-						/*
-						 * 預載入失敗不影響 Lightbox。
-						 */
-					}
-				);
-		}
-
-
-		/*
-		 * ========================================
-		 * 預載入附近圖片
-		 *
-		 * 目前圖片左右各一張。
-		 *
-		 * 這樣不會一次把整個
-		 * 超大的 gallery 全部下載。
-		 * ========================================
-		 */
-
-		function preloadNearbyImages(
-			index: number
-		) {
-
-			if (!gallery.length) {
-				return;
-			}
-
-
-			const previousIndex =
-				index - 1;
-
-
-			const nextIndex =
-				index + 1;
-
-
-			if (
-				previousIndex >= 0
-			) {
-
-				preloadInBackground(
-					gallery[
-						previousIndex
-					]
-				);
-			}
-
-
-			if (
-				nextIndex <
-				gallery.length
-			) {
-
-				preloadInBackground(
-					gallery[
-						nextIndex
-					]
-				);
-			}
-		}
-
-
-		/*
-		 * ========================================
-		 * Zoom 狀態
-		 * ========================================
-		 */
-
-		let zoomLevel = 1;
-
-		const MIN_ZOOM = 1;
-
-		const MAX_ZOOM = 3;
-
-		const ZOOM_STEP = 0.25;
-
-
-		let translateX = 0;
-
-		let translateY = 0;
-
-
-		let isDragging = false;
-
-		let dragStartX = 0;
-
-		let dragStartY = 0;
-
-		let dragOriginX = 0;
-
-		let dragOriginY = 0;
-
-
-		let touchStartX = 0;
-
-		let touchStartY = 0;
-
-
-		/*
-		 * ========================================
-		 * 取得 Gallery
-		 * ========================================
-		 */
-
-		function getGallery(
-			card: Element
-		) {
-
-			const galleryData =
-				card.getAttribute(
-					"data-zoom-gallery"
-				);
-
-
-			if (!galleryData) {
-				return [];
-			}
-
-
-			try {
-
-				const images =
-					JSON.parse(
-						galleryData
-					);
-
-
-				if (
-					!Array.isArray(images)
-				) {
-					return [];
-				}
-
-
-				return images.filter(
-					(image) =>
-						typeof image ===
-							"string" &&
-						image.length > 0
-				);
-
-			} catch (error) {
-
-				console.warn(
-					"Lightbox gallery 讀取失敗：",
-					error
-				);
-
-
-				return [];
-			}
-		}
-
-
-		/*
-		 * ========================================
-		 * 取得 Gallery Captions
-		 * ========================================
-		 */
-
-		function getGalleryCaptions(
-			wrapper: Element
-		): string[] {
-
-			const data =
-				wrapper.getAttribute(
-					"data-gallery-captions"
-				);
-
-
-			if (!data) {
-				return [];
-			}
-
-
-			try {
-
-				const parsed =
-					JSON.parse(data);
-
-
-				if (
-					!Array.isArray(parsed)
-				) {
-					return [];
-				}
-
-
-				return parsed.map(
-					(item) =>
-						typeof item === "string"
-							? item
-							: ""
-				);
-
-			} catch (error) {
-
-				console.warn(
-					"Lightbox captions 讀取失敗：",
-					error
-				);
-
-
-				return [];
-			}
-		}
-
-
-		/*
-		 * ========================================
-		 * Reset Zoom
-		 * ========================================
-		 */
-
-		function resetZoom() {
-
-			zoomLevel = 1;
-
-			translateX = 0;
-
-			translateY = 0;
-
-
-			lightboxImg.style.transform =
-				"translate3d(0, 0, 0) scale(1)";
-
-
-			lightboxImg.classList.remove(
-				"is-zoomed"
-			);
-
-
-			zoomResetBtn.textContent =
-				"100%";
-		}
-
-
-		/*
-		 * ========================================
-		 * 更新 Zoom
-		 * ========================================
-		 */
-
-		function updateZoom() {
-
-			zoomLevel =
-				Math.max(
-					MIN_ZOOM,
-					Math.min(
-						MAX_ZOOM,
-						zoomLevel
-					)
-				);
-
-
-			if (zoomLevel <= 1) {
-
-				translateX = 0;
-
-				translateY = 0;
-			}
-
-
-			lightboxImg.style.transform =
-				`translate3d(
-					${translateX}px,
-					${translateY}px,
-					0
-				)
-				scale(${zoomLevel})`;
-
-
-			if (zoomLevel > 1) {
-
-				lightboxImg.classList.add(
-					"is-zoomed"
-				);
-
-			} else {
-
-				lightboxImg.classList.remove(
-					"is-zoomed"
-				);
-			}
-
-
-			zoomResetBtn.textContent =
-				`${Math.round(
-					zoomLevel * 100
-				)}%`;
-		}
-
-
-		/*
-		 * ========================================
-		 * 設定 Zoom
-		 * ========================================
-		 */
-
-		function setZoom(
-			value: number
-		) {
-
-			zoomLevel = value;
-
-			updateZoom();
-		}
-
-
-		/*
-		 * ========================================
-		 * Zoom In
-		 * ========================================
-		 */
-
-		function zoomIn() {
-
-			setZoom(
-				zoomLevel +
-				ZOOM_STEP
-			);
-		}
-
-
-		/*
-		 * ========================================
-		 * Zoom Out
-		 * ========================================
-		 */
-
-		function zoomOut() {
-
-			setZoom(
-				zoomLevel -
-				ZOOM_STEP
-			);
-		}
-
-
-		/*
-		 * ========================================
-		 * 顯示圖片
-		 *
-		 * 這裡是圖片速度改善的核心。
-		 *
-		 * 如果圖片已經在 imageCache：
-		 *
-		 * → 直接使用
-		 *
-		 * 如果還沒有：
-		 *
-		 * → preloadImage()
-		 * → 載入完成後顯示
-		 * ========================================
-		 */
-
-		async function showImage(
-			index: number
-		) {
-
-			if (!gallery.length) {
-				return;
-			}
-
-
-			/*
-			 * 循環切換
-			 */
-
-			if (index < 0) {
-
-				index =
-					gallery.length - 1;
-			}
-
-
-			if (
-				index >=
-				gallery.length
-			) {
-
-				index = 0;
-			}
-
-
-			currentIndex = index;
-
-
-			const image =
-				gallery[
-					currentIndex
-				];
-
-
-			/*
-			 * 每換一張圖片
-			 * 都恢復 100%
-			 */
-
-			resetZoom();
-
-
-			/*
-			 * 頁數先立即更新。
-			 *
-			 * 不需要等圖片載入。
-			 */
-
-			counter.textContent =
-				`${currentIndex + 1} / ${gallery.length}`;
-
-
-			/*
-			 * Caption
-			 */
-
-			const individualCaption =
-				galleryCaptions[
-					currentIndex
-				] || "";
-
-
-			const finalCaption =
-				individualCaption ||
-				projectCaption ||
-				"";
-
-
-			caption.textContent =
-				finalCaption;
-
-
-			if (finalCaption) {
-
-				caption.classList.add(
-					"has-caption"
-				);
-
-			} else {
-
-				caption.classList.remove(
-					"has-caption"
-				);
-			}
-
-
-			/*
-			 * ====================================
-			 * 如果已經快取
-			 *
-			 * 直接切換。
-			 * ====================================
-			 */
-
-			const cached =
-				imageCache.get(
-					image
-				);
-
-
-			if (cached) {
-
-				lightboxImg.classList.remove(
-					"is-loading"
-				);
-
-
-				lightboxImg.src =
-					cached.src;
-
-
-				/*
-				 * 立即預載下一張。
-				 */
-
-				preloadNearbyImages(
-					currentIndex
-				);
-
-
-				return;
-			}
-
-
-			/*
-			 * ====================================
-			 * 尚未快取
-			 *
-			 * 顯示 loading 狀態。
-			 * ====================================
-			 */
-
-			lightboxImg.classList.add(
-				"is-loading"
-			);
-
-
-			/*
-			 * 先保留目前畫面，
-			 * 等新圖片載入完成後再切換。
-			 *
-			 * 這樣切圖時不會先閃成空白。
-			 */
-
-			try {
-
-				const loadedImage =
-					await preloadImage(
-						image
-					);
-
-
-				/*
-				 * 確認使用者在等待期間
-				 * 沒有切到其他圖片。
-				 */
-
-				if (
-					gallery[
-						currentIndex
-					] !== image
-				) {
-					return;
-				}
-
-
-				lightboxImg.src =
-					loadedImage.src;
-
-
-				lightboxImg.classList.remove(
-					"is-loading"
-				);
-
-
-				/*
-				 * 圖片顯示後，
-				 * 預載附近圖片。
-				 */
-
-				preloadNearbyImages(
-					currentIndex
-				);
-
-			} catch (error) {
-
-				/*
-				 * 即使 preload 失敗，
-				 * 仍然讓原本 img 嘗試載入。
-				 */
-
-				lightboxImg.src =
-					image;
-
-
-				lightboxImg.classList.remove(
-					"is-loading"
-				);
-
-
-				console.warn(
-					"Lightbox 圖片預載入失敗：",
-					image,
-					error
-				);
-			}
-		}
-
-
-		/*
-		 * ========================================
-		 * 開啟 Lightbox
-		 * ========================================
-		 */
-
-		function openLightbox(
-			card: Element
-		) {
-
-			const wrapper =
-				card.closest(
-					".grid-item"
-				);
-
-
-			if (!wrapper) {
-				return;
-			}
-
-
-			/*
-			 * Gallery
-			 */
-
-			gallery =
-				getGallery(card);
-
-
-			if (!gallery.length) {
-
-				console.warn(
-					"Lightbox 沒有找到圖片：",
-					card
-				);
-
-				return;
-			}
-
-
-			/*
-			 * 裁切模式
-			 */
-
-			const crop =
-				wrapper.getAttribute(
-					"data-image-crop"
-				);
-
-
-			currentCrop =
-				crop === "square"
-					? "square"
-					: "contain";
-
-
-			/*
-			 * Project Caption
-			 */
-
-			projectCaption =
-				wrapper.getAttribute(
-					"data-lightbox-caption"
-				) || "";
-
-
-			/*
-			 * Gallery Captions
-			 */
-
-			galleryCaptions =
-				getGalleryCaptions(
-					wrapper
-				);
-
-
-			/*
-			 * 套用圖片裁切模式
-			 */
-
-			if (
-				currentCrop === "square"
-			) {
-
-				imageWrap.classList.add(
-					"is-square"
-				);
-
-			} else {
-
-				imageWrap.classList.remove(
-					"is-square"
-				);
-			}
-
-
-			/*
-			 * 作品資料
-			 */
-
-			const projectTitle =
-				card.getAttribute(
-					"data-title"
-				) || "";
-
-
-			const projectCategory =
-				card.getAttribute(
-					"data-category"
-				) || "";
-
-
-			const projectYear =
-				card.getAttribute(
-					"data-year"
-				) || "";
-
-
-			title.textContent =
-				projectTitle;
-
-
-			meta.textContent =
-				`${projectCategory} / ${projectYear}`;
-
-
-			/*
-			 * 第一張圖片
-			 */
-
-			currentIndex = 0;
-
-
-			/*
-			 * 先顯示 Lightbox
-			 */
-
-			modal.classList.add(
-				"active"
-			);
-
-
-			modal.setAttribute(
-				"aria-hidden",
-				"false"
-			);
-
-
-			document.body.style.overflow =
-				"hidden";
-
-
-			/*
-			 * 顯示第一張圖片。
-			 *
-			 * 同時開始背景預載入
-			 * 第二張圖片。
-			 */
-
-			showImage(0);
-
-
-			if (
-				gallery.length > 1
-			) {
-
-				preloadInBackground(
-					gallery[1]
-				);
-			}
-		}
-
-
-		/*
-		 * ========================================
-		 * 關閉 Lightbox
-		 * ========================================
-		 */
-
-		function closeModal() {
-
-			modal.classList.remove(
-				"active"
-			);
-
-
-			modal.setAttribute(
-				"aria-hidden",
-				"true"
-			);
-
-
-			document.body.style.overflow =
-				"";
-
-
-			resetZoom();
-
-
-			setTimeout(
-				() => {
-
-					if (
-						!modal.classList.contains(
-							"active"
-						)
-					) {
-
-						lightboxImg.src =
-							"";
-
-
-						title.textContent =
-							"";
-
-
-						meta.textContent =
-							"";
-
-
-						counter.textContent =
-							"1 / 1";
-
-
-						caption.textContent =
-							"";
-
-
-						caption.classList.remove(
-							"has-caption"
-						);
-
-
-						gallery = [];
-
-						galleryCaptions = [];
-
-						projectCaption = "";
-					}
-
-				},
-				300
-			);
-		}
-
-
-		/*
-		 * ========================================
-		 * 點擊作品
-		 * ========================================
-		 */
-
-		const handleCardClick =
-			(event: Event) => {
-
-				const target =
-					event.target;
-
-
-				if (
-					!(
-						target instanceof
-						Element
-					)
-				) {
-					return;
-				}
-
-
-				const card =
-					target.closest(
-						".product-card.is-zoom-mode[data-zoom-gallery]"
-					);
-
-
-				if (!card) {
-					return;
-				}
-
-
-				const interactive =
-					target.closest(
-						"a, button"
-					);
-
-
-				if (
-					interactive &&
-					interactive !== card
-				) {
-
-					if (
-						interactive.matches(
-							".product-card"
-						)
-					) {
-
-						event.preventDefault();
-
-					} else {
-
-						return;
-					}
-				}
-
-
-				event.preventDefault();
-
-
-				openLightbox(
-					card
-				);
-			};
-
-
-		document.addEventListener(
-			"click",
-			handleCardClick
-		);
-
-
-		/*
-		 * ========================================
-		 * 關閉
-		 * ========================================
-		 */
-
-		closeBtn.addEventListener(
-			"click",
-			closeModal
-		);
-
-
-		backdrop.addEventListener(
-			"click",
-			closeModal
-		);
-
-
-		/*
-		 * ========================================
-		 * 上一張
-		 * ========================================
-		 */
-
-		prevBtn.addEventListener(
-			"click",
-			(event) => {
-
-				event.stopPropagation();
-
-
-				showImage(
-					currentIndex - 1
-				);
-			}
-		);
-
-
-		/*
-		 * ========================================
-		 * 下一張
-		 * ========================================
-		 */
-
-		nextBtn.addEventListener(
-			"click",
-			(event) => {
-
-				event.stopPropagation();
-
-
-				showImage(
-					currentIndex + 1
-				);
-			}
-		);
-
-
-		/*
-		 * ========================================
-		 * Zoom Buttons
-		 * ========================================
-		 */
-
-		zoomInBtn.addEventListener(
-			"click",
-			(event) => {
-
-				event.stopPropagation();
-
-				zoomIn();
-			}
-		);
-
-
-		zoomOutBtn.addEventListener(
-			"click",
-			(event) => {
-
-				event.stopPropagation();
-
-				zoomOut();
-			}
-		);
-
-
-		zoomResetBtn.addEventListener(
-			"click",
-			(event) => {
-
-				event.stopPropagation();
-
-				setZoom(1);
-			}
-		);
-
-
-		/*
-		 * ========================================
-		 * 滑鼠滾輪縮放
-		 * ========================================
-		 */
-
-		imageWrap.addEventListener(
-			"wheel",
-			(event) => {
-
-				if (
-					!modal.classList.contains(
-						"active"
-					)
-				) {
-					return;
-				}
-
-
-				event.preventDefault();
-
-
-				if (event.deltaY < 0) {
-
-					zoomIn();
-
-				} else {
-
-					zoomOut();
-				}
-			},
-			{
-				passive: false,
-			}
-		);
-
-
-		/*
-		 * ========================================
-		 * 雙擊縮放
-		 * ========================================
-		 */
-
-		lightboxImg.addEventListener(
-			"dblclick",
-			(event) => {
-
-				event.preventDefault();
-
-
-				if (zoomLevel > 1) {
-
-					setZoom(1);
-
-				} else {
-
-					setZoom(2);
-				}
-			}
-		);
-
-
-		/*
-		 * ========================================
-		 * 滑鼠拖曳圖片
-		 * ========================================
-		 */
-
-		lightboxImg.addEventListener(
-			"mousedown",
-			(event) => {
-
-				if (
-					zoomLevel <= 1
-				) {
-					return;
-				}
-
-
-				event.preventDefault();
-
-
-				isDragging = true;
-
-
-				dragStartX =
-					event.clientX;
-
-
-				dragStartY =
-					event.clientY;
-
-
-				dragOriginX =
-					translateX;
-
-
-				dragOriginY =
-					translateY;
-
-
-				lightboxImg.classList.add(
-					"is-dragging"
-				);
-			}
-		);
-
-
-		window.addEventListener(
-			"mousemove",
-			(event) => {
-
-				if (!isDragging) {
-					return;
-				}
-
-
-				translateX =
-					dragOriginX +
-					(
-						event.clientX -
-						dragStartX
-					);
-
-
-				translateY =
-					dragOriginY +
-					(
-						event.clientY -
-						dragStartY
-					);
-
-
-				updateZoom();
-			}
-		);
-
-
-		window.addEventListener(
-			"mouseup",
-			() => {
-
-				if (!isDragging) {
-					return;
-				}
-
-
-				isDragging = false;
-
-
-				lightboxImg.classList.remove(
-					"is-dragging"
-				);
-			}
-		);
-
-
-		/*
-		 * ========================================
-		 * ESC / 鍵盤左右鍵
-		 * ========================================
-		 */
-
-		const handleKeydown =
-			(event: KeyboardEvent) => {
-
-				if (
-					!modal.classList.contains(
-						"active"
-					)
-				) {
-					return;
-				}
-
-
-				/*
-				 * ESC
-				 */
-
-				if (
-					event.key ===
-					"Escape"
-				) {
-
-					closeModal();
-
-					return;
-				}
-
-
-				/*
-				 * 放大
-				 */
-
-				if (
-					event.key ===
-					"+" ||
-					event.key ===
-					"="
-				) {
-
-					event.preventDefault();
-
-					zoomIn();
-
-					return;
-				}
-
-
-				/*
-				 * 縮小
-				 */
-
-				if (
-					event.key ===
-					"-"
-				) {
-
-					event.preventDefault();
-
-					zoomOut();
-
-					return;
-				}
-
-
-				/*
-				 * 100%
-				 */
-
-				if (
-					event.key ===
-					"0"
-				) {
-
-					event.preventDefault();
-
-					setZoom(1);
-
-					return;
-				}
-
-
-				/*
-				 * 上一張
-				 */
-
-				if (
-					event.key ===
-					"ArrowLeft"
-				) {
-
-					event.preventDefault();
-
-
-					showImage(
-						currentIndex - 1
-					);
-
-
-					return;
-				}
-
-
-				/*
-				 * 下一張
-				 */
-
-				if (
-					event.key ===
-					"ArrowRight"
-				) {
-
-					event.preventDefault();
-
-
-					showImage(
-						currentIndex + 1
-					);
-				}
-			};
-
-
-		document.addEventListener(
-			"keydown",
-			handleKeydown
-		);
-
-
-		/*
-		 * ========================================
-		 * Touch Start
-		 * ========================================
-		 */
-
-		const handleTouchStart =
-			(event: TouchEvent) => {
-
-				if (
-					!event.changedTouches ||
-					!event.changedTouches.length
-				) {
-					return;
-				}
-
-
-				touchStartX =
-					event
-						.changedTouches[0]
-						.screenX;
-
-
-				touchStartY =
-					event
-						.changedTouches[0]
-						.screenY;
-			};
-
-
-		/*
-		 * ========================================
-		 * Touch End
-		 * ========================================
-		 */
-
-		const handleTouchEnd =
-			(event: TouchEvent) => {
-
-				if (
-					!event.changedTouches ||
-					!event.changedTouches.length
-				) {
-					return;
-				}
-
-
-				const touchEndX =
-					event
-						.changedTouches[0]
-						.screenX;
-
-
-				const touchEndY =
-					event
-						.changedTouches[0]
-						.screenY;
-
-
-				const distanceX =
-					touchEndX -
-					touchStartX;
-
-
-				const distanceY =
-					touchEndY -
-					touchStartY;
-
-
-				/*
-				 * 放大時
-				 *
-				 * 優先當作拖曳
-				 */
-
-				if (
-					zoomLevel > 1
-				) {
-
-					if (
-						Math.abs(
-							distanceX
-						) < 100
-					) {
-						return;
-					}
-
-
-					if (
-						Math.abs(
-							distanceY
-						) >
-						Math.abs(
-							distanceX
-						)
-					) {
-						return;
-					}
-				}
-
-
-				/*
-				 * 滑動距離太短
-				 */
-
-				if (
-					Math.abs(
-						distanceX
-					) < 50
-				) {
-					return;
-				}
-
-
-				/*
-				 * 左滑
-				 */
-
-				if (
-					distanceX < 0
-				) {
-
-					showImage(
-						currentIndex + 1
-					);
-
-				} else {
-
-					/*
-					 * 右滑
-					 */
-
-					showImage(
-						currentIndex - 1
-					);
-				}
-			};
-
-
-		modal.addEventListener(
-			"touchstart",
-			handleTouchStart,
-			{
-				passive: true,
-			}
-		);
-
-
-		modal.addEventListener(
-			"touchend",
-			handleTouchEnd,
-			{
-				passive: true,
-			}
-		);
-
-	}
-
-
-	/*
-	 * ========================================
-	 * 初次載入
-	 * ========================================
-	 */
-
-	if (
-		document.readyState ===
-		"loading"
-	) {
-
-		document.addEventListener(
-			"DOMContentLoaded",
-			initLightbox,
-			{
-				once: true,
-			}
-		);
-
-	} else {
-
-		initLightbox();
-
-	}
-
-
-	/*
-	 * ========================================
-	 * Astro View Transitions
-	 * ========================================
-	 */
-
-	document.addEventListener(
-		"astro:after-swap",
-		() => {
-
-			lightboxInitialized =
-				false;
-
-
-			initLightbox();
-
-		}
-	);
+  /*
+   * ========================================
+   * Lightbox
+   * ========================================
+   */
+
+  type ImageCache = Map<string, HTMLImageElement>;
+  type ImagePromiseCache = Map<
+    string,
+    Promise<HTMLImageElement>
+  >;
+
+  /*
+   * 將圖片快取掛到 window。
+   *
+   * 這樣 Astro 頁面切換後，
+   * 已經載入過的圖片仍然可以繼續使用。
+   */
+
+  type PortfolioWindow = Window & {
+    __portfolioLightboxImageCache?: ImageCache;
+    __portfolioLightboxImagePromises?: ImagePromiseCache;
+  };
+
+  const portfolioWindow =
+    window as PortfolioWindow;
+
+  const imageCache: ImageCache =
+    portfolioWindow.__portfolioLightboxImageCache ||
+    new Map<string, HTMLImageElement>();
+
+  const imagePromiseCache: ImagePromiseCache =
+    portfolioWindow.__portfolioLightboxImagePromises ||
+    new Map<string, Promise<HTMLImageElement>>();
+
+  portfolioWindow.__portfolioLightboxImageCache =
+    imageCache;
+
+  portfolioWindow.__portfolioLightboxImagePromises =
+    imagePromiseCache;
+
+  let lightboxInitialized = false;
+
+  /*
+   * ========================================
+   * 圖片預載入
+   * ========================================
+   */
+
+  function preloadImage(
+    src: string
+  ): Promise<HTMLImageElement> {
+    if (!src) {
+      return Promise.reject(
+        new Error("圖片網址不存在")
+      );
+    }
+
+    /*
+     * 已經成功載入
+     */
+    const cached = imageCache.get(src);
+
+    if (cached && cached.complete) {
+      return Promise.resolve(cached);
+    }
+
+    /*
+     * 已經正在載入
+     */
+    const existingPromise =
+      imagePromiseCache.get(src);
+
+    if (existingPromise) {
+      return existingPromise;
+    }
+
+    const promise =
+      new Promise<HTMLImageElement>(
+        (resolve, reject) => {
+          const image = new Image();
+
+          image.decoding = "async";
+
+          image.onload = async () => {
+            try {
+              /*
+               * decode 可以讓瀏覽器先完成圖片解碼，
+               * 避免已下載但還沒真正繪製時閃一下。
+               */
+              if (typeof image.decode === "function") {
+                try {
+                  await image.decode();
+                } catch {
+                  /*
+                   * 某些瀏覽器 decode 可能失敗，
+                   * 但圖片其實已經可以使用。
+                   */
+                }
+              }
+
+              imageCache.set(src, image);
+              resolve(image);
+            } catch (error) {
+              reject(error);
+            }
+          };
+
+          image.onerror = () => {
+            imagePromiseCache.delete(src);
+            reject(
+              new Error(
+                `圖片載入失敗：${src}`
+              )
+            );
+          };
+
+          image.src = src;
+        }
+      );
+
+    imagePromiseCache.set(src, promise);
+
+    return promise;
+  }
+
+  /*
+   * 取得目前頁面所有 Lightbox 圖片
+   */
+  function collectLightboxImages(): string[] {
+    const cards =
+      document.querySelectorAll(
+        ".product-card.is-zoom-mode[data-zoom-gallery]"
+      );
+
+    const images = new Set<string>();
+
+    cards.forEach((card) => {
+      const data =
+        card.getAttribute("data-zoom-gallery");
+
+      if (!data) return;
+
+      try {
+        const parsed = JSON.parse(data);
+
+        if (!Array.isArray(parsed)) return;
+
+        parsed.forEach((image) => {
+          if (
+            typeof image === "string" &&
+            image.length > 0
+          ) {
+            images.add(image);
+          }
+        });
+      } catch {
+        /*
+         * gallery JSON 錯誤時略過
+         */
+      }
+    });
+
+    return [...images];
+  }
+
+  /*
+   * 背景預載。
+   *
+   * 不在頁面剛開時一次全部 Promise.all，
+   * 避免大量圖片同時搶頻寬。
+   */
+
+  function preloadImagesInBackground(
+    images: string[]
+  ) {
+    if (!images.length) return;
+
+    const run = () => {
+      let index = 0;
+
+      const loadNext = () => {
+        if (index >= images.length) return;
+
+        const src = images[index];
+        index += 1;
+
+        preloadImage(src)
+          .catch(() => {
+            /*
+             * 單張失敗不影響其他圖片
+             */
+          })
+          .finally(() => {
+            /*
+             * 稍微讓瀏覽器喘息，
+             * 避免作品集首頁被大量圖片拖慢。
+             */
+            setTimeout(loadNext, 30);
+          });
+      };
+
+      /*
+       * 一次維持少量載入。
+       */
+      loadNext();
+      setTimeout(loadNext, 80);
+      setTimeout(loadNext, 160);
+    };
+
+    if ("requestIdleCallback" in window) {
+      window.requestIdleCallback(
+        run,
+        { timeout: 1500 }
+      );
+    } else {
+      setTimeout(run, 500);
+    }
+  }
+
+  function initLightbox() {
+    if (lightboxInitialized) return;
+
+    const modal =
+      document.getElementById(
+        "lightbox-modal"
+      );
+
+    const imageWrap =
+      document.getElementById(
+        "lightbox-image-wrap"
+      );
+
+    const lightboxImg =
+      document.getElementById(
+        "lightbox-img"
+      ) as HTMLImageElement | null;
+
+    const loading =
+      document.getElementById(
+        "lightbox-loading"
+      );
+
+    const title =
+      document.getElementById(
+        "lightbox-title"
+      );
+
+    const meta =
+      document.getElementById(
+        "lightbox-meta"
+      );
+
+    const counter =
+      document.getElementById(
+        "lightbox-counter"
+      );
+
+    const caption =
+      document.getElementById(
+        "lightbox-caption"
+      );
+
+    const closeBtn =
+      modal?.querySelector(
+        ".lightbox-close"
+      );
+
+    const prevBtn =
+      modal?.querySelector(
+        ".lightbox-prev"
+      );
+
+    const nextBtn =
+      modal?.querySelector(
+        ".lightbox-next"
+      );
+
+    const backdrop =
+      modal?.querySelector(
+        ".lightbox-backdrop"
+      );
+
+    const zoomOutBtn =
+      modal?.querySelector(
+        ".lightbox-zoom-out"
+      );
+
+    const zoomResetBtn =
+      modal?.querySelector(
+        ".lightbox-zoom-reset"
+      );
+
+    const zoomInBtn =
+      modal?.querySelector(
+        ".lightbox-zoom-in"
+      );
+
+    if (
+      !modal ||
+      !imageWrap ||
+      !lightboxImg ||
+      !loading ||
+      !title ||
+      !meta ||
+      !counter ||
+      !caption ||
+      !closeBtn ||
+      !prevBtn ||
+      !nextBtn ||
+      !backdrop ||
+      !zoomOutBtn ||
+      !zoomResetBtn ||
+      !zoomInBtn
+    ) {
+      return;
+    }
+
+    lightboxInitialized = true;
+
+    let gallery: string[] = [];
+    let galleryCaptions: string[] = [];
+    let projectCaption = "";
+    let currentIndex = 0;
+
+    let currentCrop:
+      | "contain"
+      | "square" = "contain";
+
+    /*
+     * ========================================
+     * Zoom
+     * ========================================
+     */
+
+    let zoomLevel = 1;
+
+    const MIN_ZOOM = 1;
+    const MAX_ZOOM = 3;
+    const ZOOM_STEP = 0.25;
+
+    let translateX = 0;
+    let translateY = 0;
+
+    let isDragging = false;
+
+    let dragStartX = 0;
+    let dragStartY = 0;
+
+    let dragOriginX = 0;
+    let dragOriginY = 0;
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    /*
+     * 防止快速切換圖片時，
+     * 前一張圖片晚到而覆蓋目前圖片。
+     */
+    let imageRequestId = 0;
+
+    /*
+     * ========================================
+     * Gallery
+     * ========================================
+     */
+
+    function getGallery(card: Element) {
+      const galleryData =
+        card.getAttribute(
+          "data-zoom-gallery"
+        );
+
+      if (!galleryData) return [];
+
+      try {
+        const images =
+          JSON.parse(galleryData);
+
+        if (!Array.isArray(images)) {
+          return [];
+        }
+
+        return images.filter(
+          (image) =>
+            typeof image === "string" &&
+            image.length > 0
+        );
+      } catch (error) {
+        console.warn(
+          "Lightbox gallery 讀取失敗：",
+          error
+        );
+
+        return [];
+      }
+    }
+
+    function getGalleryCaptions(
+      wrapper: Element
+    ): string[] {
+      const data =
+        wrapper.getAttribute(
+          "data-gallery-captions"
+        );
+
+      if (!data) return [];
+
+      try {
+        const parsed = JSON.parse(data);
+
+        if (!Array.isArray(parsed)) {
+          return [];
+        }
+
+        return parsed.map((item) =>
+          typeof item === "string"
+            ? item
+            : ""
+        );
+      } catch (error) {
+        console.warn(
+          "Lightbox captions 讀取失敗：",
+          error
+        );
+
+        return [];
+      }
+    }
+
+    /*
+     * ========================================
+     * Zoom reset
+     * ========================================
+     */
+
+    function resetZoom() {
+      zoomLevel = 1;
+
+      translateX = 0;
+      translateY = 0;
+
+      lightboxImg.style.transform =
+        "translate3d(0, 0, 0) scale(1)";
+
+      lightboxImg.classList.remove(
+        "is-zoomed"
+      );
+
+      lightboxImg.classList.remove(
+        "is-dragging"
+      );
+
+      zoomResetBtn.textContent = "100%";
+    }
+
+    function updateZoom() {
+      zoomLevel = Math.max(
+        MIN_ZOOM,
+        Math.min(MAX_ZOOM, zoomLevel)
+      );
+
+      if (zoomLevel <= 1) {
+        translateX = 0;
+        translateY = 0;
+      }
+
+      lightboxImg.style.transform =
+        `translate3d(${translateX}px, ${translateY}px, 0) scale(${zoomLevel})`;
+
+      if (zoomLevel > 1) {
+        lightboxImg.classList.add(
+          "is-zoomed"
+        );
+      } else {
+        lightboxImg.classList.remove(
+          "is-zoomed"
+        );
+      }
+
+      zoomResetBtn.textContent =
+        `${Math.round(zoomLevel * 100)}%`;
+    }
+
+    function setZoom(value: number) {
+      zoomLevel = value;
+      updateZoom();
+    }
+
+    function zoomIn() {
+      setZoom(
+        zoomLevel + ZOOM_STEP
+      );
+    }
+
+    function zoomOut() {
+      setZoom(
+        zoomLevel - ZOOM_STEP
+      );
+    }
+
+    /*
+     * ========================================
+     * 顯示圖片
+     * ========================================
+     */
+
+    async function showImage(
+      index: number
+    ) {
+      if (!gallery.length) return;
+
+      if (index < 0) {
+        index = gallery.length - 1;
+      }
+
+      if (index >= gallery.length) {
+        index = 0;
+      }
+
+      currentIndex = index;
+
+      const image =
+        gallery[currentIndex];
+
+      const requestId =
+        ++imageRequestId;
+
+      resetZoom();
+
+      /*
+       * 圖片尚未完成前完全隱藏。
+       *
+       * 這就是修正「點開瞬間破圖」的關鍵。
+       */
+      lightboxImg.classList.remove(
+        "is-loaded"
+      );
+
+      lightboxImg.classList.add(
+        "is-loading"
+      );
+
+      loading.classList.add(
+        "active"
+      );
+
+      /*
+       * 先清掉舊圖片，
+       * 避免 square 模式下舊圖短暫殘留。
+       */
+      lightboxImg.removeAttribute(
+        "src"
+      );
+
+      counter.textContent =
+        `${currentIndex + 1} / ${gallery.length}`;
+
+      const individualCaption =
+        galleryCaptions[currentIndex] ||
+        "";
+
+      const finalCaption =
+        individualCaption ||
+        projectCaption ||
+        "";
+
+      caption.textContent =
+        finalCaption;
+
+      if (finalCaption) {
+        caption.classList.add(
+          "has-caption"
+        );
+      } else {
+        caption.classList.remove(
+          "has-caption"
+        );
+      }
+
+      /*
+       * 預先載入目前圖片
+       */
+      try {
+        const cached =
+          imageCache.get(image);
+
+        let loadedImage:
+          | HTMLImageElement
+          | undefined;
+
+        if (
+          cached &&
+          cached.complete
+        ) {
+          loadedImage = cached;
+        } else {
+          loadedImage =
+            await preloadImage(image);
+        }
+
+        /*
+         * 如果使用者在圖片載入期間
+         * 已經切到下一張，
+         * 就不要把這張舊圖片放回去。
+         */
+        if (
+          requestId !== imageRequestId
+        ) {
+          return;
+        }
+
+        /*
+         * 使用已完成載入的圖片。
+         */
+        lightboxImg.src =
+          loadedImage.src;
+
+        lightboxImg.alt =
+          title.textContent || "";
+
+        /*
+         * 等瀏覽器完成實際繪製。
+         */
+        requestAnimationFrame(() => {
+          if (
+            requestId !== imageRequestId
+          ) {
+            return;
+          }
+
+          lightboxImg.classList.remove(
+            "is-loading"
+          );
+
+          lightboxImg.classList.add(
+            "is-loaded"
+          );
+
+          loading.classList.remove(
+            "active"
+          );
+        });
+      } catch (error) {
+        if (
+          requestId !== imageRequestId
+        ) {
+          return;
+        }
+
+        lightboxImg.classList.remove(
+          "is-loading"
+        );
+
+        loading.classList.remove(
+          "active"
+        );
+
+        console.warn(
+          "Lightbox 圖片載入失敗：",
+          image,
+          error
+        );
+      }
+
+      /*
+       * ========================================
+       * 提前載入前後圖片
+       * ========================================
+       */
+
+      if (gallery.length > 1) {
+        const previousIndex =
+          currentIndex - 1 < 0
+            ? gallery.length - 1
+            : currentIndex - 1;
+
+        const nextIndex =
+          currentIndex + 1 >=
+          gallery.length
+            ? 0
+            : currentIndex + 1;
+
+        preloadImage(
+          gallery[previousIndex]
+        ).catch(() => {});
+
+        preloadImage(
+          gallery[nextIndex]
+        ).catch(() => {});
+      }
+    }
+
+    /*
+     * ========================================
+     * 開啟
+     * ========================================
+     */
+
+    function openLightbox(
+      card: Element
+    ) {
+      const wrapper =
+        card.closest(".grid-item");
+
+      if (!wrapper) return;
+
+      gallery =
+        getGallery(card);
+
+      if (!gallery.length) {
+        console.warn(
+          "Lightbox 沒有找到圖片：",
+          card
+        );
+
+        return;
+      }
+
+      const crop =
+        wrapper.getAttribute(
+          "data-image-crop"
+        );
+
+      currentCrop =
+        crop === "square"
+          ? "square"
+          : "contain";
+
+      projectCaption =
+        wrapper.getAttribute(
+          "data-lightbox-caption"
+        ) || "";
+
+      galleryCaptions =
+        getGalleryCaptions(
+          wrapper
+        );
+
+      /*
+       * Square 模式
+       */
+      if (
+        currentCrop === "square"
+      ) {
+        imageWrap.classList.add(
+          "is-square"
+        );
+      } else {
+        imageWrap.classList.remove(
+          "is-square"
+        );
+      }
+
+      const projectTitle =
+        card.getAttribute(
+          "data-title"
+        ) || "";
+
+      const projectCategory =
+        card.getAttribute(
+          "data-category"
+        ) || "";
+
+      const projectYear =
+        card.getAttribute(
+          "data-year"
+        ) || "";
+
+      title.textContent =
+        projectTitle;
+
+      meta.textContent =
+        `${projectCategory} / ${projectYear}`;
+
+      currentIndex = 0;
+
+      /*
+       * 先打開 Lightbox。
+       * 圖片本身仍然保持隱藏，
+       * 所以不會看到破圖。
+       */
+      modal.classList.add(
+        "active"
+      );
+
+      modal.setAttribute(
+        "aria-hidden",
+        "false"
+      );
+
+      document.body.style.overflow =
+        "hidden";
+
+      /*
+       * 立即載入第一張。
+       */
+      showImage(0);
+
+      /*
+       * 目前 gallery 的前兩張優先預載。
+       */
+      gallery
+        .slice(0, 3)
+        .forEach((image) => {
+          preloadImage(image).catch(
+            () => {}
+          );
+        });
+    }
+
+    /*
+     * ========================================
+     * 關閉
+     * ========================================
+     */
+
+    function closeModal() {
+      imageRequestId += 1;
+
+      modal.classList.remove(
+        "active"
+      );
+
+      modal.setAttribute(
+        "aria-hidden",
+        "true"
+      );
+
+      document.body.style.overflow =
+        "";
+
+      resetZoom();
+
+      lightboxImg.classList.remove(
+        "is-loaded"
+      );
+
+      lightboxImg.classList.add(
+        "is-loading"
+      );
+
+      loading.classList.remove(
+        "active"
+      );
+
+      setTimeout(() => {
+        if (
+          !modal.classList.contains(
+            "active"
+          )
+        ) {
+          lightboxImg.removeAttribute(
+            "src"
+          );
+
+          title.textContent = "";
+          meta.textContent = "";
+
+          counter.textContent =
+            "1 / 1";
+
+          caption.textContent = "";
+
+          caption.classList.remove(
+            "has-caption"
+          );
+
+          gallery = [];
+          galleryCaptions = [];
+          projectCaption = "";
+        }
+      }, 300);
+    }
+
+    /*
+     * ========================================
+     * Card click
+     * ========================================
+     */
+
+    const handleCardClick = (
+      event: Event
+    ) => {
+      const target =
+        event.target;
+
+      if (
+        !(target instanceof Element)
+      ) {
+        return;
+      }
+
+      const card =
+        target.closest(
+          ".product-card.is-zoom-mode[data-zoom-gallery]"
+        );
+
+      if (!card) return;
+
+      const interactive =
+        target.closest(
+          "a, button"
+        );
+
+      if (
+        interactive &&
+        interactive !== card
+      ) {
+        if (
+          interactive.matches(
+            ".product-card"
+          )
+        ) {
+          event.preventDefault();
+        } else {
+          return;
+        }
+      }
+
+      event.preventDefault();
+
+      openLightbox(card);
+    };
+
+    document.addEventListener(
+      "click",
+      handleCardClick
+    );
+
+    /*
+     * ========================================
+     * Buttons
+     * ========================================
+     */
+
+    closeBtn.addEventListener(
+      "click",
+      closeModal
+    );
+
+    backdrop.addEventListener(
+      "click",
+      closeModal
+    );
+
+    prevBtn.addEventListener(
+      "click",
+      (event) => {
+        event.stopPropagation();
+
+        showImage(
+          currentIndex - 1
+        );
+      }
+    );
+
+    nextBtn.addEventListener(
+      "click",
+      (event) => {
+        event.stopPropagation();
+
+        showImage(
+          currentIndex + 1
+        );
+      }
+    );
+
+    zoomInBtn.addEventListener(
+      "click",
+      (event) => {
+        event.stopPropagation();
+
+        zoomIn();
+      }
+    );
+
+    zoomOutBtn.addEventListener(
+      "click",
+      (event) => {
+        event.stopPropagation();
+
+        zoomOut();
+      }
+    );
+
+    zoomResetBtn.addEventListener(
+      "click",
+      (event) => {
+        event.stopPropagation();
+
+        setZoom(1);
+      }
+    );
+
+    /*
+     * ========================================
+     * 滾輪縮放
+     * ========================================
+     */
+
+    imageWrap.addEventListener(
+      "wheel",
+      (event) => {
+        if (
+          !modal.classList.contains(
+            "active"
+          )
+        ) {
+          return;
+        }
+
+        event.preventDefault();
+
+        if (event.deltaY < 0) {
+          zoomIn();
+        } else {
+          zoomOut();
+        }
+      },
+      { passive: false }
+    );
+
+    /*
+     * ========================================
+     * 雙擊縮放
+     * ========================================
+     */
+
+    lightboxImg.addEventListener(
+      "dblclick",
+      (event) => {
+        event.preventDefault();
+
+        if (zoomLevel > 1) {
+          setZoom(1);
+        } else {
+          setZoom(2);
+        }
+      }
+    );
+
+    /*
+     * ========================================
+     * 滑鼠拖曳
+     * ========================================
+     */
+
+    lightboxImg.addEventListener(
+      "mousedown",
+      (event) => {
+        if (zoomLevel <= 1) return;
+
+        event.preventDefault();
+
+        isDragging = true;
+
+        dragStartX =
+          event.clientX;
+
+        dragStartY =
+          event.clientY;
+
+        dragOriginX =
+          translateX;
+
+        dragOriginY =
+          translateY;
+
+        lightboxImg.classList.add(
+          "is-dragging"
+        );
+      }
+    );
+
+    window.addEventListener(
+      "mousemove",
+      (event) => {
+        if (!isDragging) return;
+
+        translateX =
+          dragOriginX +
+          (event.clientX -
+            dragStartX);
+
+        translateY =
+          dragOriginY +
+          (event.clientY -
+            dragStartY);
+
+        updateZoom();
+      }
+    );
+
+    window.addEventListener(
+      "mouseup",
+      () => {
+        if (!isDragging) return;
+
+        isDragging = false;
+
+        lightboxImg.classList.remove(
+          "is-dragging"
+        );
+      }
+    );
+
+    /*
+     * ========================================
+     * 鍵盤
+     * ========================================
+     */
+
+    const handleKeydown = (
+      event: KeyboardEvent
+    ) => {
+      if (
+        !modal.classList.contains(
+          "active"
+        )
+      ) {
+        return;
+      }
+
+      if (event.key === "Escape") {
+        closeModal();
+        return;
+      }
+
+      if (
+        event.key === "+" ||
+        event.key === "="
+      ) {
+        event.preventDefault();
+
+        zoomIn();
+
+        return;
+      }
+
+      if (event.key === "-") {
+        event.preventDefault();
+
+        zoomOut();
+
+        return;
+      }
+
+      if (event.key === "0") {
+        event.preventDefault();
+
+        setZoom(1);
+
+        return;
+      }
+
+      if (
+        event.key === "ArrowLeft"
+      ) {
+        event.preventDefault();
+
+        showImage(
+          currentIndex - 1
+        );
+
+        return;
+      }
+
+      if (
+        event.key === "ArrowRight"
+      ) {
+        event.preventDefault();
+
+        showImage(
+          currentIndex + 1
+        );
+      }
+    };
+
+    document.addEventListener(
+      "keydown",
+      handleKeydown
+    );
+
+    /*
+     * ========================================
+     * 手機滑動
+     * ========================================
+     */
+
+    const handleTouchStart = (
+      event: TouchEvent
+    ) => {
+      if (
+        !event.changedTouches ||
+        !event.changedTouches.length
+      ) {
+        return;
+      }
+
+      touchStartX =
+        event.changedTouches[0]
+          .screenX;
+
+      touchStartY =
+        event.changedTouches[0]
+          .screenY;
+    };
+
+    const handleTouchEnd = (
+      event: TouchEvent
+    ) => {
+      if (
+        !event.changedTouches ||
+        !event.changedTouches.length
+      ) {
+        return;
+      }
+
+      const touchEndX =
+        event.changedTouches[0]
+          .screenX;
+
+      const touchEndY =
+        event.changedTouches[0]
+          .screenY;
+
+      const distanceX =
+        touchEndX -
+        touchStartX;
+
+      const distanceY =
+        touchEndY -
+        touchStartY;
+
+      if (zoomLevel > 1) {
+        if (
+          Math.abs(distanceX) <
+          100
+        ) {
+          return;
+        }
+
+        if (
+          Math.abs(distanceY) >
+          Math.abs(distanceX)
+        ) {
+          return;
+        }
+      }
+
+      if (
+        Math.abs(distanceX) <
+        50
+      ) {
+        return;
+      }
+
+      if (distanceX < 0) {
+        showImage(
+          currentIndex + 1
+        );
+      } else {
+        showImage(
+          currentIndex - 1
+        );
+      }
+    };
+
+    modal.addEventListener(
+      "touchstart",
+      handleTouchStart,
+      { passive: true }
+    );
+
+    modal.addEventListener(
+      "touchend",
+      handleTouchEnd,
+      { passive: true }
+    );
+
+    /*
+     * ========================================
+     * 頁面初始化後，
+     * 背景慢慢預載 Lightbox 圖片
+     * ========================================
+     */
+
+    const backgroundImages =
+      collectLightboxImages();
+
+    preloadImagesInBackground(
+      backgroundImages
+    );
+  }
+
+  /*
+   * ========================================
+   * 初始化
+   * ========================================
+   */
+
+  if (
+    document.readyState ===
+    "loading"
+  ) {
+    document.addEventListener(
+      "DOMContentLoaded",
+      initLightbox,
+      { once: true }
+    );
+  } else {
+    initLightbox();
+  }
+
+  /*
+   * Astro View Transition
+   */
+  document.addEventListener(
+    "astro:after-swap",
+    () => {
+      lightboxInitialized = false;
+
+      initLightbox();
+    }
+  );
 </script>
 
-
 <style>
+  /* ========================================
+   * Grid
+   * ======================================== */
+
+  .product-grid {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(
+      3,
+      minmax(0, 1fr)
+    );
+    gap: 1rem 0.2rem;
+    margin: 1rem 0 6rem;
+    min-height: 400px;
+  }
+
+  .grid-item {
+    display: block;
+    width: 100%;
+  }
+
+  /* ========================================
+   * Lightbox
+   * ======================================== */
+
+  .lightbox {
+    position: fixed;
+    z-index: 999999;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+
+    transition:
+      opacity 0.3s ease,
+      visibility 0.3s ease;
+  }
+
+  .lightbox.active {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .lightbox-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  /* ========================================
+   * Lightbox content
+   * ======================================== */
+
+  .lightbox-content {
+    position: relative;
+    z-index: 2;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: min(90vw, 1400px);
+    height: 90vh;
+
+    pointer-events: none;
+  }
 
-	/*
-	 * ========================================
-	 * Grid
-	 * ========================================
-	 */
+  /* ========================================
+   * Zoom controls
+   * ======================================== */
 
-	.product-grid {
-		position: relative;
+  .lightbox-zoom-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-		overflow: hidden;
+    width: max-content;
+    height: 32px;
 
-		display: grid;
+    margin: 0 0 12px;
+    padding: 0;
 
-		width: 100%;
+    flex-shrink: 0;
+    box-sizing: border-box;
 
-		grid-template-columns:
-			repeat(
-				3,
-				minmax(0, 1fr)
-			);
+    pointer-events: auto;
 
-		gap:
-			1rem
-			0.2rem;
+    border: 1px solid
+      rgba(255, 255, 255, 0.25);
 
-		margin:
-			1rem
-			0
-			6rem;
+    border-radius: 999px;
 
-		min-height:
-			400px;
-	}
+    overflow: hidden;
+  }
 
+  .lightbox-zoom-controls button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-	.grid-item {
-		display: block;
+    width: 38px;
+    height: 30px;
 
-		width: 100%;
-	}
+    margin: 0;
+    padding: 0;
 
+    flex: 0 0 38px;
 
-	/*
-	 * ========================================
-	 * Lightbox 外層
-	 * ========================================
-	 */
+    box-sizing: border-box;
 
-	.lightbox {
-		position: fixed;
+    border: 0;
+    border-right: 1px solid
+      rgba(255, 255, 255, 0.2);
 
-		z-index: 999999;
+    background: transparent;
 
-		inset: 0;
+    color: #fff;
 
-		width: 100%;
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1;
 
-		height: 100%;
+    cursor: pointer;
 
-		background:
-			transparent;
+    transition:
+      background 0.2s ease,
+      opacity 0.2s ease;
+  }
 
-		display: flex;
+  .lightbox-zoom-controls
+    button:last-child {
+    border-right: 0;
+  }
 
-		justify-content:
-			center;
+  .lightbox-zoom-controls
+    button:hover {
+    background:
+      rgba(255, 255, 255, 0.12);
+  }
 
-		align-items:
-			center;
+  .lightbox-zoom-reset {
+    min-width: 50px !important;
+    flex-basis: 50px !important;
 
-		opacity: 0;
+    font-size: 11px !important;
+    opacity: 0.7;
+  }
 
-		visibility:
-			hidden;
+  /* ========================================
+   * Image
+   * ======================================== */
 
-		pointer-events:
-			none;
+  .lightbox-image-wrap {
+    position: relative;
 
-		transition:
-			opacity
-			0.3s ease,
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-			visibility
-			0.3s ease;
-	}
+    width: auto;
 
+    max-width: 90vw;
+    max-height: 72vh;
 
-	.lightbox.active {
-		opacity: 1;
+    overflow: hidden;
 
-		visibility:
-			visible;
+    pointer-events: auto;
 
-		pointer-events:
-			auto;
-	}
+    background: transparent;
 
+    flex-shrink: 0;
+  }
 
-	/*
-	 * ========================================
-	 * 黑色透明背景
-	 * ========================================
-	 */
+  .lightbox-image-wrap.is-square {
+    width: min(72vh, 80vw);
+    height: min(72vh, 80vw);
 
-	.lightbox-backdrop {
-		position: absolute;
+    aspect-ratio: 1 / 1;
+  }
 
-		inset: 0;
+  .lightbox-content img {
+    display: block;
 
-		background:
-			rgba(
-				0,
-				0,
-				0,
-				0.80
-			);
-	}
+    max-width: 100%;
+    max-height: 72vh;
 
+    width: auto;
+    height: auto;
 
-	/*
-	 * ========================================
-	 * Lightbox Content
-	 * ========================================
-	 */
+    object-fit: contain;
 
-	.lightbox-content {
-		position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
 
-		z-index: 2;
+    pointer-events: auto;
 
-		display: flex;
+    transform:
+      translate3d(0, 0, 0)
+      scale(1);
 
-		flex-direction:
-			column;
+    transform-origin: center center;
 
-		align-items:
-			center;
+    will-change: transform;
 
-		justify-content:
-			center;
+    cursor: default;
 
-		width:
-			min(
-				90vw,
-				1400px
-			);
+    /*
+     * 重要：
+     * 圖片載入前完全透明，
+     * 不會顯示破圖圖示。
+     */
+    opacity: 0;
 
-		height:
-			90vh;
+    transition:
+      opacity 0.18s ease;
+  }
 
-		pointer-events:
-			none;
-	}
+  /*
+   * 只有真正載入完成後才顯示。
+   */
+  .lightbox-content
+    img.is-loaded {
+    opacity: 1;
+  }
 
+  /*
+   * Square 模式
+   */
+  .lightbox-image-wrap.is-square
+    img {
+    width: 100%;
+    height: 100%;
 
-	/*
-	 * ========================================
-	 * Zoom 控制
-	 *
-	 * 固定在圖片上方
-	 * ========================================
-	 */
+    max-width: 100%;
+    max-height: 100%;
 
-	.lightbox-zoom-controls {
-		position: relative;
+    object-fit: cover;
+  }
 
-		z-index: 20;
+  .lightbox-content
+    img.is-zoomed {
+    cursor: grab;
+  }
 
-		display: flex;
+  .lightbox-content
+    img.is-dragging {
+    cursor: grabbing;
+    transition: none;
+  }
 
-		flex-shrink: 0;
+  /*
+   * ========================================
+   * Loading
+   * ======================================== */
 
-		align-items:
-			center;
+  .lightbox-loading {
+    position: absolute;
 
-		justify-content:
-			center;
+    top: 50%;
+    left: 50%;
 
-		width:
-			max-content;
+    width: 22px;
+    height: 22px;
 
-		height:
-			32px;
+    margin-left: -11px;
+    margin-top: -11px;
 
-		margin:
-			0
-			0
-			12px;
+    border: 1px solid
+      rgba(255, 255, 255, 0.25);
 
-		padding:
-			0;
+    border-top-color: #fff;
 
-		box-sizing:
-			border-box;
+    border-radius: 50%;
 
-		border:
-			1px solid
-			rgba(
-				255,
-				255,
-				255,
-				0.25
-			);
+    opacity: 0;
+    visibility: hidden;
 
-		border-radius:
-			999px;
+    pointer-events: none;
 
-		overflow:
-			hidden;
+    animation:
+      lightbox-spin
+      0.7s linear infinite;
+  }
 
-		pointer-events:
-			auto;
+  .lightbox-loading.active {
+    opacity: 0.7;
+    visibility: visible;
+  }
 
-		line-height:
-			1;
-	}
+  @keyframes lightbox-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 
+  /* ========================================
+   * Title
+   * ======================================== */
 
-	.lightbox-zoom-controls button {
-		display: flex;
+  .lightbox-title {
+    margin-top: 15px;
 
-		align-items:
-			center;
+    color: #fff;
 
-		justify-content:
-			center;
+    font-size: 16px;
+    font-weight: 600;
 
-		flex-shrink: 0;
+    text-align: center;
+    line-height: 1.4;
 
-		width:
-			38px;
+    max-width: 80vw;
+  }
 
-		height:
-			30px;
+  .lightbox-meta {
+    margin-top: 5px;
 
-		margin:
-			0;
+    color: #fff;
 
-		padding:
-			0;
+    font-size: 12px;
 
-		box-sizing:
-			border-box;
+    opacity: 0.6;
 
-		border:
-			0;
+    line-height: 1.4;
+  }
 
-		border-right:
-			1px solid
-			rgba(
-				255,
-				255,
-				255,
-				0.2
-			);
+  .lightbox-counter {
+    margin-top: 10px;
 
-		border-radius:
-			0;
+    color: #fff;
 
-		background:
-			transparent;
+    font-size: 13px;
 
-		color:
-			#ffffff;
+    opacity: 0.65;
 
-		font-family:
-			inherit;
+    line-height: 1.4;
+  }
 
-		font-size:
-			14px;
+  .lightbox-caption {
+    display: none;
 
-		font-weight:
-			400;
+    max-width: 75vw;
 
-		line-height:
-			1;
+    margin-top: 8px;
 
-		text-align:
-			center;
+    color: #fff;
 
-		vertical-align:
-			middle;
+    font-size: 12px;
 
-		cursor:
-			pointer;
+    line-height: 1.6;
 
-		appearance:
-			none;
+    text-align: center;
 
-		-webkit-appearance:
-			none;
+    opacity: 0.7;
+  }
 
-		transition:
-			background
-			0.2s ease,
+  .lightbox-caption.has-caption {
+    display: block;
+  }
 
-			opacity
-			0.2s ease;
-	}
+  /* ========================================
+   * Buttons
+   * ======================================== */
 
+  .lightbox-close,
+  .lightbox-prev,
+  .lightbox-next {
+    position: absolute;
 
-	.lightbox-zoom-controls
-		button:last-child {
-		border-right:
-			0;
-	}
+    z-index: 10;
 
+    border: 0;
 
-	.lightbox-zoom-controls
-		button:hover {
-		background:
-			rgba(
-				255,
-				255,
-				255,
-				0.12
-			);
-	}
+    background: transparent;
 
+    color: #fff;
 
-	.lightbox-zoom-reset {
-		width:
-			50px !important;
+    cursor: pointer;
 
-		min-width:
-			50px;
+    font-family: inherit;
 
-		font-size:
-			11px !important;
+    transition:
+      opacity 0.2s ease,
+      transform 0.2s ease;
+  }
 
-		line-height:
-			1 !important;
+  .lightbox-close {
+    top: 18px;
+    right: 25px;
 
-		opacity:
-			0.7;
-	}
+    width: 55px;
+    height: 55px;
 
+    font-size: 44px;
+    font-weight: 200;
 
-	/*
-	 * ========================================
-	 * 圖片外框
-	 * ========================================
-	 */
+    line-height: 1;
+  }
 
-	.lightbox-image-wrap {
-		position: relative;
+  .lightbox-prev,
+  .lightbox-next {
+    top: 50%;
 
-		display: flex;
+    width: 70px;
+    height: 90px;
 
-		align-items:
-			center;
+    transform:
+      translateY(-50%);
 
-		justify-content:
-			center;
+    padding: 0;
 
-		width:
-			auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-		max-width:
-			90vw;
+  .lightbox-prev span,
+  .lightbox-next span {
+    display: block;
 
-		max-height:
-			72vh;
+    width: 24px;
+    height: 24px;
 
-		overflow:
-			hidden;
+    border-top:
+      1.5px solid #fff;
 
-		pointer-events:
-			auto;
+    border-right:
+      1.5px solid #fff;
 
-		background:
-			transparent;
-	}
+    transition:
+      transform 0.2s ease,
+      opacity 0.2s ease;
+  }
 
+  .lightbox-prev {
+    left: 20px;
+  }
 
-	.lightbox-image-wrap.is-square {
-		width:
-			min(
-				72vh,
-				80vw
-			);
+  .lightbox-prev span {
+    transform: rotate(-135deg);
+  }
 
-		height:
-			min(
-				72vh,
-				80vw
-			);
+  .lightbox-next {
+    right: 20px;
+  }
 
-		aspect-ratio:
-			1 / 1;
-	}
+  .lightbox-next span {
+    transform: rotate(45deg);
+  }
 
+  .lightbox-close:hover,
+  .lightbox-prev:hover,
+  .lightbox-next:hover {
+    opacity: 0.55;
+  }
 
-	/*
-	 * ========================================
-	 * 大圖
-	 * ========================================
-	 */
+  .lightbox-prev:hover {
+    transform:
+      translateY(-50%)
+      scale(1.08);
+  }
 
-	.lightbox-content img {
-		display:
-			block;
+  .lightbox-next:hover {
+    transform:
+      translateY(-50%)
+      scale(1.08);
+  }
 
-		max-width:
-			100%;
+  /* ========================================
+   * Desktop Grid
+   * ======================================== */
 
-		max-height:
-			72vh;
+  @media screen and (min-width: 64em) {
+    .product-grid {
+      grid-template-columns:
+        repeat(5, minmax(0, 1fr))
+        !important;
+    }
+  }
 
-		width:
-			auto;
+  @media screen and (min-width: 80em) {
+    .product-grid {
+      grid-template-columns:
+        repeat(6, minmax(0, 1fr))
+        !important;
+    }
+  }
 
-		height:
-			auto;
+  /* ========================================
+   * Mobile
+   * ======================================== */
 
-		object-fit:
-			contain;
+  @media (max-width: 700px) {
+    .lightbox-content {
+      width: 100vw;
+      height: 100vh;
 
-		user-select:
-			none;
+      padding:
+        55px 20px 35px;
 
-		-webkit-user-select:
-			none;
+      box-sizing: border-box;
 
-		-webkit-user-drag:
-			none;
+      justify-content: center;
+    }
 
-		pointer-events:
-			auto;
+    .lightbox-zoom-controls {
+      height: 30px;
 
-		transform:
-			translate3d(
-				0,
-				0,
-				0
-			)
-			scale(1);
+      margin-bottom: 9px;
+    }
 
-		transform-origin:
-			center center;
+    .lightbox-zoom-controls button {
+      width: 34px;
+      height: 28px;
 
-		will-change:
-			transform;
+      flex-basis: 34px;
 
-		cursor:
-			default;
+      font-size: 13px;
+    }
 
-		transition:
-			opacity
-			0.15s ease;
-	}
+    .lightbox-zoom-reset {
+      min-width: 46px !important;
+      flex-basis: 46px !important;
+    }
 
+    .lightbox-image-wrap {
+      max-width: 88vw;
+      max-height: 65vh;
+    }
 
-	.lightbox-image-wrap.is-square img {
-		width:
-			100%;
+    .lightbox-image-wrap.is-square {
+      width: min(78vw, 65vh);
+      height: min(78vw, 65vh);
 
-		height:
-			100%;
+      aspect-ratio: 1 / 1;
+    }
 
-		max-width:
-			100%;
+    .lightbox-content img {
+      max-width: 88vw;
+      max-height: 65vh;
+    }
 
-		max-height:
-			100%;
+    .lightbox-image-wrap.is-square
+      img {
+      width: 100%;
+      height: 100%;
 
-		object-fit:
-			cover;
-	}
+      max-width: 100%;
+      max-height: 100%;
 
+      object-fit: cover;
+    }
 
-	/*
-	 * ========================================
-	 * Zoom
-	 * ========================================
-	 */
+    .lightbox-title {
+      margin-top: 12px;
 
-	.lightbox-content img.is-zoomed {
-		cursor:
-			grab;
-	}
+      font-size: 14px;
 
+      line-height: 1.4;
 
-	.lightbox-content img.is-dragging {
-		cursor:
-			grabbing;
+      max-width: 78vw;
 
-		transition:
-			none;
-	}
+      text-align: center;
+    }
 
+    .lightbox-meta {
+      margin-top: 4px;
 
-	.lightbox-content img.is-loading {
-		opacity:
-			0.5;
-	}
+      font-size: 11px;
 
+      line-height: 1.4;
+    }
 
-	/*
-	 * ========================================
-	 * 標題
-	 * ========================================
-	 */
+    .lightbox-counter {
+      margin-top: 7px;
 
-	.lightbox-title {
-		margin-top:
-			15px;
+      font-size: 12px;
+    }
 
-		color:
-			#ffffff;
+    .lightbox-caption {
+      max-width: 78vw;
 
-		font-size:
-			16px;
+      margin-top: 7px;
 
-		font-weight:
-			600;
+      font-size: 11px;
 
-		text-align:
-			center;
+      line-height: 1.5;
+    }
 
-		line-height:
-			1.4;
+    .lightbox-close {
+      top: 8px;
+      right: 10px;
 
-		max-width:
-			80vw;
-	}
+      width: 45px;
+      height: 45px;
 
+      font-size: 36px;
+    }
 
-	/*
-	 * ========================================
-	 * 類別 / 年份
-	 * ========================================
-	 */
+    .lightbox-prev,
+    .lightbox-next {
+      top: 50%;
 
-	.lightbox-meta {
-		margin-top:
-			5px;
+      width: 45px;
+      height: 70px;
+    }
 
-		color:
-			#ffffff;
+    .lightbox-prev {
+      left: 0;
+    }
 
-		font-size:
-			12px;
+    .lightbox-next {
+      right: 0;
+    }
 
-		opacity:
-			0.6;
+    .lightbox-prev span,
+    .lightbox-next span {
+      width: 20px;
+      height: 20px;
 
-		line-height:
-			1.4;
-	}
-
-
-	/*
-	 * ========================================
-	 * 1 / 5
-	 * ========================================
-	 */
-
-	.lightbox-counter {
-		margin-top:
-			10px;
-
-		color:
-			#ffffff;
-
-		font-size:
-			13px;
-
-		opacity:
-			0.65;
-
-		line-height:
-			1.4;
-	}
-
-
-	/*
-	 * ========================================
-	 * 圖片說明
-	 * ========================================
-	 */
-
-	.lightbox-caption {
-		display:
-			none;
-
-		max-width:
-			75vw;
-
-		margin-top:
-			8px;
-
-		color:
-			#ffffff;
-
-		font-size:
-			12px;
-
-		line-height:
-			1.6;
-
-		text-align:
-			center;
-
-		opacity:
-			0.7;
-	}
-
-
-	.lightbox-caption.has-caption {
-		display:
-			block;
-	}
-
-
-	/*
-	 * ========================================
-	 * 按鈕
-	 * ========================================
-	 */
-
-	.lightbox-close,
-	.lightbox-prev,
-	.lightbox-next {
-		position: absolute;
-
-		z-index: 10;
-
-		border: 0;
-
-		background:
-			transparent;
-
-		color:
-			#ffffff;
-
-		cursor:
-			pointer;
-
-		font-family:
-			inherit;
-
-		transition:
-			opacity
-			0.2s ease,
-
-			transform
-			0.2s ease;
-	}
-
-
-	/*
-	 * ========================================
-	 * 關閉
-	 * ========================================
-	 */
-
-	.lightbox-close {
-		top:
-			18px;
-
-		right:
-			25px;
-
-		width:
-			55px;
-
-		height:
-			55px;
-
-		font-size:
-			44px;
-
-		font-weight:
-			200;
-
-		line-height:
-			1;
-	}
-
-
-	/*
-	 * ========================================
-	 * 左右箭頭
-	 * ========================================
-	 */
-
-	.lightbox-prev,
-	.lightbox-next {
-		top:
-			50%;
-
-		width:
-			70px;
-
-		height:
-			90px;
-
-		transform:
-			translateY(
-				-50%
-			);
-
-		padding:
-			0;
-
-		display:
-			flex;
-
-		align-items:
-			center;
-
-		justify-content:
-			center;
-	}
-
-
-	.lightbox-prev span,
-	.lightbox-next span {
-		display:
-			block;
-
-		width:
-			24px;
-
-		height:
-			24px;
-
-		border-top:
-			1.5px solid
-			#ffffff;
-
-		border-right:
-			1.5px solid
-			#ffffff;
-
-		transition:
-			transform
-			0.2s ease,
-
-			opacity
-			0.2s ease;
-	}
-
-
-	.lightbox-prev {
-		left:
-			20px;
-	}
-
-
-	.lightbox-prev span {
-		transform:
-			rotate(
-				-135deg
-			);
-	}
-
-
-	.lightbox-next {
-		right:
-			20px;
-	}
-
-
-	.lightbox-next span {
-		transform:
-			rotate(
-				45deg
-			);
-	}
-
-
-	/*
-	 * ========================================
-	 * Hover
-	 * ========================================
-	 */
-
-	.lightbox-close:hover,
-	.lightbox-prev:hover,
-	.lightbox-next:hover {
-		opacity:
-			0.55;
-	}
-
-
-	.lightbox-prev:hover {
-		transform:
-			translateY(
-				-50%
-			)
-			scale(
-				1.08
-			);
-	}
-
-
-	.lightbox-next:hover {
-		transform:
-			translateY(
-				-50%
-			)
-			scale(
-				1.08
-			);
-	}
-
-
-	/*
-	 * ========================================
-	 * Desktop Grid
-	 * ========================================
-	 */
-
-	@media screen and (min-width: 64em) {
-
-		.product-grid {
-			grid-template-columns:
-				repeat(
-					5,
-					minmax(
-						0,
-						1fr
-					)
-				) !important;
-		}
-
-	}
-
-
-	@media screen and (min-width: 80em) {
-
-		.product-grid {
-			grid-template-columns:
-				repeat(
-					6,
-					minmax(
-						0,
-						1fr
-					)
-				) !important;
-		}
-
-	}
-
-
-	/*
-	 * ========================================
-	 * Mobile
-	 * ========================================
-	 */
-
-	@media (max-width: 700px) {
-
-		.lightbox-content {
-			width:
-				100vw;
-
-			height:
-				100vh;
-
-			padding:
-				55px
-				20px
-				35px;
-
-			box-sizing:
-				border-box;
-
-			justify-content:
-				center;
-		}
-
-
-		/*
-		 * Mobile 圖片外框
-		 */
-
-		.lightbox-image-wrap {
-			max-width:
-				88vw;
-
-			max-height:
-				65vh;
-		}
-
-
-		/*
-		 * Mobile 正方形
-		 */
-
-		.lightbox-image-wrap.is-square {
-			width:
-				min(
-					78vw,
-					65vh
-				);
-
-			height:
-				min(
-					78vw,
-					65vh
-				);
-
-			aspect-ratio:
-				1 / 1;
-		}
-
-
-		.lightbox-content img {
-			max-width:
-				88vw;
-
-			max-height:
-				65vh;
-		}
-
-
-		.lightbox-image-wrap.is-square img {
-			width:
-				100%;
-
-			height:
-				100%;
-
-			max-width:
-				100%;
-
-			max-height:
-				100%;
-
-			object-fit:
-				cover;
-		}
-
-
-		/*
-		 * ====================================
-		 * Mobile Zoom 控制
-		 * ====================================
-		 */
-
-		.lightbox-zoom-controls {
-			height:
-				30px;
-
-			margin:
-				0
-				0
-				9px;
-		}
-
-
-		.lightbox-zoom-controls button {
-			width:
-				34px;
-
-			height:
-				28px;
-
-			font-size:
-				13px;
-		}
-
-
-		.lightbox-zoom-reset {
-			width:
-				46px !important;
-
-			min-width:
-				46px;
-		}
-
-
-		/*
-		 * ====================================
-		 * 標題
-		 * ====================================
-		 */
-
-		.lightbox-title {
-			margin-top:
-				12px;
-
-			font-size:
-				14px;
-
-			line-height:
-				1.4;
-
-			max-width:
-				78vw;
-
-			text-align:
-				center;
-		}
-
-
-		/*
-		 * ====================================
-		 * Meta
-		 * ====================================
-		 */
-
-		.lightbox-meta {
-			margin-top:
-				4px;
-
-			font-size:
-				11px;
-
-			line-height:
-				1.4;
-		}
-
-
-		/*
-		 * ====================================
-		 * Counter
-		 * ====================================
-		 */
-
-		.lightbox-counter {
-			margin-top:
-				7px;
-
-			font-size:
-				12px;
-		}
-
-
-		/*
-		 * ====================================
-		 * Caption
-		 * ====================================
-		 */
-
-		.lightbox-caption {
-			max-width:
-				78vw;
-
-			margin-top:
-				7px;
-
-			font-size:
-				11px;
-
-			line-height:
-				1.5;
-		}
-
-
-		/*
-		 * ====================================
-		 * Close
-		 * ====================================
-		 */
-
-		.lightbox-close {
-			top:
-				8px;
-
-			right:
-				10px;
-
-			width:
-				45px;
-
-			height:
-				45px;
-
-			font-size:
-				36px;
-		}
-
-
-		/*
-		 * ====================================
-		 * Mobile 左右箭頭
-		 * ====================================
-		 */
-
-		.lightbox-prev,
-		.lightbox-next {
-			top:
-				50%;
-
-			width:
-				45px;
-
-			height:
-				70px;
-		}
-
-
-		.lightbox-prev {
-			left:
-				0;
-		}
-
-
-		.lightbox-next {
-			right:
-				0;
-		}
-
-
-		.lightbox-prev span,
-		.lightbox-next span {
-			width:
-				20px;
-
-			height:
-				20px;
-
-			border-width:
-				1.5px;
-		}
-
-	}
-
+      border-width: 1.5px;
+    }
+  }
 </style>
