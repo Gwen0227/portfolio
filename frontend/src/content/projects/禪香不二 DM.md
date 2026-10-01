@@ -14,6 +14,6 @@ gallery:
 tech:
   - Astro
   - TypeScript
-lightboxCaption: 定調品牌主色與視覺風格
+lightboxCaption: 以濃郁的墨綠色定調為品牌主色，象徵來自於植物的天然香氣。且以如煙霧繚繞的曲線為主要品牌視覺。
 ---
 

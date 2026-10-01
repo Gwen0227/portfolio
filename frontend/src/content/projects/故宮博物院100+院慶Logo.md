@@ -1,9 +1,9 @@
 ---
-title: 故宮博物院100+院慶Logo
-slug: 故宮博物院100+院慶Logo
+title: 故宮博物院100+院慶Logo競賽
+slug: 故宮博物院100+院慶Logo競賽
 year: 2024
 cover: /images/visual/bn-Tw Mansion-meat.jpg
-category: "Product"
+category: "Visual"
 mode: "zoom"
 imageCrop: square
 
@@ -13,5 +13,5 @@ gallery:
 tech:
   - Astro
   - TypeScript
-lightboxCaption: 沙威隆洗手乳-經典植萃系列 
+lightboxCaption: 以故宮博物院視覺系統延伸設計 
 ---

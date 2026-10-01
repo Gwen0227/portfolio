@@ -13,5 +13,5 @@ gallery:
 tech:
   - Astro
   - TypeScript
-lightboxCaption: 定調品牌主色與視覺風格
+lightboxCaption: 為GUSHA品牌，頻道標準字設計
 ---

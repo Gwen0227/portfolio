@@ -17,6 +17,5 @@ gallery:
 tech:
   - Astro
   - TypeScript
+lightboxCaption: GUSHA與overdigi手機殼-限定聯名款。以復古+科技的風格為主題所設計
 ---
-
-我是 Gwen，專注於前端開發與使用者體驗設計。

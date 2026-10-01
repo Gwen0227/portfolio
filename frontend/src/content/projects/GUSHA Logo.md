@@ -15,5 +15,5 @@ gallery:
 tech:
   - Astro
   - TypeScript
-lightboxCaption: 定調品牌主色與視覺風格
+lightboxCaption: GUSHA品牌重塑，自由、簡單的視覺表現品牌的新定義
 ---

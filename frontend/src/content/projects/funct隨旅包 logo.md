@@ -17,5 +17,5 @@ gallery:
 tech:
   - Astro
   - TypeScript
-lightboxCaption: 定調品牌主色與視覺風格
+lightboxCaption: 以功能的字根為出發，展現極簡、俐落的風格
 ---
