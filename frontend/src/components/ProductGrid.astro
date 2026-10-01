@@ -85,40 +85,7 @@ const grid = "projects";
   <div class="lightbox-content">
 
     <!-- ========================================
-         1. 縮放控制
-         ======================================== -->
-
-    <div
-      class="lightbox-zoom-controls"
-      aria-label="圖片縮放"
-    >
-      <button
-        type="button"
-        class="lightbox-zoom-out"
-        aria-label="縮小"
-      >
-        −
-      </button>
-
-      <button
-        type="button"
-        class="lightbox-zoom-reset"
-        aria-label="恢復原始大小"
-      >
-        100%
-      </button>
-
-      <button
-        type="button"
-        class="lightbox-zoom-in"
-        aria-label="放大"
-      >
-        +
-      </button>
-    </div>
-
-    <!-- ========================================
-         2. 圖片
+         1. 圖片
          ======================================== -->
 
     <div
@@ -140,7 +107,7 @@ const grid = "projects";
     </div>
 
     <!-- ========================================
-         3. 作品名 + 分類 / 年份
+         2. 作品名 + 分類 / 年份
          同一排
          ======================================== -->
 
@@ -159,7 +126,7 @@ const grid = "projects";
     </div>
 
     <!-- ========================================
-         4. 頁數
+         3. 頁數
          多張圖片才顯示
          ======================================== -->
 
@@ -171,7 +138,7 @@ const grid = "projects";
     </div>
 
     <!-- ========================================
-         5. 簡單文字說明
+         4. 簡單文字說明
          有內容才顯示
          ======================================== -->
 
@@ -506,21 +473,6 @@ const grid = "projects";
         ".lightbox-backdrop"
       );
 
-    const zoomOutBtn =
-      modal?.querySelector(
-        ".lightbox-zoom-out"
-      );
-
-    const zoomResetBtn =
-      modal?.querySelector(
-        ".lightbox-zoom-reset"
-      );
-
-    const zoomInBtn =
-      modal?.querySelector(
-        ".lightbox-zoom-in"
-      );
-
     if (
       !modal ||
       !imageWrap ||
@@ -533,10 +485,7 @@ const grid = "projects";
       !closeBtn ||
       !prevBtn ||
       !nextBtn ||
-      !backdrop ||
-      !zoomOutBtn ||
-      !zoomResetBtn ||
-      !zoomInBtn
+      !backdrop
     ) {
       return;
     }
@@ -560,6 +509,15 @@ const grid = "projects";
      * ========================================
      * Zoom
      * ========================================
+     *
+     * 保留：
+     * - 滑鼠滾輪
+     * - 鍵盤 + / -
+     * - 鍵盤 0
+     * - 雙擊
+     *
+     * 移除：
+     * - 畫面上的 − / 100% / +
      */
 
     let zoomLevel = 1;
@@ -688,9 +646,6 @@ const grid = "projects";
       lightboxImg.classList.remove(
         "is-dragging"
       );
-
-      zoomResetBtn.textContent =
-        "100%";
     }
 
     function updateZoom() {
@@ -719,11 +674,6 @@ const grid = "projects";
           "is-zoomed"
         );
       }
-
-      zoomResetBtn.textContent =
-        `${Math.round(
-          zoomLevel * 100
-        )}%`;
     }
 
     function setZoom(
@@ -1359,33 +1309,6 @@ const grid = "projects";
       }
     );
 
-    zoomInBtn.addEventListener(
-      "click",
-      (event) => {
-        event.stopPropagation();
-
-        zoomIn();
-      }
-    );
-
-    zoomOutBtn.addEventListener(
-      "click",
-      (event) => {
-        event.stopPropagation();
-
-        zoomOut();
-      }
-    );
-
-    zoomResetBtn.addEventListener(
-      "click",
-      (event) => {
-        event.stopPropagation();
-
-        setZoom(1);
-      }
-    );
-
     /*
      * ========================================
      * 滾輪縮放
@@ -1514,6 +1437,13 @@ const grid = "projects";
      * ========================================
      * 鍵盤
      * ========================================
+     *
+     * + / = ：放大
+     * -     ：縮小
+     * 0     ：恢復 100%
+     * ←     ：上一張
+     * →     ：下一張
+     * ESC   ：關閉
      */
 
     const handleKeydown = (
@@ -1883,123 +1813,6 @@ const grid = "projects";
     height: 90vh;
 
     pointer-events: none;
-  }
-
-  /* ========================================
-   * Zoom controls
-   * ======================================== */
-
-  .lightbox-zoom-controls {
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    width: max-content;
-
-    height: 32px;
-
-    margin:
-      0 0 12px;
-
-    padding: 0;
-
-    flex-shrink: 0;
-
-    box-sizing: border-box;
-
-    pointer-events: auto;
-
-    border:
-      1px solid
-      rgba(
-        255,
-        255,
-        255,
-        0.25
-      );
-
-    border-radius: 999px;
-
-    overflow: hidden;
-  }
-
-  .lightbox-zoom-controls button {
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    width: 38px;
-
-    height: 30px;
-
-    margin: 0;
-
-    padding: 0;
-
-    flex:
-      0 0 38px;
-
-    box-sizing: border-box;
-
-    border: 0;
-
-    border-right:
-      1px solid
-      rgba(
-        255,
-        255,
-        255,
-        0.2
-      );
-
-    background: transparent;
-
-    color: #fff;
-
-    font-family: inherit;
-
-    font-size: 14px;
-
-    line-height: 1;
-
-    cursor: pointer;
-
-    transition:
-      background 0.2s ease,
-      opacity 0.2s ease;
-  }
-
-  .lightbox-zoom-controls
-    button:last-child {
-    border-right: 0;
-  }
-
-  .lightbox-zoom-controls
-    button:hover {
-    background:
-      rgba(
-        255,
-        255,
-        255,
-        0.12
-      );
-  }
-
-  .lightbox-zoom-reset {
-    min-width:
-      50px !important;
-
-    flex-basis:
-      50px !important;
-
-    font-size:
-      11px !important;
-
-    opacity: 0.7;
   }
 
   /* ========================================
@@ -2451,30 +2264,6 @@ const grid = "projects";
       box-sizing: border-box;
 
       justify-content: center;
-    }
-
-    .lightbox-zoom-controls {
-      height: 30px;
-
-      margin-bottom: 9px;
-    }
-
-    .lightbox-zoom-controls button {
-      width: 34px;
-
-      height: 28px;
-
-      flex-basis: 34px;
-
-      font-size: 13px;
-    }
-
-    .lightbox-zoom-reset {
-      min-width:
-        46px !important;
-
-      flex-basis:
-        46px !important;
     }
 
     .lightbox-image-wrap {
