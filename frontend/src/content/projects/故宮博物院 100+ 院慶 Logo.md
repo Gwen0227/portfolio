@@ -13,5 +13,5 @@ gallery:
 tech:
   - Astro
   - TypeScript
-lightboxCaption: 定調品牌主色與視覺風格
+lightboxCaption: 故宮博物院 100+ 院慶 logo競賽提案
 ---
