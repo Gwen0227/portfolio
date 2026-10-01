@@ -14,15 +14,6 @@ const { projects } = Astro.props;
  * 作品年份排序
  *
  * 新 → 舊
- *
- * 例如：
- * 2026
- * 2026
- * 2025
- * 2024
- * 2023
- *
- * 其他作品資料與功能完全不變
  * ========================================
  */
 
@@ -37,26 +28,61 @@ const sortedProjects = [
 const grid = "projects";
 ---
 
+
 <section
 	class="product-grid"
 	id="grid"
 	data-grid={grid}
 >
-	{sortedProjects.map((project) => {
-		const currentCategory =
-			project.data.category || "None";
+	{
+		sortedProjects.map((project) => {
+			const currentCategory =
+				project.data.category || "None";
 
-		return (
-			<div
-				data-category={currentCategory}
-				class="grid-item"
-			>
-				<ProductCard
-					product={project}
-				/>
-			</div>
-		);
-	})}
+			/*
+			 * Lightbox 圖片裁切模式
+			 *
+			 * contain
+			 * → 完整顯示
+			 *
+			 * square
+			 * → 正方形裁切
+			 */
+			const imageCrop =
+				project.data.imageCrop || "contain";
+
+
+			/*
+			 * Lightbox 固定說明
+			 */
+			const lightboxCaption =
+				(project.data as any).lightboxCaption || "";
+
+
+			/*
+			 * 每張圖片自己的說明
+			 */
+			const galleryCaptions =
+				(project.data as any).galleryCaptions || [];
+
+
+			return (
+				<div
+					data-category={currentCategory}
+					data-image-crop={imageCrop}
+					data-lightbox-caption={lightboxCaption}
+					data-gallery-captions={
+						JSON.stringify(galleryCaptions)
+					}
+					class="grid-item"
+				>
+					<ProductCard
+						product={project}
+					/>
+				</div>
+			);
+		})
+	}
 </section>
 
 
@@ -65,18 +91,18 @@ const grid = "projects";
 
      只有 mode="zoom" 的作品會使用
 
-     每個作品都有自己的圖片組：
-     cover
-     +
-     Markdown 內文圖片
+     功能：
 
-     例如 About Me：
-     1 / 5
-     2 / 5
-     3 / 5
-     4 / 5
-     5 / 5
-======================================== -->
+     1. cover + gallery
+     2. 左右切換
+     3. ESC 關閉
+     4. 鍵盤左右鍵
+     5. 手機左右滑動
+     6. 圖片縮放
+     7. 圖片拖曳
+     8. 正方形裁切
+     9. 圖片說明
+     ======================================== -->
 
 <div
 	id="lightbox-modal"
@@ -87,6 +113,7 @@ const grid = "projects";
 		class="lightbox-backdrop"
 	></div>
 
+
 	<button
 		type="button"
 		class="lightbox-close"
@@ -94,6 +121,7 @@ const grid = "projects";
 	>
 		×
 	</button>
+
 
 	<button
 		type="button"
@@ -103,33 +131,85 @@ const grid = "projects";
 		<span></span>
 	</button>
 
+
 	<div class="lightbox-content">
 
-		<img
-			id="lightbox-img"
-			src=""
-			alt=""
-			draggable="false"
-		/>
+		<div
+			class="lightbox-image-wrap"
+			id="lightbox-image-wrap"
+		>
+
+			<img
+				id="lightbox-img"
+				src=""
+				alt=""
+				draggable="false"
+			/>
+
+		</div>
+
 
 		<div
-			id="lightbox-title"
 			class="lightbox-title"
+			id="lightbox-title"
 		></div>
 
+
 		<div
-			id="lightbox-meta"
 			class="lightbox-meta"
+			id="lightbox-meta"
 		></div>
 
+
 		<div
-			id="lightbox-counter"
 			class="lightbox-counter"
+			id="lightbox-counter"
 		>
 			1 / 1
 		</div>
 
+
+		<div
+			class="lightbox-caption"
+			id="lightbox-caption"
+		></div>
+
+
+		<div
+			class="lightbox-zoom-controls"
+			aria-label="圖片縮放"
+		>
+
+			<button
+				type="button"
+				class="lightbox-zoom-out"
+				aria-label="縮小"
+			>
+				−
+			</button>
+
+
+			<button
+				type="button"
+				class="lightbox-zoom-reset"
+				aria-label="恢復原始大小"
+			>
+				100%
+			</button>
+
+
+			<button
+				type="button"
+				class="lightbox-zoom-in"
+				aria-label="放大"
+			>
+				+
+			</button>
+
+		</div>
+
 	</div>
+
 
 	<button
 		type="button"
@@ -144,13 +224,13 @@ const grid = "projects";
 <script>
 	/*
 	 * ========================================
-	 * Lightbox 初始化
+	 * Lightbox
+	 * ========================================
 	 *
-	 * 修正：
-	 * Astro 頁面切換後偶爾無法開啟 Lightbox
+	 * 這裡使用單一初始化函式。
 	 *
-	 * 只有在 DOM 完整存在後
-	 * 才會設定 initialized
+	 * Astro View Transitions 切頁後，
+	 * 會重新初始化新的 DOM。
 	 * ========================================
 	 */
 
@@ -159,11 +239,6 @@ const grid = "projects";
 
 	function initLightbox() {
 
-		/*
-		 * 如果目前這個 DOM 已經初始化
-		 * 就不要重複綁定
-		 */
-
 		if (lightboxInitialized) {
 			return;
 		}
@@ -171,7 +246,7 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * 取得 DOM
+		 * DOM
 		 * ========================================
 		 */
 
@@ -180,40 +255,60 @@ const grid = "projects";
 				"lightbox-modal"
 			);
 
+
+		const imageWrap =
+			document.getElementById(
+				"lightbox-image-wrap"
+			);
+
+
 		const lightboxImg =
 			document.getElementById(
 				"lightbox-img"
 			);
+
 
 		const title =
 			document.getElementById(
 				"lightbox-title"
 			);
 
+
 		const meta =
 			document.getElementById(
 				"lightbox-meta"
 			);
+
 
 		const counter =
 			document.getElementById(
 				"lightbox-counter"
 			);
 
+
+		const caption =
+			document.getElementById(
+				"lightbox-caption"
+			);
+
+
 		const closeBtn =
 			modal?.querySelector(
 				".lightbox-close"
 			);
+
 
 		const prevBtn =
 			modal?.querySelector(
 				".lightbox-prev"
 			);
 
+
 		const nextBtn =
 			modal?.querySelector(
 				".lightbox-next"
 			);
+
 
 		const backdrop =
 			modal?.querySelector(
@@ -221,41 +316,47 @@ const grid = "projects";
 			);
 
 
+		const zoomOutBtn =
+			modal?.querySelector(
+				".lightbox-zoom-out"
+			);
+
+
+		const zoomResetBtn =
+			modal?.querySelector(
+				".lightbox-zoom-reset"
+			);
+
+
+		const zoomInBtn =
+			modal?.querySelector(
+				".lightbox-zoom-in"
+			);
+
+
 		/*
-		 * ========================================
-		 * DOM 還沒準備好
-		 *
-		 * 這裡不能設定：
-		 *
-		 * lightboxInitialized = true
-		 *
-		 * 否則之後 DOM 準備好時
-		 * 就不會再次初始化
-		 * ========================================
+		 * DOM 尚未準備完成
 		 */
 
 		if (
 			!modal ||
+			!imageWrap ||
 			!lightboxImg ||
 			!title ||
 			!meta ||
 			!counter ||
+			!caption ||
 			!closeBtn ||
 			!prevBtn ||
 			!nextBtn ||
-			!backdrop
+			!backdrop ||
+			!zoomOutBtn ||
+			!zoomResetBtn ||
+			!zoomInBtn
 		) {
 			return;
 		}
 
-
-		/*
-		 * ========================================
-		 * DOM 完整存在
-		 *
-		 * 現在才正式標記初始化完成
-		 * ========================================
-		 */
 
 		lightboxInitialized = true;
 
@@ -266,20 +367,61 @@ const grid = "projects";
 		 * ========================================
 		 */
 
-		let gallery = [];
+		let gallery: string[] = [];
+
+		let galleryCaptions: string[] = [];
+
+		let projectCaption = "";
 
 		let currentIndex = 0;
 
-		let touchStartX = 0;
+		let currentCrop:
+			"contain" | "square" = "contain";
 
 
 		/*
 		 * ========================================
-		 * 取得作品 Gallery
+		 * Zoom 狀態
 		 * ========================================
 		 */
 
-		function getGallery(card) {
+		let zoomLevel = 1;
+
+		const MIN_ZOOM = 1;
+
+		const MAX_ZOOM = 3;
+
+		const ZOOM_STEP = 0.25;
+
+
+		let translateX = 0;
+
+		let translateY = 0;
+
+
+		let isDragging = false;
+
+		let dragStartX = 0;
+
+		let dragStartY = 0;
+
+		let dragOriginX = 0;
+
+		let dragOriginY = 0;
+
+
+		let touchStartX = 0;
+
+		let touchStartY = 0;
+
+
+		/*
+		 * ========================================
+		 * 取得 Gallery
+		 * ========================================
+		 */
+
+		function getGallery(card: Element) {
 
 			const galleryData =
 				card.getAttribute(
@@ -321,8 +463,214 @@ const grid = "projects";
 					error
 				);
 
+
 				return [];
 			}
+		}
+
+
+		/*
+		 * ========================================
+		 * 取得 Gallery Captions
+		 * ========================================
+		 */
+
+		function getGalleryCaptions(
+			wrapper: Element
+		): string[] {
+
+			const data =
+				wrapper.getAttribute(
+					"data-gallery-captions"
+				);
+
+
+			if (!data) {
+				return [];
+			}
+
+
+			try {
+
+				const parsed =
+					JSON.parse(data);
+
+
+				if (
+					!Array.isArray(parsed)
+				) {
+					return [];
+				}
+
+
+				return parsed.map(
+					(item) =>
+						typeof item === "string"
+							? item
+							: ""
+				);
+
+			} catch (error) {
+
+				console.warn(
+					"Lightbox captions 讀取失敗：",
+					error
+				);
+
+
+				return [];
+			}
+		}
+
+
+		/*
+		 * ========================================
+		 * Reset Zoom
+		 * ========================================
+		 */
+
+		function resetZoom() {
+
+			zoomLevel = 1;
+
+			translateX = 0;
+
+			translateY = 0;
+
+
+			lightboxImg.style.transform =
+				"translate3d(0, 0, 0) scale(1)";
+
+
+			lightboxImg.classList.remove(
+				"is-zoomed"
+			);
+
+
+			zoomResetBtn.textContent =
+				"100%";
+		}
+
+
+		/*
+		 * ========================================
+		 * 更新 Zoom
+		 * ========================================
+		 */
+
+		function updateZoom() {
+
+			/*
+			 * 限制範圍
+			 */
+
+			zoomLevel =
+				Math.max(
+					MIN_ZOOM,
+					Math.min(
+						MAX_ZOOM,
+						zoomLevel
+					)
+				);
+
+
+			/*
+			 * 1 倍時清除位移
+			 */
+
+			if (zoomLevel <= 1) {
+
+				translateX = 0;
+
+				translateY = 0;
+			}
+
+
+			/*
+			 * 圖片 Transform
+			 */
+
+			lightboxImg.style.transform =
+				`translate3d(
+					${translateX}px,
+					${translateY}px,
+					0
+				)
+				scale(${zoomLevel})`;
+
+
+			/*
+			 * Zoom class
+			 */
+
+			if (zoomLevel > 1) {
+
+				lightboxImg.classList.add(
+					"is-zoomed"
+				);
+
+			} else {
+
+				lightboxImg.classList.remove(
+					"is-zoomed"
+				);
+			}
+
+
+			/*
+			 * 顯示百分比
+			 */
+
+			zoomResetBtn.textContent =
+				`${Math.round(
+					zoomLevel * 100
+				)}%`;
+		}
+
+
+		/*
+		 * ========================================
+		 * 設定 Zoom
+		 * ========================================
+		 */
+
+		function setZoom(
+			value: number
+		) {
+
+			zoomLevel = value;
+
+			updateZoom();
+		}
+
+
+		/*
+		 * ========================================
+		 * Zoom In
+		 * ========================================
+		 */
+
+		function zoomIn() {
+
+			setZoom(
+				zoomLevel +
+				ZOOM_STEP
+			);
+		}
+
+
+		/*
+		 * ========================================
+		 * Zoom Out
+		 * ========================================
+		 */
+
+		function zoomOut() {
+
+			setZoom(
+				zoomLevel -
+				ZOOM_STEP
+			);
 		}
 
 
@@ -332,7 +680,9 @@ const grid = "projects";
 		 * ========================================
 		 */
 
-		function showImage(index) {
+		function showImage(
+			index: number
+		) {
 
 			if (!gallery.length) {
 				return;
@@ -347,16 +697,15 @@ const grid = "projects";
 
 				index =
 					gallery.length - 1;
-
 			}
 
 
 			if (
-				index >= gallery.length
+				index >=
+				gallery.length
 			) {
 
 				index = 0;
-
 			}
 
 
@@ -370,19 +719,114 @@ const grid = "projects";
 
 
 			/*
-			 * 清除舊的錯誤事件
+			 * 每換一張圖片
+			 * 都重新恢復 100%
+			 */
+
+			resetZoom();
+
+
+			/*
+			 * 清除舊錯誤
 			 */
 
 			lightboxImg.onerror =
 				null;
 
 
+			/*
+			 * 圖片載入
+			 */
+
+			lightboxImg.classList.add(
+				"is-loading"
+			);
+
+
 			lightboxImg.src =
 				image;
 
 
+			/*
+			 * 頁數
+			 */
+
 			counter.textContent =
 				`${currentIndex + 1} / ${gallery.length}`;
+
+
+			/*
+			 * 圖說
+			 *
+			 * galleryCaptions 優先
+			 *
+			 * 沒有單張圖說時，
+			 * 使用 projectCaption
+			 */
+
+			const individualCaption =
+				galleryCaptions[
+					currentIndex
+				] || "";
+
+
+			const finalCaption =
+				individualCaption ||
+				projectCaption ||
+				"";
+
+
+			caption.textContent =
+				finalCaption;
+
+
+			/*
+			 * 沒有說明就隱藏
+			 */
+
+			if (finalCaption) {
+
+				caption.classList.add(
+					"has-caption"
+				);
+
+			} else {
+
+				caption.classList.remove(
+					"has-caption"
+				);
+			}
+
+
+			/*
+			 * 圖片載入完成
+			 */
+
+			lightboxImg.onload =
+				() => {
+
+					lightboxImg.classList.remove(
+						"is-loading"
+					);
+				};
+
+
+			/*
+			 * 圖片載入失敗
+			 */
+
+			lightboxImg.onerror =
+				() => {
+
+					lightboxImg.classList.remove(
+						"is-loading"
+					);
+
+					console.warn(
+						"Lightbox 圖片載入失敗：",
+						image
+					);
+				};
 		}
 
 
@@ -392,15 +836,37 @@ const grid = "projects";
 		 * ========================================
 		 */
 
-		function openLightbox(card) {
+		function openLightbox(
+			card: Element
+		) {
+
+			/*
+			 * 找到外層 grid-item
+			 *
+			 * imageCrop
+			 * galleryCaptions
+			 * lightboxCaption
+			 * 都放在這裡
+			 */
+
+			const wrapper =
+				card.closest(
+					".grid-item"
+				);
+
+
+			if (!wrapper) {
+				return;
+			}
+
+
+			/*
+			 * Gallery
+			 */
 
 			gallery =
 				getGallery(card);
 
-
-			/*
-			 * 沒有圖片就不開啟
-			 */
 
 			if (!gallery.length) {
 
@@ -413,13 +879,64 @@ const grid = "projects";
 			}
 
 
-			currentIndex = 0;
+			/*
+			 * 裁切模式
+			 */
+
+			const crop =
+				wrapper.getAttribute(
+					"data-image-crop"
+				);
+
+
+			currentCrop =
+				crop === "square"
+					? "square"
+					: "contain";
 
 
 			/*
-			 * ========================================
+			 * Project Caption
+			 */
+
+			projectCaption =
+				wrapper.getAttribute(
+					"data-lightbox-caption"
+				) || "";
+
+
+			/*
+			 * Gallery Captions
+			 */
+
+			galleryCaptions =
+				getGalleryCaptions(
+					wrapper
+				);
+
+
+			/*
+			 * 套用圖片裁切模式
+			 */
+
+			if (
+				currentCrop === "square"
+			) {
+
+				imageWrap.classList.add(
+					"is-square"
+				);
+
+			} else {
+
+				imageWrap.classList.remove(
+					"is-square"
+				);
+			}
+
+
+			/*
 			 * 作品資料
-			 * ========================================
 			 */
 
 			const projectTitle =
@@ -445,18 +962,20 @@ const grid = "projects";
 
 
 			meta.textContent =
-				`${projectCategory} /${projectYear}`;
+				`${projectCategory} / ${projectYear}`;
 
 
 			/*
 			 * 第一張圖片
 			 */
 
+			currentIndex = 0;
+
 			showImage(0);
 
 
 			/*
-			 * 開啟
+			 * 顯示 Lightbox
 			 */
 
 			modal.classList.add(
@@ -498,6 +1017,9 @@ const grid = "projects";
 				"";
 
 
+			resetZoom();
+
+
 			setTimeout(
 				() => {
 
@@ -510,14 +1032,33 @@ const grid = "projects";
 						lightboxImg.src =
 							"";
 
+
 						title.textContent =
 							"";
+
 
 						meta.textContent =
 							"";
 
+
 						counter.textContent =
 							"1 / 1";
+
+
+						caption.textContent =
+							"";
+
+
+						caption.classList.remove(
+							"has-caption"
+						);
+
+
+						gallery = [];
+
+						galleryCaptions = [];
+
+						projectCaption = "";
 					}
 
 				},
@@ -534,18 +1075,15 @@ const grid = "projects";
 		 *
 		 * .is-zoom-mode
 		 *
-		 * 才會進 Lightbox
+		 * 才進 Lightbox
 		 *
-		 * mode="page"
-		 * 不會被攔截
-		 *
-		 * mode="link"
-		 * 不會被攔截
+		 * page / link
+		 * 都不攔截
 		 * ========================================
 		 */
 
 		const handleCardClick =
-			(event) => {
+			(event: Event) => {
 
 				const target =
 					event.target;
@@ -572,8 +1110,43 @@ const grid = "projects";
 				}
 
 
-				event.preventDefault();
+				/*
+				 * 如果點到按鈕或連結
+				 * 不攔截
+				 */
 
+				const interactive =
+					target.closest(
+						"a, button"
+					);
+
+
+				if (
+					interactive &&
+					interactive !== card
+				) {
+
+					/*
+					 * 仍然讓 card 本身
+					 * 控制 Lightbox
+					 */
+
+					if (
+						interactive.matches(
+							".product-card"
+						)
+					) {
+
+						event.preventDefault();
+
+					} else {
+
+						return;
+					}
+				}
+
+
+				event.preventDefault();
 
 				openLightbox(
 					card
@@ -621,7 +1194,6 @@ const grid = "projects";
 				showImage(
 					currentIndex - 1
 				);
-
 			}
 		);
 
@@ -642,7 +1214,202 @@ const grid = "projects";
 				showImage(
 					currentIndex + 1
 				);
+			}
+		);
 
+
+		/*
+		 * ========================================
+		 * Zoom buttons
+		 * ========================================
+		 */
+
+		zoomInBtn.addEventListener(
+			"click",
+			(event) => {
+
+				event.stopPropagation();
+
+				zoomIn();
+			}
+		);
+
+
+		zoomOutBtn.addEventListener(
+			"click",
+			(event) => {
+
+				event.stopPropagation();
+
+				zoomOut();
+			}
+		);
+
+
+		zoomResetBtn.addEventListener(
+			"click",
+			(event) => {
+
+				event.stopPropagation();
+
+				setZoom(1);
+			}
+		);
+
+
+		/*
+		 * ========================================
+		 * 滑鼠滾輪縮放
+		 * ========================================
+		 */
+
+		imageWrap.addEventListener(
+			"wheel",
+			(event) => {
+
+				if (
+					!modal.classList.contains(
+						"active"
+					)
+				) {
+					return;
+				}
+
+
+				event.preventDefault();
+
+
+				if (event.deltaY < 0) {
+
+					zoomIn();
+
+				} else {
+
+					zoomOut();
+				}
+			},
+			{
+				passive: false,
+			}
+		);
+
+
+		/*
+		 * ========================================
+		 * 雙擊縮放
+		 * ========================================
+		 */
+
+		lightboxImg.addEventListener(
+			"dblclick",
+			(event) => {
+
+				event.preventDefault();
+
+
+				if (zoomLevel > 1) {
+
+					setZoom(1);
+
+				} else {
+
+					setZoom(2);
+				}
+			}
+		);
+
+
+		/*
+		 * ========================================
+		 * 滑鼠拖曳圖片
+		 * ========================================
+		 */
+
+		lightboxImg.addEventListener(
+			"mousedown",
+			(event) => {
+
+				if (
+					zoomLevel <= 1
+				) {
+					return;
+				}
+
+
+				event.preventDefault();
+
+
+				isDragging = true;
+
+
+				dragStartX =
+					event.clientX;
+
+
+				dragStartY =
+					event.clientY;
+
+
+				dragOriginX =
+					translateX;
+
+
+				dragOriginY =
+					translateY;
+
+
+				lightboxImg.classList.add(
+					"is-dragging"
+				);
+			}
+		);
+
+
+		window.addEventListener(
+			"mousemove",
+			(event) => {
+
+				if (!isDragging) {
+					return;
+				}
+
+
+				translateX =
+					dragOriginX +
+					(
+						event.clientX -
+						dragStartX
+					);
+
+
+				translateY =
+					dragOriginY +
+					(
+						event.clientY -
+						dragStartY
+					);
+
+
+				updateZoom();
+			}
+		);
+
+
+		window.addEventListener(
+			"mouseup",
+			() => {
+
+				if (!isDragging) {
+					return;
+				}
+
+
+				isDragging = false;
+
+
+				lightboxImg.classList.remove(
+					"is-dragging"
+				);
 			}
 		);
 
@@ -654,7 +1421,7 @@ const grid = "projects";
 		 */
 
 		const handleKeydown =
-			(event) => {
+			(event: KeyboardEvent) => {
 
 				if (
 					!modal.classList.contains(
@@ -675,6 +1442,59 @@ const grid = "projects";
 				) {
 
 					closeModal();
+
+					return;
+				}
+
+
+				/*
+				 * 放大
+				 */
+
+				if (
+					event.key ===
+					"+" ||
+					event.key ===
+					"="
+				) {
+
+					event.preventDefault();
+
+					zoomIn();
+
+					return;
+				}
+
+
+				/*
+				 * 縮小
+				 */
+
+				if (
+					event.key ===
+					"-"
+				) {
+
+					event.preventDefault();
+
+					zoomOut();
+
+					return;
+				}
+
+
+				/*
+				 * 100%
+				 */
+
+				if (
+					event.key ===
+					"0"
+				) {
+
+					event.preventDefault();
+
+					setZoom(1);
 
 					return;
 				}
@@ -728,12 +1548,12 @@ const grid = "projects";
 
 		/*
 		 * ========================================
-		 * 手機左右滑動
+		 * Touch Start
 		 * ========================================
 		 */
 
 		const handleTouchStart =
-			(event) => {
+			(event: TouchEvent) => {
 
 				if (
 					!event.changedTouches ||
@@ -747,11 +1567,23 @@ const grid = "projects";
 					event
 						.changedTouches[0]
 						.screenX;
+
+
+				touchStartY =
+					event
+						.changedTouches[0]
+						.screenY;
 			};
 
 
+		/*
+		 * ========================================
+		 * Touch End
+		 * ========================================
+		 */
+
 		const handleTouchEnd =
-			(event) => {
+			(event: TouchEvent) => {
 
 				if (
 					!event.changedTouches ||
@@ -767,19 +1599,72 @@ const grid = "projects";
 						.screenX;
 
 
-				const distance =
+				const touchEndY =
+					event
+						.changedTouches[0]
+						.screenY;
+
+
+				const distanceX =
 					touchEndX -
 					touchStartX;
 
 
+				const distanceY =
+					touchEndY -
+					touchStartY;
+
+
+				/*
+				 * 放大時
+				 *
+				 * 優先當作拖曳
+				 */
+
+				if (
+					zoomLevel > 1
+				) {
+
+					/*
+					 * 只有水平距離比較大
+					 * 才切換圖片
+					 */
+
+					if (
+						Math.abs(
+							distanceX
+						) <
+						100
+					) {
+						return;
+					}
+
+
+					/*
+					 * 如果垂直位移也很大
+					 * 不切換
+					 */
+
+					if (
+						Math.abs(
+							distanceY
+						) >
+						Math.abs(
+							distanceX
+						)
+					) {
+						return;
+					}
+				}
+
+
 				/*
 				 * 滑動距離太短
-				 * 視為普通點擊
 				 */
 
 				if (
 					Math.abs(
-						distance
+						distanceX
 					) < 50
 				) {
 					return;
@@ -791,25 +1676,22 @@ const grid = "projects";
 				 */
 
 				if (
-					distance < 0
+					distanceX < 0
 				) {
 
 					showImage(
 						currentIndex + 1
 					);
 
-				}
+				} else {
 
-				/*
-				 * 右滑
-				 */
-
-				else {
+					/*
+					 * 右滑
+					 */
 
 					showImage(
 						currentIndex - 1
 					);
-
 				}
 			};
 
@@ -863,9 +1745,6 @@ const grid = "projects";
 	/*
 	 * ========================================
 	 * Astro View Transitions
-	 *
-	 * 頁面切換完成後
-	 * 重新初始化 Lightbox
 	 * ========================================
 	 */
 
@@ -874,9 +1753,7 @@ const grid = "projects";
 		() => {
 
 			/*
-			 * 新頁面已經產生新的 DOM
-			 *
-			 * 舊的 initialized 狀態不能保留
+			 * 新 DOM
 			 */
 
 			lightboxInitialized =
@@ -1017,7 +1894,7 @@ const grid = "projects";
 
 	/*
 	 * ========================================
-	 * Lightbox 內容
+	 * Lightbox Content
 	 * ========================================
 	 */
 
@@ -1053,6 +1930,67 @@ const grid = "projects";
 
 	/*
 	 * ========================================
+	 * 圖片外框
+	 * ========================================
+	 */
+
+	.lightbox-image-wrap {
+		position: relative;
+
+		display: flex;
+
+		align-items:
+			center;
+
+		justify-content:
+			center;
+
+		width:
+			auto;
+
+		max-width:
+			90vw;
+
+		max-height:
+			72vh;
+
+		overflow:
+			hidden;
+
+		pointer-events:
+			auto;
+
+		background:
+			transparent;
+	}
+
+
+	/*
+	 * ========================================
+	 * 正方形裁切
+	 * ========================================
+	 */
+
+	.lightbox-image-wrap.is-square {
+		width:
+			min(
+				72vh,
+				80vw
+			);
+
+		height:
+			min(
+				72vh,
+				80vw
+			);
+
+		aspect-ratio:
+			1 / 1;
+	}
+
+
+	/*
+	 * ========================================
 	 * 大圖
 	 * ========================================
 	 */
@@ -1064,11 +2002,13 @@ const grid = "projects";
 			100%;
 
 		max-height:
-			78vh;
+			72vh;
 
-		width: auto;
+		width:
+			auto;
 
-		height: auto;
+		height:
+			auto;
 
 		object-fit:
 			contain;
@@ -1083,7 +2023,75 @@ const grid = "projects";
 			none;
 
 		pointer-events:
+			auto;
+
+		transform:
+			translate3d(
+				0,
+				0,
+				0
+			)
+			scale(1);
+
+		transform-origin:
+			center center;
+
+		will-change:
+			transform;
+
+		cursor:
+			default;
+
+		transition:
+			opacity
+			0.15s ease;
+	}
+
+
+	/*
+	 * 正方形圖片
+	 */
+
+	.lightbox-image-wrap.is-square img {
+		width:
+			100%;
+
+		height:
+			100%;
+
+		max-width:
+			100%;
+
+		max-height:
+			100%;
+
+		object-fit:
+			cover;
+	}
+
+
+	/*
+	 * Zoom
+	 */
+
+	.lightbox-content img.is-zoomed {
+		cursor:
+			grab;
+	}
+
+
+	.lightbox-content img.is-dragging {
+		cursor:
+			grabbing;
+
+		transition:
 			none;
+	}
+
+
+	.lightbox-content img.is-loading {
+		opacity:
+			0.5;
 	}
 
 
@@ -1108,6 +2116,12 @@ const grid = "projects";
 
 		text-align:
 			center;
+
+		line-height:
+			1.4;
+
+		max-width:
+			80vw;
 	}
 
 
@@ -1129,6 +2143,9 @@ const grid = "projects";
 
 		opacity:
 			0.6;
+
+		line-height:
+			1.4;
 	}
 
 
@@ -1150,6 +2167,169 @@ const grid = "projects";
 
 		opacity:
 			0.65;
+
+		line-height:
+			1.4;
+	}
+
+
+	/*
+	 * ========================================
+	 * 圖片說明
+	 *
+	 * 頁數下面
+	 * ========================================
+	 */
+
+	.lightbox-caption {
+		display:
+			none;
+
+		max-width:
+			75vw;
+
+		margin-top:
+			8px;
+
+		color:
+			#ffffff;
+
+		font-size:
+			12px;
+
+		line-height:
+			1.6;
+
+		text-align:
+			center;
+
+		opacity:
+			0.7;
+	}
+
+
+	.lightbox-caption.has-caption {
+		display:
+			block;
+	}
+
+
+	/*
+	 * ========================================
+	 * Zoom 控制
+	 * ========================================
+	 */
+
+	.lightbox-zoom-controls {
+		display:
+			flex;
+
+		align-items:
+			center;
+
+		justify-content:
+			center;
+
+		gap:
+			0;
+
+		margin-top:
+			12px;
+
+		pointer-events:
+			auto;
+
+		border:
+			1px solid
+			rgba(
+				255,
+				255,
+				255,
+				0.25
+			);
+
+		border-radius:
+			999px;
+
+		overflow:
+			hidden;
+	}
+
+
+	.lightbox-zoom-controls button {
+		width:
+			38px;
+
+		height:
+			30px;
+
+		padding:
+			0;
+
+		border:
+			0;
+
+		border-right:
+			1px solid
+			rgba(
+				255,
+				255,
+				255,
+				0.2
+			);
+
+		background:
+			transparent;
+
+		color:
+			#ffffff;
+
+		font-family:
+			inherit;
+
+		font-size:
+			14px;
+
+		cursor:
+			pointer;
+
+		transition:
+			background
+			0.2s ease,
+
+			opacity
+			0.2s ease;
+	}
+
+
+	.lightbox-zoom-controls
+		button:last-child {
+		border-right:
+			0;
+	}
+
+
+	.lightbox-zoom-controls
+		button:hover {
+		background:
+			rgba(
+				255,
+				255,
+				255,
+				0.12
+			);
+	}
+
+
+	.lightbox-zoom-reset {
+		min-width:
+			50px;
+
+		font-size:
+			11px !important;
+
+		opacity:
+			0.7;
 	}
 
 
@@ -1222,11 +2402,6 @@ const grid = "projects";
 	/*
 	 * ========================================
 	 * 左右箭頭
-	 *
-	 * 使用 CSS 線條繪製
-	 * 不使用 < > 字元
-	 *
-	 * 角度約 120°
 	 * ========================================
 	 */
 
@@ -1293,12 +2468,7 @@ const grid = "projects";
 
 
 	/*
-	 * ========================================
 	 * 左箭頭
-	 *
-	 * <
-	 * 約 120° 張開
-	 * ========================================
 	 */
 
 	.lightbox-prev {
@@ -1316,12 +2486,7 @@ const grid = "projects";
 
 
 	/*
-	 * ========================================
 	 * 右箭頭
-	 *
-	 * >
-	 * 約 120° 張開
-	 * ========================================
 	 */
 
 	.lightbox-next {
@@ -1415,15 +2580,6 @@ const grid = "projects";
 	/*
 	 * ========================================
 	 * Mobile
-	 *
-	 * 手機版 Lightbox：
-	 * - 滿版
-	 * - 圖片縮小
-	 * - 上下留白
-	 * - 標題跟在圖片下方
-	 * - 分類 / 年份跟在標題下方
-	 * - 1 / 5 最後顯示
-	 * - 左右箭頭靠近螢幕邊緣
 	 * ========================================
 	 */
 
@@ -1437,9 +2593,9 @@ const grid = "projects";
 				100vh;
 
 			padding:
-				60px
+				55px
 				20px
-				40px;
+				35px;
 
 			box-sizing:
 				border-box;
@@ -1449,24 +2605,75 @@ const grid = "projects";
 		}
 
 
-		.lightbox-content img {
-			width:
-				auto;
+		/*
+		 * Mobile 圖片外框
+		 */
 
+		.lightbox-image-wrap {
 			max-width:
 				88vw;
 
 			max-height:
-				68vh;
-
-			object-fit:
-				contain;
+				65vh;
 		}
 
 
+		/*
+		 * Mobile 正方形
+		 */
+
+		.lightbox-image-wrap.is-square {
+			width:
+				min(
+					78vw,
+					65vh
+				);
+
+			height:
+				min(
+					78vw,
+					65vh
+				);
+
+			aspect-ratio:
+				1 / 1;
+		}
+
+
+		.lightbox-content img {
+			max-width:
+				88vw;
+
+			max-height:
+				65vh;
+		}
+
+
+		.lightbox-image-wrap.is-square img {
+			width:
+				100%;
+
+			height:
+				100%;
+
+			max-width:
+				100%;
+
+			max-height:
+				100%;
+
+			object-fit:
+				cover;
+		}
+
+
+		/*
+		 * 標題
+		 */
+
 		.lightbox-title {
 			margin-top:
-				14px;
+				12px;
 
 			font-size:
 				14px;
@@ -1475,12 +2682,16 @@ const grid = "projects";
 				1.4;
 
 			max-width:
-				80vw;
+				78vw;
 
 			text-align:
 				center;
 		}
 
+
+		/*
+		 * Meta
+		 */
 
 		.lightbox-meta {
 			margin-top:
@@ -1494,14 +2705,69 @@ const grid = "projects";
 		}
 
 
+		/*
+		 * Counter
+		 */
+
 		.lightbox-counter {
 			margin-top:
-				8px;
+				7px;
 
 			font-size:
 				12px;
 		}
 
+
+		/*
+		 * Caption
+		 */
+
+		.lightbox-caption {
+			max-width:
+				78vw;
+
+			margin-top:
+				7px;
+
+			font-size:
+				11px;
+
+			line-height:
+				1.5;
+		}
+
+
+		/*
+		 * Zoom 控制
+		 */
+
+		.lightbox-zoom-controls {
+			margin-top:
+				9px;
+		}
+
+
+		.lightbox-zoom-controls button {
+			width:
+				34px;
+
+			height:
+				28px;
+
+			font-size:
+				13px;
+		}
+
+
+		.lightbox-zoom-reset {
+			min-width:
+				46px;
+		}
+
+
+		/*
+		 * Close
+		 */
 
 		.lightbox-close {
 			top:
@@ -1522,7 +2788,7 @@ const grid = "projects";
 
 
 		/*
-		 * 手機左右箭頭
+		 * Mobile 左右箭頭
 		 */
 
 		.lightbox-prev,
