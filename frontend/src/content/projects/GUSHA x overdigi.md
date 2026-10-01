@@ -7,10 +7,11 @@ category: "Product"
 mode: "zoom"
 
 gallery:
+  - /images/product/phonecase01.jpg
   - /images/product/phonecase02.jpg
   - /images/product/phonecase03.jpg
-    - /images/product/phonecase03.jpg
-      - /images/product/phonecase03.jpg
+  - /images/product/phonecase04.jpg
+  - /images/product/phonecase05.jpg
 
 tech:
   - Astro
@@ -18,21 +19,3 @@ tech:
 ---
 
 我是 Gwen，專注於前端開發與使用者體驗設計。
-
-## About Me
-
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
-
-這是第一張測試圖片。
-
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
-
-這是第二張測試圖片。
-
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
-
-這是第三張測試圖片。
-
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
-
-這是第四張測試圖片。

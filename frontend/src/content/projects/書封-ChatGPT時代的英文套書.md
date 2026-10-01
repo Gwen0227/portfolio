@@ -7,30 +7,9 @@ category: "Graphic"
 mode: "zoom"
 
 gallery:
-  - /images/visual/bn-Tw Mansion-meat.jpg
-  - /images/visual/bn-Tw Mansion-meat.jpg
+  - /images/graphic/book07-ChatGPT時代的英文套書.png
 
 tech:
   - Astro
   - TypeScript
 ---
-
-我是 Gwen，專注於前端開發與使用者體驗設計。
-
-## About Me
-
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
-
-這是第一張測試圖片。
-
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
-
-這是第二張測試圖片。
-
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
-
-這是第三張測試圖片。
-
-![About Me](/images/visual/bn-Tw Mansion-meat.jpg)
-
-這是第四張測試圖片。

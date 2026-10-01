@@ -1,13 +1,13 @@
 ---
-title: 日常和食
-slug: 日常和食
-year: 2025
+title: gusha-頻道標準字
+slug: gusha-頻道標準字
+year: 2019
 cover: /images/visual/bn-Tw Mansion-meat.jpg
 category: "Graphic"
 mode: "zoom"
 
 gallery:
-  - /images/graphic/book11-日常和食.png
+  - /images/visual/gusha-頻道標準字.png
 
 tech:
   - Astro
