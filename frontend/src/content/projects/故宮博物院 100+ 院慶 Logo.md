@@ -1,14 +1,14 @@
 ---
-title: GUSHA頻道標準字
-slug: GUSHA頻道標準字
-year: 2019
+title: 故宮博物院100+院慶 Logo競賽
+slug: 故宮博物院100+院慶 Logo競賽
+year: 2024
 cover: /images/visual/bn-Tw Mansion-meat.jpg
 category: "Visual"
 mode: "zoom"
 imageCrop: contain
 
 gallery:
-  - /images/visual/gusha-頻道標準字.png
+  - /images/visual/brand01-故宮博物院 100+ 院慶 Logo.jpg
 
 tech:
   - Astro

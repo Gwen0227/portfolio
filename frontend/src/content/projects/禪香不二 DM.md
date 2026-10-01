@@ -14,6 +14,6 @@ gallery:
 tech:
   - Astro
   - TypeScript
-lightboxCaption: 這是一個品牌視覺設計專案，包含識別系統、應用設計與相關視覺延伸。
+lightboxCaption: 定調品牌主色與視覺風格
 ---
 

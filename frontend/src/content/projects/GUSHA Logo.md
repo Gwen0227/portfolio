@@ -15,7 +15,5 @@ gallery:
 tech:
   - Astro
   - TypeScript
+lightboxCaption: 定調品牌主色與視覺風格
 ---
-
-我是 Gwen，專注於前端開發與使用者體驗設計。
-
