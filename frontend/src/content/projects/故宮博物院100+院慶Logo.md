@@ -5,10 +5,11 @@ year: 2024
 cover: /images/visual/brand01-故宮博物院100院慶Logo.jpg
 category: "Visual"
 mode: "zoom"
-imageCrop: square
+imageCrop: contain
 
 gallery:
   - /images/visual/brand01-故宮博物院100院慶Logo.jpg
+  - /images/visual/brand02-故宮博物院100院慶Logo.png
 
 tech:
   - Astro
