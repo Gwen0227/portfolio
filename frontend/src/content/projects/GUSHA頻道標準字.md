@@ -2,7 +2,7 @@
 title: GUSHA頻道標準字
 slug: GUSHA頻道標準字
 year: 2019
-cover: /images/visual/bn-Tw Mansion-meat.jpg
+cover: /images/visual/gusha-頻道標準字.png
 category: "Visual"
 mode: "zoom"
 imageCrop: contain

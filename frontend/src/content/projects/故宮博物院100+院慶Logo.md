@@ -2,7 +2,7 @@
 title: 故宮博物院100+院慶Logo競賽
 slug: 故宮博物院100+院慶Logo競賽
 year: 2024
-cover: /images/visual/bn-Tw Mansion-meat.jpg
+cover: /images/visual/brand01-故宮博物院100院慶Logo.jpg
 category: "Visual"
 mode: "zoom"
 imageCrop: square
