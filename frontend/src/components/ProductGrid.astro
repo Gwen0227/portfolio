@@ -11,18 +11,47 @@ const { projects } = Astro.props;
 
 /*
  * ========================================
- * 作品年份排序
+ * 作品排序
  *
- * 新 → 舊
+ * 第一層：
+ * Visual → Graphic → Product
+ *
+ * 第二層：
+ * 同分類內年份 新 → 舊
+ *
+ * 其他分類放最後
  * ========================================
  */
 
-const sortedProjects =
-	[...projects].sort(
-		(a, b) =>
-			b.data.year -
-			a.data.year
-	);
+const categoryOrder: Record<string, number> = {
+	Visual: 0,
+	Graphic: 1,
+	Product: 2,
+};
+
+const sortedProjects = [...projects].sort(
+	(a, b) => {
+		const categoryA =
+			categoryOrder[a.data.category || ""] ??
+			99;
+
+		const categoryB =
+			categoryOrder[b.data.category || ""] ??
+			99;
+
+		if (categoryA !== categoryB) {
+			return categoryA - categoryB;
+		}
+
+		const yearA =
+			Number(a.data.year) || 0;
+
+		const yearB =
+			Number(b.data.year) || 0;
+
+		return yearB - yearA;
+	}
+);
 
 const grid = "projects";
 ---
