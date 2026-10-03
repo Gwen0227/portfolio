@@ -14,5 +14,5 @@ gallery:
 tech:
   - Astro
   - TypeScript
-lightboxCaption: 以故宮博物院視覺系統延伸設計 
+lightboxCaption: 以故宮博物院視覺系統延伸，為100週年設計的院慶logo
 ---
